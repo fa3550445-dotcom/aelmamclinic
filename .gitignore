@@ -101,3 +101,15 @@ app.*.map.json
 android/**/build/
 android/**/intermediates/
 windows/.cache/
+android/**/build/
+android/**/intermediates/
+android/**/merged_native_libs/
+windows/.cache/
+windows/Flutter/ephemeral/
+ios/Pods/
+macos/Pods/
+linux/flutter/ephemeral/
+*.apk
+*.aab
+*.zip
+*.exe
