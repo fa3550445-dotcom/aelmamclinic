@@ -1,0 +1,2476 @@
+
+[2025-06-24T17:18:59.935374]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:64:5)
+<asynchronous suspension>
+
+
+[2025-06-24T17:21:11.391514]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:64:5)
+<asynchronous suspension>
+
+
+[2025-06-24T17:33:05.879846]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:64:5)
+<asynchronous suspension>
+
+
+[2025-06-24T18:37:08.579550]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:64:5)
+<asynchronous suspension>
+
+
+[2025-06-24T18:59:36.020923]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:64:5)
+<asynchronous suspension>
+
+
+[2025-08-07T18:43:50.130786]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:91:5)
+<asynchronous suspension>
+
+
+[2025-08-07T18:44:42.478671]
+ERROR: PostgrestException(message: Cannot coerce the result to a single JSON object, code: PGRST116, details: The result contains 0 rows, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-07T18:46:12.519903]
+ERROR: PostgrestException(message: Cannot coerce the result to a single JSON object, code: PGRST116, details: The result contains 0 rows, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-07T20:42:38.776863]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T20:51:35.375383]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T21:20:04.744175]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T21:22:34.215208]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T21:29:56.695940]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T21:43:17.152622]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-07T21:49:07.053820]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-08T00:51:42.312460]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-08T00:53:54.360556]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-08T01:09:16.447613]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:93:5)
+<asynchronous suspension>
+
+
+[2025-08-08T01:55:58.506817]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T03:06:26.632271]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T03:56:50.299037]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T03:57:05.398142]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T03:57:17.074907]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T05:02:01.692948]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T05:04:04.434339]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T06:05:05.513408]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T06:48:31.257974]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T06:51:51.398744]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:92:5)
+<asynchronous suspension>
+
+
+[2025-08-08T07:36:58.018452]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-08T07:39:58.264373]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-08T10:10:32.218474]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:23:46.832497]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:23:46.852923]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:24:26.465526]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:24:26.483776]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:52:08.637681]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T10:52:08.657090]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T11:04:12.861999]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T11:04:13.095059]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T11:08:25.047360]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-08T11:19:51.689233]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-08T11:24:14.354026]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-08T19:41:16.136491]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+#0      GotrueFetch._handleRequest (package:gotrue/src/fetch.dart:190:7)
+<asynchronous suspension>
+#1      GotrueFetch.request (package:gotrue/src/fetch.dart:141:12)
+<asynchronous suspension>
+#2      GoTrueClient._refreshAccessToken.<anonymous closure> (package:gotrue/src/gotrue_client.dart:1073:26)
+<asynchronous suspension>
+#3      RetryOptions.retry (package:retry/retry.dart:131:16)
+<asynchronous suspension>
+#4      GoTrueClient._refreshAccessToken (package:gotrue/src/gotrue_client.dart:1064:12)
+<asynchronous suspension>
+#5      GoTrueClient._callRefreshToken (package:gotrue/src/gotrue_client.dart:1234:20)
+<asynchronous suspension>
+#6      GoTrueClient._autoRefreshTokenTick (package:gotrue/src/gotrue_client.dart:1051:9)
+<asynchronous suspension>
+
+
+[2025-08-08T19:41:29.765292]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+#0      GotrueFetch._handleRequest (package:gotrue/src/fetch.dart:190:7)
+<asynchronous suspension>
+#1      GotrueFetch.request (package:gotrue/src/fetch.dart:141:12)
+<asynchronous suspension>
+#2      GoTrueClient._refreshAccessToken.<anonymous closure> (package:gotrue/src/gotrue_client.dart:1073:26)
+<asynchronous suspension>
+#3      RetryOptions.retry (package:retry/retry.dart:131:16)
+<asynchronous suspension>
+#4      GoTrueClient._refreshAccessToken (package:gotrue/src/gotrue_client.dart:1064:12)
+<asynchronous suspension>
+#5      GoTrueClient._callRefreshToken (package:gotrue/src/gotrue_client.dart:1234:20)
+<asynchronous suspension>
+#6      GoTrueClient._autoRefreshTokenTick (package:gotrue/src/gotrue_client.dart:1051:9)
+<asynchronous suspension>
+
+
+[2025-08-08T19:41:49.756669]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+#0      GotrueFetch._handleRequest (package:gotrue/src/fetch.dart:190:7)
+<asynchronous suspension>
+#1      GotrueFetch.request (package:gotrue/src/fetch.dart:141:12)
+<asynchronous suspension>
+#2      GoTrueClient._refreshAccessToken.<anonymous closure> (package:gotrue/src/gotrue_client.dart:1073:26)
+<asynchronous suspension>
+#3      RetryOptions.retry (package:retry/retry.dart:131:16)
+<asynchronous suspension>
+#4      GoTrueClient._refreshAccessToken (package:gotrue/src/gotrue_client.dart:1064:12)
+<asynchronous suspension>
+#5      GoTrueClient._callRefreshToken (package:gotrue/src/gotrue_client.dart:1234:20)
+<asynchronous suspension>
+#6      GoTrueClient._autoRefreshTokenTick (package:gotrue/src/gotrue_client.dart:1051:9)
+<asynchronous suspension>
+
+
+[2025-08-08T19:42:09.807097]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+#0      GotrueFetch._handleRequest (package:gotrue/src/fetch.dart:190:7)
+<asynchronous suspension>
+#1      GotrueFetch.request (package:gotrue/src/fetch.dart:141:12)
+<asynchronous suspension>
+#2      GoTrueClient._refreshAccessToken.<anonymous closure> (package:gotrue/src/gotrue_client.dart:1073:26)
+<asynchronous suspension>
+#3      RetryOptions.retry (package:retry/retry.dart:131:16)
+<asynchronous suspension>
+#4      GoTrueClient._refreshAccessToken (package:gotrue/src/gotrue_client.dart:1064:12)
+<asynchronous suspension>
+#5      GoTrueClient._callRefreshToken (package:gotrue/src/gotrue_client.dart:1234:20)
+<asynchronous suspension>
+#6      GoTrueClient._autoRefreshTokenTick (package:gotrue/src/gotrue_client.dart:1051:9)
+<asynchronous suspension>
+
+
+[2025-08-08T19:42:38.655930]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: The semaphore timeout period has expired.
+ (OS Error: The semaphore timeout period has expired.
+, errno = 121), address = wiypiofuyrayywciovoo.supabase.co, port = 51979, uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+#0      GotrueFetch._handleRequest (package:gotrue/src/fetch.dart:190:7)
+<asynchronous suspension>
+#1      GotrueFetch.request (package:gotrue/src/fetch.dart:141:12)
+<asynchronous suspension>
+#2      GoTrueClient._refreshAccessToken.<anonymous closure> (package:gotrue/src/gotrue_client.dart:1073:26)
+<asynchronous suspension>
+#3      RetryOptions.retry (package:retry/retry.dart:131:16)
+<asynchronous suspension>
+#4      GoTrueClient._refreshAccessToken (package:gotrue/src/gotrue_client.dart:1064:12)
+<asynchronous suspension>
+#5      GoTrueClient._callRefreshToken (package:gotrue/src/gotrue_client.dart:1234:20)
+<asynchronous suspension>
+#6      GoTrueClient._autoRefreshTokenTick (package:gotrue/src/gotrue_client.dart:1051:9)
+<asynchronous suspension>
+
+
+[2025-08-09T03:12:54.449534]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-09T03:15:01.034146]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-09T03:15:36.994590]
+ERROR: PostgrestException(message: {"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"account_users\""}, code: 500, details: Internal Server Error, hint: null)
+STACKTRACE:
+#0      PostgrestBuilder._parseResponse (package:postgrest/src/postgrest_builder.dart:299:7)
+#1      PostgrestBuilder._execute (package:postgrest/src/postgrest_builder.dart:174:14)
+<asynchronous suspension>
+#2      PostgrestBuilder.then (package:postgrest/src/postgrest_builder.dart:397:24)
+<asynchronous suspension>
+
+
+[2025-08-09T06:03:33.747995]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-10T05:39:12.964727]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-10T05:49:41.620711]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-10T05:50:07.856386]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:96:5)
+<asynchronous suspension>
+
+
+[2025-08-10T06:40:22.465247]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:40:42.463476]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:41:02.479693]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:41:22.483160]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:41:42.481898]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:42:02.466088]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:42:22.472779]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:42:42.484803]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:43:02.465833]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:43:22.481693]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:43:42.468413]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:44:02.458298]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:44:22.463736]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:44:42.467794]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:45:02.468567]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:45:22.483090]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:45:42.483673]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:46:02.474280]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:46:22.460542]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:46:42.478064]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:47:02.484383]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:47:22.466906]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:47:42.477209]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:48:02.462158]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:48:22.487364]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:48:42.468957]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-10T06:49:02.455367]
+ERROR: AuthRetryableFetchException(message: ClientException with SocketException: Failed host lookup: 'wiypiofuyrayywciovoo.supabase.co' (OS Error: No such host is known.
+, errno = 11001), uri=https://wiypiofuyrayywciovoo.supabase.co/auth/v1/token?grant_type=refresh_token, statusCode: null)
+STACKTRACE:
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+pid: 20700, tid: 15092, name io.flutter.ui
+os: windows arch: x64 comp: no sim: no
+build_id: '6e6e2939051f4d7ac7d3c1b434032c2c'
+isolate_dso_base: 27e59ca0000, vm_dso_base: 27e59ca0000
+isolate_instructions: 27e5a08ea00, vm_instructions: 27e5a088000
+    #00 abs 0000027e5a68e353 virt 00000000009ee353 _kDartIsolateSnapshotInstructions+0x5ff953
+<asynchronous suspension>
+    #01 abs 0000027e5a68dfbf virt 00000000009edfbf _kDartIsolateSnapshotInstructions+0x5ff5bf
+<asynchronous suspension>
+    #02 abs 0000027e5a68db3c virt 00000000009edb3c _kDartIsolateSnapshotInstructions+0x5ff13c
+<asynchronous suspension>
+    #03 abs 0000027e5a68d8c1 virt 00000000009ed8c1 _kDartIsolateSnapshotInstructions+0x5feec1
+<asynchronous suspension>
+    #04 abs 0000027e5a68d62e virt 00000000009ed62e _kDartIsolateSnapshotInstructions+0x5fec2e
+<asynchronous suspension>
+    #05 abs 0000027e5a68d27b virt 00000000009ed27b _kDartIsolateSnapshotInstructions+0x5fe87b
+<asynchronous suspension>
+    #06 abs 0000027e5a68d08a virt 00000000009ed08a _kDartIsolateSnapshotInstructions+0x5fe68a
+<asynchronous suspension>
+
+
+[2025-08-16T18:29:00.873745]
+ERROR: Navigator operation requested with a context that does not include a Navigator.
+The context used to push or pop routes from the Navigator must be that of a widget that is a descendant of a Navigator widget.
+STACKTRACE:
+#0      Navigator.of.<anonymous closure> (package:flutter/src/widgets/navigator.dart:2886:9)
+#1      Navigator.of (package:flutter/src/widgets/navigator.dart:2893:6)
+#2      _ActivationListenerState.build.<anonymous closure>.<anonymous closure> (package:aelmamclinic/widgets/activation_listener.dart:70:23)
+#3      SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1442:15)
+#4      SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1369:11)
+#5      SchedulerBinding.scheduleWarmUpFrame.<anonymous closure> (package:flutter/src/scheduler/binding.dart:1064:9)
+#6      PlatformDispatcher.scheduleWarmUpFrame.<anonymous closure> (dart:ui/platform_dispatcher.dart:873:16)
+#7      _rootRun (dart:async/zone.dart:1517:47)
+#8      _CustomZone.run (dart:async/zone.dart:1422:19)
+#9      _CustomZone.runGuarded (dart:async/zone.dart:1321:7)
+#10     _CustomZone.bindCallbackGuarded.<anonymous closure> (dart:async/zone.dart:1362:23)
+#11     _rootRun (dart:async/zone.dart:1525:13)
+#12     _CustomZone.run (dart:async/zone.dart:1422:19)
+#13     _CustomZone.bindCallback.<anonymous closure> (dart:async/zone.dart:1345:23)
+#14     Timer._createTimer.<anonymous closure> (dart:async-patch/timer_patch.dart:18:15)
+#15     _Timer._runTimers (dart:isolate-patch/timer_impl.dart:410:19)
+#16     _Timer._handleMessage (dart:isolate-patch/timer_impl.dart:441:5)
+#17     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:194:12)
+
+
+[2025-08-16T18:29:01.272858]
+ERROR: A StatisticsProvider was used after being disposed.
+Once you have called dispose() on a StatisticsProvider, it can no longer be used.
+STACKTRACE:
+#0      ChangeNotifier.debugAssertNotDisposed.<anonymous closure> (package:flutter/src/foundation/change_notifier.dart:183:9)
+#1      ChangeNotifier.debugAssertNotDisposed (package:flutter/src/foundation/change_notifier.dart:190:6)
+#2      ChangeNotifier.notifyListeners (package:flutter/src/foundation/change_notifier.dart:418:27)
+#3      StatisticsProvider.refresh (package:aelmamclinic/providers/statistics_provider.dart:189:5)
+<asynchronous suspension>
+
+
+[2025-08-16T18:30:09.440254]
+ERROR: A StatisticsProvider was used after being disposed.
+Once you have called dispose() on a StatisticsProvider, it can no longer be used.
+STACKTRACE:
+#0      ChangeNotifier.debugAssertNotDisposed.<anonymous closure> (package:flutter/src/foundation/change_notifier.dart:183:9)
+#1      ChangeNotifier.debugAssertNotDisposed (package:flutter/src/foundation/change_notifier.dart:190:6)
+#2      ChangeNotifier.notifyListeners (package:flutter/src/foundation/change_notifier.dart:418:27)
+#3      StatisticsProvider.refresh (package:aelmamclinic/providers/statistics_provider.dart:189:5)
+<asynchronous suspension>
+
+
+[2025-08-16T18:52:15.696747]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T20:34:35.841354]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T21:10:21.503097]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T22:32:35.598653]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T22:46:33.975594]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T22:57:00.532602]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T22:57:26.606720]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T22:59:44.792035]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T23:06:23.067889]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-16T23:06:49.855228]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T14:12:16.677420]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T14:18:08.952654]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T14:44:16.213030]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T14:52:55.297926]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T15:16:33.175684]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T15:41:21.422713]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T17:06:00.268278]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T17:34:55.061836]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T17:54:13.864283]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T18:17:12.049863]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T18:49:22.243886]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:06:49.264311]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:09:36.078189]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:25:39.829872]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:31:43.325882]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:35:10.822839]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T19:42:16.217010]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T20:10:21.539045]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T20:17:48.316508]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T20:52:19.056601]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T20:54:02.916237]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T21:02:22.543283]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T21:25:58.662433]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T21:59:30.116877]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T22:04:39.026033]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T22:14:37.773524]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T22:30:09.398215]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T22:58:51.920248]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T23:04:12.838269]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T23:04:41.731215]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T23:07:30.491856]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-17T23:10:37.904832]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T12:39:13.420600]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T13:16:55.310790]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T13:17:20.580835]
+ERROR: Null check operator used on a null value
+STACKTRACE:
+#0      _ConsumptionTypeWidgetState._applyFilters (package:aelmamclinic/screens/statistics/statistics_screen.dart:1127:79)
+#1      _ConsumptionTypeWidgetState._load (package:aelmamclinic/screens/statistics/statistics_screen.dart:1112:5)
+<asynchronous suspension>
+
+
+[2025-08-18T13:17:39.594852]
+ERROR: Null check operator used on a null value
+STACKTRACE:
+#0      _ConsumptionTypeWidgetState._applyFilters (package:aelmamclinic/screens/statistics/statistics_screen.dart:1127:79)
+#1      _ConsumptionTypeWidgetState._load (package:aelmamclinic/screens/statistics/statistics_screen.dart:1112:5)
+<asynchronous suspension>
+
+
+[2025-08-18T13:30:42.761476]
+ERROR: Null check operator used on a null value
+STACKTRACE:
+#0      _ConsumptionTypeWidgetState._applyFilters (package:aelmamclinic/screens/statistics/statistics_screen.dart:1127:79)
+#1      _ConsumptionTypeWidgetState._load (package:aelmamclinic/screens/statistics/statistics_screen.dart:1112:5)
+<asynchronous suspension>
+
+
+[2025-08-18T13:49:34.627175]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T14:03:13.021514]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T14:16:32.717005]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T14:43:43.850161]
+ERROR: Null check operator used on a null value
+STACKTRACE:
+#0      _ConsumptionTypeWidgetState._applyFilters (package:aelmamclinic/screens/statistics/statistics_screen.dart:1265:79)
+#1      _ConsumptionTypeWidgetState._load (package:aelmamclinic/screens/statistics/statistics_screen.dart:1250:5)
+<asynchronous suspension>
+
+
+[2025-08-18T14:44:55.633546]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T14:59:51.903058]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T15:08:51.480112]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T15:11:43.865393]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T15:14:08.837665]
+ERROR: Zone mismatch.
+The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+STACKTRACE:
+#0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+#1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+#2      _runWidget (package:flutter/src/widgets/binding.dart:1544:18)
+#3      runApp (package:flutter/src/widgets/binding.dart:1480:3)
+#4      main.<anonymous closure> (package:aelmamclinic/main.dart:98:5)
+<asynchronous suspension>
+
+
+[2025-08-18T15:50:35.374755]
+ERROR: Navigator operation requested with a context that does not include a Navigator.
+The context used to push or pop routes from the Navigator must be that of a widget that is a descendant of a Navigator widget.
+STACKTRACE:
+#0      Navigator.of.<anonymous closure> (package:flutter/src/widgets/navigator.dart:2886:9)
+#1      Navigator.of (package:flutter/src/widgets/navigator.dart:2893:6)
+#2      _ActivationListenerState.build.<anonymous closure>.<anonymous closure> (package:aelmamclinic/widgets/activation_listener.dart:70:23)
+#3      SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1442:15)
+#4      SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1369:11)
+#5      SchedulerBinding.scheduleWarmUpFrame.<anonymous closure> (package:flutter/src/scheduler/binding.dart:1064:9)
+#6      PlatformDispatcher.scheduleWarmUpFrame.<anonymous closure> (dart:ui/platform_dispatcher.dart:873:16)
+#7      _rootRun (dart:async/zone.dart:1517:47)
+#8      _CustomZone.run (dart:async/zone.dart:1422:19)
+#9      _CustomZone.runGuarded (dart:async/zone.dart:1321:7)
+#10     _CustomZone.bindCallbackGuarded.<anonymous closure> (dart:async/zone.dart:1362:23)
+#11     _rootRun (dart:async/zone.dart:1525:13)
+#12     _CustomZone.run (dart:async/zone.dart:1422:19)
+#13     _CustomZone.bindCallback.<anonymous closure> (dart:async/zone.dart:1345:23)
+#14     Timer._createTimer.<anonymous closure> (dart:async-patch/timer_patch.dart:18:15)
+#15     _Timer._runTimers (dart:isolate-patch/timer_impl.dart:410:19)
+#16     _Timer._handleMessage (dart:isolate-patch/timer_impl.dart:441:5)
+#17     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:194:12)
+
+
+[2025-08-18T15:51:07.264862]
+ERROR: MissingPluginException(No implementation found for method showToast on channel PonnamKarthik/fluttertoast)
+STACKTRACE:
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:368:7)
+<asynchronous suspension>
+#1      Fluttertoast.showToast (package:fluttertoast/fluttertoast.dart:116:17)
+<asynchronous suspension>
+
+
+[2025-08-18T15:52:16.109855]
+ERROR: MissingPluginException(No implementation found for method showToast on channel PonnamKarthik/fluttertoast)
+STACKTRACE:
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:368:7)
+<asynchronous suspension>
+#1      Fluttertoast.showToast (package:fluttertoast/fluttertoast.dart:116:17)
+<asynchronous suspension>
+
+
+[2025-08-18T15:52:21.649746]
+ERROR: A StatisticsProvider was used after being disposed.
+Once you have called dispose() on a StatisticsProvider, it can no longer be used.
+STACKTRACE:
+#0      ChangeNotifier.debugAssertNotDisposed.<anonymous closure> (package:flutter/src/foundation/change_notifier.dart:183:9)
+#1      ChangeNotifier.debugAssertNotDisposed (package:flutter/src/foundation/change_notifier.dart:190:6)
+#2      ChangeNotifier.notifyListeners (package:flutter/src/foundation/change_notifier.dart:418:27)
+#3      StatisticsProvider.refresh (package:aelmamclinic/providers/statistics_provider.dart:189:5)
+<asynchronous suspension>
+
+
+[2025-08-18T16:04:28.247865]
+ERROR: setState() called after dispose(): _DoctorServicesDetailScreenState#6ba2c(lifecycle state: defunct, not mounted)
+This error happens if you call setState() on a State object for a widget that no longer appears in the widget tree (e.g., whose parent widget no longer includes the widget in its build). This error can occur when code calls setState() from a timer or an animation callback.
+The preferred solution is to cancel the timer or stop listening to the animation in the dispose() callback. Another solution is to check the "mounted" property of this object before calling setState() to ensure the object is still in the tree.
+This error might indicate a memory leak if setState() is being called because another object is retaining a reference to this State object after it has been removed from the tree. To avoid memory leaks, consider breaking the reference to this object during dispose().
+STACKTRACE:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1171:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1206:6)
+#2      _DoctorServicesDetailScreenState._loadDoctorServices (package:aelmamclinic/services/doctor_services_detail_screen.dart:76:5)
+#3      _DoctorServicesDetailScreenState._importServicesFromExcel (package:aelmamclinic/services/doctor_services_detail_screen.dart:306:11)
+<asynchronous suspension>
+
+
+[2025-08-18T16:49:23.788377]
+ERROR: Exception: Widget won't fit into the page as its height (923.98) exceed a page height (801.8897637795275). You probably need a SpanningWidget or use a single page layout
+STACKTRACE:
+#0      MultiPage.generate (package:pdf/src/widgets/multi_page.dart:345:11)
+#1      Document.addPage (package:pdf/src/widgets/document.dart:117:10)
+#2      _ViewPatientScreenState._buildPatientPdfBytes (package:aelmamclinic/screens/patients/view_patient_screen.dart:178:9)
+<asynchronous suspension>
+#3      MethodChannelPrinting._handleMethod (package:printing/src/method_channel.dart:70:19)
+<asynchronous suspension>
+#4      MethodChannel._handleAsMethodCall (package:flutter/src/services/platform_channel.dart:611:42)
+<asynchronous suspension>
+#5      _DefaultBinaryMessenger.setMessageHandler.<anonymous closure> (package:flutter/src/services/binding.dart:650:22)
+<asynchronous suspension>
+
+
+[2025-08-19T09:34:59.393495]
+ERROR: 'package:pdf/src/pdf/format/num.dart': Failed assertion: line 32 pos 12: '!value.isNaN': is not true.
+STACKTRACE:
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:63:4)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:45:5)
+#2      PdfNum.output (package:pdf/src/pdf/format/num.dart:32:12)
+#3      PdfNumList.output (package:pdf/src/pdf/format/num.dart:81:25)
+#4      PdfGraphics.drawRect (package:pdf/src/pdf/graphics.dart:413:30)
+#5      BarDataSet._drawSurface (package:pdf/src/widgets/chart/bar_chart.dart:80:24)
+#6      BarDataSet.paint (package:pdf/src/widgets/chart/bar_chart.dart:111:9)
+#7      CartesianGrid.paint (package:pdf/src/widgets/chart/grid_cartesian.dart:114:15)
+#8      Stack.paint (package:pdf/src/widgets/stack.dart:300:13)
+#9      SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#10     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#11     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#12     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#13     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#14     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#15     Chart.paint (package:pdf/src/widgets/chart/chart.dart:130:12)
+#16     Padding.paint (package:pdf/src/widgets/basic.dart:127:14)
+#17     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#18     ConstrainedBox.paint (package:pdf/src/widgets/basic.dart:449:5)
+#19     StatelessWidget.paint (package:pdf/src/widgets/widget.dart:260:15)
+#20     MultiPage._paintChild (package:pdf/src/widgets/multi_page.dart:214:13)
+#21     MultiPage.postProcess (package:pdf/src/widgets/multi_page.dart:577:9)
+#22     Document.save (package:pdf/src/widgets/document.dart:130:14)
+#23     _PdfUtils.downloadDoc (package:aelmamclinic/screens/statistics/statistics_screen.dart:283:29)
+#24     _IncomeByDoctorWidgetState._downloadPdf (package:aelmamclinic/screens/statistics/statistics_screen.dart:1099:21)
+<asynchronous suspension>
+
+
+[2025-08-19T09:35:09.938453]
+ERROR: 'package:pdf/src/pdf/format/num.dart': Failed assertion: line 32 pos 12: '!value.isNaN': is not true.
+STACKTRACE:
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:63:4)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:45:5)
+#2      PdfNum.output (package:pdf/src/pdf/format/num.dart:32:12)
+#3      PdfNumList.output (package:pdf/src/pdf/format/num.dart:81:25)
+#4      PdfGraphics.drawRect (package:pdf/src/pdf/graphics.dart:413:30)
+#5      BarDataSet._drawSurface (package:pdf/src/widgets/chart/bar_chart.dart:80:24)
+#6      BarDataSet.paint (package:pdf/src/widgets/chart/bar_chart.dart:111:9)
+#7      CartesianGrid.paint (package:pdf/src/widgets/chart/grid_cartesian.dart:114:15)
+#8      Stack.paint (package:pdf/src/widgets/stack.dart:300:13)
+#9      SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#10     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#11     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#12     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#13     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#14     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#15     Chart.paint (package:pdf/src/widgets/chart/chart.dart:130:12)
+#16     Padding.paint (package:pdf/src/widgets/basic.dart:127:14)
+#17     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#18     ConstrainedBox.paint (package:pdf/src/widgets/basic.dart:449:5)
+#19     StatelessWidget.paint (package:pdf/src/widgets/widget.dart:260:15)
+#20     MultiPage._paintChild (package:pdf/src/widgets/multi_page.dart:214:13)
+#21     MultiPage.postProcess (package:pdf/src/widgets/multi_page.dart:577:9)
+#22     Document.save (package:pdf/src/widgets/document.dart:130:14)
+#23     _PdfUtils.downloadDoc (package:aelmamclinic/screens/statistics/statistics_screen.dart:283:29)
+#24     _IncomeByDoctorWidgetState._downloadPdf (package:aelmamclinic/screens/statistics/statistics_screen.dart:1099:21)
+<asynchronous suspension>
+
+
+[2025-08-19T09:35:25.652688]
+ERROR: 'package:pdf/src/pdf/format/num.dart': Failed assertion: line 32 pos 12: '!value.isNaN': is not true.
+STACKTRACE:
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:63:4)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:45:5)
+#2      PdfNum.output (package:pdf/src/pdf/format/num.dart:32:12)
+#3      PdfNumList.output (package:pdf/src/pdf/format/num.dart:81:25)
+#4      PdfGraphics.drawRect (package:pdf/src/pdf/graphics.dart:413:30)
+#5      BarDataSet._drawSurface (package:pdf/src/widgets/chart/bar_chart.dart:80:24)
+#6      BarDataSet.paint (package:pdf/src/widgets/chart/bar_chart.dart:111:9)
+#7      CartesianGrid.paint (package:pdf/src/widgets/chart/grid_cartesian.dart:114:15)
+#8      Stack.paint (package:pdf/src/widgets/stack.dart:300:13)
+#9      SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#10     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#11     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#12     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#13     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#14     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#15     Chart.paint (package:pdf/src/widgets/chart/chart.dart:130:12)
+#16     Padding.paint (package:pdf/src/widgets/basic.dart:127:14)
+#17     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#18     ConstrainedBox.paint (package:pdf/src/widgets/basic.dart:449:5)
+#19     StatelessWidget.paint (package:pdf/src/widgets/widget.dart:260:15)
+#20     MultiPage._paintChild (package:pdf/src/widgets/multi_page.dart:214:13)
+#21     MultiPage.postProcess (package:pdf/src/widgets/multi_page.dart:577:9)
+#22     Document.save (package:pdf/src/widgets/document.dart:130:14)
+#23     _PdfUtils.shareDoc (package:aelmamclinic/screens/statistics/statistics_screen.dart:276:39)
+<asynchronous suspension>
+#24     _IncomeByDoctorWidgetState._exportPdf (package:aelmamclinic/screens/statistics/statistics_screen.dart:1094:5)
+<asynchronous suspension>
+
+
+[2025-08-19T09:35:47.591884]
+ERROR: 'package:pdf/src/pdf/format/num.dart': Failed assertion: line 32 pos 12: '!value.isNaN': is not true.
+STACKTRACE:
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:63:4)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:45:5)
+#2      PdfNum.output (package:pdf/src/pdf/format/num.dart:32:12)
+#3      PdfNumList.output (package:pdf/src/pdf/format/num.dart:81:25)
+#4      PdfGraphics.drawRect (package:pdf/src/pdf/graphics.dart:413:30)
+#5      BarDataSet._drawSurface (package:pdf/src/widgets/chart/bar_chart.dart:80:24)
+#6      BarDataSet.paint (package:pdf/src/widgets/chart/bar_chart.dart:111:9)
+#7      CartesianGrid.paint (package:pdf/src/widgets/chart/grid_cartesian.dart:114:15)
+#8      Stack.paint (package:pdf/src/widgets/stack.dart:300:13)
+#9      SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#10     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#11     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#12     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#13     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#14     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#15     Chart.paint (package:pdf/src/widgets/chart/chart.dart:130:12)
+#16     Padding.paint (package:pdf/src/widgets/basic.dart:127:14)
+#17     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#18     ConstrainedBox.paint (package:pdf/src/widgets/basic.dart:449:5)
+#19     StatelessWidget.paint (package:pdf/src/widgets/widget.dart:260:15)
+#20     MultiPage._paintChild (package:pdf/src/widgets/multi_page.dart:214:13)
+#21     MultiPage.postProcess (package:pdf/src/widgets/multi_page.dart:577:9)
+#22     Document.save (package:pdf/src/widgets/document.dart:130:14)
+#23     _PdfUtils.downloadDoc (package:aelmamclinic/screens/statistics/statistics_screen.dart:283:29)
+#24     _IncomeByDoctorWidgetState._downloadPdf (package:aelmamclinic/screens/statistics/statistics_screen.dart:1099:21)
+<asynchronous suspension>
+
+
+[2025-08-19T09:36:25.601052]
+ERROR: 'package:pdf/src/pdf/format/num.dart': Failed assertion: line 32 pos 12: '!value.isNaN': is not true.
+STACKTRACE:
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:63:4)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:45:5)
+#2      PdfNum.output (package:pdf/src/pdf/format/num.dart:32:12)
+#3      PdfNumList.output (package:pdf/src/pdf/format/num.dart:81:25)
+#4      PdfGraphics.drawRect (package:pdf/src/pdf/graphics.dart:413:30)
+#5      BarDataSet._drawSurface (package:pdf/src/widgets/chart/bar_chart.dart:80:24)
+#6      BarDataSet.paint (package:pdf/src/widgets/chart/bar_chart.dart:111:9)
+#7      CartesianGrid.paint (package:pdf/src/widgets/chart/grid_cartesian.dart:114:15)
+#8      Stack.paint (package:pdf/src/widgets/stack.dart:300:13)
+#9      SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#10     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#11     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#12     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#13     Flexible.paint (package:pdf/src/widgets/flex.dart:594:5)
+#14     Flex.paint (package:pdf/src/widgets/flex.dart:521:13)
+#15     Chart.paint (package:pdf/src/widgets/chart/chart.dart:130:12)
+#16     Padding.paint (package:pdf/src/widgets/basic.dart:127:14)
+#17     SingleChildWidget.paintChild (package:pdf/src/widgets/widget.dart:320:14)
+#18     ConstrainedBox.paint (package:pdf/src/widgets/basic.dart:449:5)
+#19     StatelessWidget.paint (package:pdf/src/widgets/widget.dart:260:15)
+#20     MultiPage._paintChild (package:pdf/src/widgets/multi_page.dart:214:13)
+#21     MultiPage.postProcess (package:pdf/src/widgets/multi_page.dart:577:9)
+#22     Document.save (package:pdf/src/widgets/document.dart:130:14)
+#23     _PdfUtils.downloadDoc (package:aelmamclinic/screens/statistics/statistics_screen.dart:283:29)
+#24     _IncomeByDoctorWidgetState._downloadPdf (package:aelmamclinic/screens/statistics/statistics_screen.dart:1099:21)
+<asynchronous suspension>
+

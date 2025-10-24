@@ -1,0 +1,99 @@
+# =========================
+# OS / Misc
+# =========================
+.DS_Store
+Thumbs.db
+*.class
+*.log
+*.pyc
+*.swp
+.history
+.svn/
+.atom/
+.build/
+.buildlog/
+migrate_working_dir/
+.swiftpm/
+
+# =========================
+# Editors / IDE
+# =========================
+*.iml
+*.ipr
+*.iws
+.idea/
+#.vscode/
+
+# =========================
+# Flutter / Dart / Pub
+# =========================
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+flutter_export_environment.sh
+coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+/build/
+windows/.cache/
+
+# =========================
+# Android
+# =========================
+android/.gradle/
+android/local.properties
+android/**/captures/
+android/**/generated/
+android/**/outputs/
+android/**/release/
+android/app/google-services.json
+android/key.properties
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# =========================
+# iOS
+# =========================
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Runner/GoogleService-Info.plist
+
+# =========================
+# macOS
+# =========================
+macos/Pods/
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# =========================
+# Windows
+# =========================
+windows/Flutter/ephemeral/
+
+# =========================
+# Linux
+# =========================
+linux/flutter/ephemeral/
+
+# =========================
+# Web
+# =========================
+web/.dart_tool/
+
+# =========================
+# Supabase / Secrets
+# =========================
+.env
+.env.*
+supabase/.env
+
+# =========================
+# Symbolication / Obfuscation
+# =========================
+app.*.symbols
+app.*.map.json

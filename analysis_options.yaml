@@ -1,0 +1,17 @@
+# توصيات Flutter القياسية
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - .dart_tool/**
+  language:
+    strict-raw-types: false
+
+linter:
+  rules:
+    # خفّف الضجيج، وخلّينا واقعيين للمنتج
+    avoid_print: false
+    prefer_single_quotes: false
+    always_use_package_imports: true
+    require_trailing_commas: true

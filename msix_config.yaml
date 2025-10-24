@@ -1,0 +1,10 @@
+display_name: Aelmam Clinic
+publisher_display_name: Elmam Software
+identity_name: com.elmam.aelmamclinic
+msix_version: 1.0.0.0
+certificate_path: certificates/elmam.pfx
+certificate_password: "•••"
+icons:
+  - .\windows\runner\resources\app_icon.ico
+capabilities:
+  - internetClient
