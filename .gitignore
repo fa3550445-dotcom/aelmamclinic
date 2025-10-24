@@ -97,3 +97,7 @@ supabase/.env
 # =========================
 app.*.symbols
 app.*.map.json
+
+android/**/build/
+android/**/intermediates/
+windows/.cache/
