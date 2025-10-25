@@ -113,3 +113,5 @@ linux/flutter/ephemeral/
 *.aab
 *.zip
 *.exe
+*.env*
+**/supabase/.temp/
