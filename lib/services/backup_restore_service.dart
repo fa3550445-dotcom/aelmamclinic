@@ -308,9 +308,9 @@ class BackupRestoreService {
       await mergeTable('service_doctor_share', ['serviceId', 'doctorId']);
       await mergeTable('employees', ['identityNumber']);
       await mergeTable('items', ['name', 'type_id']);
-      await mergeTable('purchases', ['itemId', 'created_at']);
+      await mergeTable('purchases', ['item_id', 'created_at']);
       await mergeTable('consumptions', ['itemId', 'date']);
-      await mergeTable('alert_settings', ['itemId']);
+      await mergeTable('alert_settings', ['item_id']);
       await mergeTable('drugs', ['name']);
       await mergeTable('prescriptions', ['patientId', 'recordDate']);
       await mergeTable('prescription_items', ['prescriptionId', 'drugId']);
