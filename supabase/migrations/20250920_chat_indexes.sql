@@ -55,7 +55,7 @@ create index if not exists chat_conversations_last_msg_at_idx
   on public.chat_conversations (last_msg_at);
 
 -- فهارس المرفقات (إن كان جدول chat_attachments موجودًا)
-do $$
+; DO $
 begin
   if to_regclass('public.chat_attachments') is not null then
     create index if not exists chat_attachments_msg_idx
@@ -64,6 +64,7 @@ begin
       on public.chat_attachments (bucket, path);
   end if;
 end$$;
+
 
 
 
