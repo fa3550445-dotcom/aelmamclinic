@@ -298,6 +298,9 @@ CREATE TABLE IF NOT EXISTS alert_settings (
   itemId INTEGER,
   item_id INTEGER,
 
+  itemUuid TEXT,
+  item_uuid TEXT,
+
   isEnabled INTEGER NOT NULL DEFAULT 1,
   is_enabled INTEGER NOT NULL DEFAULT 1,
 

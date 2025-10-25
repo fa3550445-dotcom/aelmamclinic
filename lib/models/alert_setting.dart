@@ -15,6 +15,8 @@ class AlertSetting {
   final int threshold;
   final bool isEnabled;
   final DateTime? lastTriggered;
+  final DateTime? notifyTime;
+  final String? itemUuid;
   final DateTime createdAt;
 
   AlertSetting({
@@ -23,6 +25,8 @@ class AlertSetting {
     required this.threshold,
     this.isEnabled = true,
     this.lastTriggered,
+    this.notifyTime,
+    this.itemUuid,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -45,7 +49,15 @@ class AlertSetting {
   static DateTime? _toDateN(dynamic v) {
     if (v == null) return null;
     if (v is DateTime) return v;
-    return DateTime.tryParse(v.toString());
+    final s = v.toString().trim();
+    if (s.isEmpty) return null;
+    return DateTime.tryParse(s);
+  }
+
+  static String? _toStrN(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
   }
 
   /*──────── SQL (SQLite) ────────*/
@@ -57,6 +69,8 @@ class AlertSetting {
     threshold       INTEGER NOT NULL,
     is_enabled      INTEGER NOT NULL DEFAULT 1,
     last_triggered  TEXT,
+    notify_time     TEXT,
+    item_uuid       TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY(item_id) REFERENCES ${Item.table}(id) ON DELETE CASCADE
   );
@@ -69,6 +83,8 @@ class AlertSetting {
       'threshold': threshold,
       'is_enabled': isEnabled ? 1 : 0,
       'last_triggered': lastTriggered?.toIso8601String(),
+      'notify_time': notifyTime?.toIso8601String(),
+      'item_uuid': itemUuid,
       'created_at': createdAt.toIso8601String(),
     };
     if (id != null && id! > 0) {
@@ -85,6 +101,8 @@ class AlertSetting {
     isEnabled: _toBool(map['is_enabled'] ?? map['isEnabled'] ?? 1),
     lastTriggered:
     _toDateN(map['last_triggered'] ?? map['lastTriggered']),
+    notifyTime: _toDateN(map['notify_time'] ?? map['notifyTime']),
+    itemUuid: _toStrN(map['item_uuid'] ?? map['itemUuid']),
     createdAt:
     _toDateN(map['created_at'] ?? map['createdAt']) ?? DateTime.now(),
   );
@@ -95,6 +113,8 @@ class AlertSetting {
     int? threshold,
     bool? isEnabled,
     DateTime? lastTriggered,
+    DateTime? notifyTime,
+    String? itemUuid,
     DateTime? createdAt,
   }) =>
       AlertSetting(
@@ -103,10 +123,12 @@ class AlertSetting {
         threshold: threshold ?? this.threshold,
         isEnabled: isEnabled ?? this.isEnabled,
         lastTriggered: lastTriggered ?? this.lastTriggered,
+        notifyTime: notifyTime ?? this.notifyTime,
+        itemUuid: itemUuid ?? this.itemUuid,
         createdAt: createdAt ?? this.createdAt,
       );
 
   @override
   String toString() =>
-      'AlertSetting(id: $id, itemId: $itemId, threshold: $threshold, isEnabled: $isEnabled)';
+      'AlertSetting(id: $id, itemId: $itemId, threshold: $threshold, isEnabled: $isEnabled, notifyTime: $notifyTime, itemUuid: $itemUuid)';
 }

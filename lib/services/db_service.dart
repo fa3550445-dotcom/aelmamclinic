@@ -315,9 +315,13 @@ class DBService {
       await _ensureColumn('lastTriggered', 'TEXT');
       await _ensureColumn('last_triggered', 'TEXT');
 
-      // 🔔 وقت الإشعار الجديد (حتى لو الموديل لا يستخدمه حاليًا)
+      // 🔔 وقت الإشعار الجديد (camel + snake)
       await _ensureColumn('notifyTime', 'TEXT');
       await _ensureColumn('notify_time', 'TEXT');
+
+      // 🆔 uuid العنصر المرتبط (camel + snake)
+      await _ensureColumn('itemUuid', 'TEXT');
+      await _ensureColumn('item_uuid', 'TEXT');
 
       // createdAt/created_at
       if (!has('createdAt')) {
@@ -336,6 +340,8 @@ class DBService {
       await db.execute('UPDATE alert_settings SET last_triggered = COALESCE(last_triggered, lastTriggered)');
       await db.execute('UPDATE alert_settings SET notifyTime = COALESCE(notifyTime, notify_time)');
       await db.execute('UPDATE alert_settings SET notify_time = COALESCE(notify_time, notifyTime)');
+      await db.execute('UPDATE alert_settings SET itemUuid = COALESCE(itemUuid, item_uuid)');
+      await db.execute('UPDATE alert_settings SET item_uuid = COALESCE(item_uuid, itemUuid)');
       await db.execute('UPDATE alert_settings SET createdAt = COALESCE(createdAt, created_at, CURRENT_TIMESTAMP)');
       await db.execute('UPDATE alert_settings SET created_at = COALESCE(created_at, createdAt, CURRENT_TIMESTAMP)');
 
@@ -357,7 +363,9 @@ class DBService {
                  lastTriggered  = COALESCE(NEW.lastTriggered,  NEW.last_triggered),
                  last_triggered = COALESCE(NEW.last_triggered, NEW.lastTriggered),
                  notifyTime     = COALESCE(NEW.notifyTime, NEW.notify_time),
-                 notify_time    = COALESCE(NEW.notify_time, NEW.notifyTime)
+                 notify_time    = COALESCE(NEW.notify_time, NEW.notifyTime),
+                 itemUuid       = COALESCE(NEW.itemUuid, NEW.item_uuid),
+                 item_uuid      = COALESCE(NEW.item_uuid, NEW.itemUuid)
            WHERE id = NEW.id;
         END;
       ''');
