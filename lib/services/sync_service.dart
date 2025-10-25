@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:postgrest/postgrest.dart' show PostgrestException;
+import 'package:uuid/uuid.dart';
 
 /// كلاس مساعد اختياري لتحويل الحقول عند الدفع/السحب.
 /// ضع أي من الدالتين إن كنت تحتاج مسار تحويل مخصص لهذا الجدول.
@@ -17,6 +18,18 @@ class EntityMapper {
       )? fromCloudMap;
 
   const EntityMapper({this.toCloudMap, this.fromCloudMap});
+}
+
+class _RowIdentity {
+  final String deviceId;
+  final int localId;
+  final int recordId;
+
+  const _RowIdentity({
+    required this.deviceId,
+    required this.localId,
+    required this.recordId,
+  });
 }
 
 /// خدمة للمزامنة بين SQLite المحلي و Supabase.
@@ -55,7 +68,11 @@ class SyncService {
     'local_id',
     'device_id',
     'updated_at',
+    'id',
   };
+
+  static const String _uuidMappingTable = 'sync_uuid_mapping';
+  static final Uuid _uuidGen = const Uuid();
 
   final Map<String, Set<String>> _localColsCache = {};
   final Map<String, Map<String, String>> _localColTypeCache = {};
@@ -320,6 +337,221 @@ class SyncService {
 
   String get _safeDeviceId =>
       (deviceId != null && deviceId!.trim().isNotEmpty) ? deviceId!.trim() : 'app-unknown';
+
+  String _normalizeDeviceId(String? value) {
+    final normalized = (value ?? '').trim();
+    if (normalized.isEmpty || normalized.toLowerCase() == 'app-unknown') {
+      return _safeDeviceId;
+    }
+    return normalized;
+  }
+
+  bool _looksLikeUuid(String? value) {
+    if (value == null) return false;
+    final s = value.trim();
+    if (s.length != 36) return false;
+    final re = RegExp(r'^[0-9a-fA-F-]{36}$');
+    return re.hasMatch(s);
+  }
+
+  String _uuidKey(String table, String device, int local) {
+    final normalizedDevice = device.trim().isEmpty ? 'app-unknown' : device.trim();
+    return '$table|$accountId|$normalizedDevice|$local';
+  }
+
+  Future<String?> _getUuidForRecord(String table, int recordId) async {
+    if (recordId <= 0) return null;
+    final rows = await _db.query(
+      _uuidMappingTable,
+      columns: const ['uuid'],
+      where: 'table_name = ? AND record_id = ?',
+      whereArgs: [table, recordId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.first['uuid'];
+    final uuid = raw?.toString().trim() ?? '';
+    return uuid.isEmpty ? null : uuid;
+  }
+
+  Future<String?> _getUuidForSyncKey(String table, String device, int local) async {
+    if (local <= 0) return null;
+    final rows = await _db.query(
+      _uuidMappingTable,
+      columns: const ['uuid'],
+      where: 'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
+      whereArgs: [table, accountId, device, local],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.first['uuid'];
+    final uuid = raw?.toString().trim() ?? '';
+    return uuid.isEmpty ? null : uuid;
+  }
+
+  Future<void> _saveUuidMapping({
+    required String table,
+    required int recordId,
+    required String uuid,
+    required String device,
+    required int local,
+  }) async {
+    if (uuid.trim().isEmpty || recordId <= 0) return;
+    final normalizedDevice = _normalizeDeviceId(device);
+    final normalizedUuid = uuid.trim();
+    final now = DateTime.now().toIso8601String();
+    await _db.insert(
+      _uuidMappingTable,
+      {
+        'table_name': table,
+        'record_id': recordId,
+        'account_id': accountId,
+        'device_id': normalizedDevice,
+        'local_sync_id': local,
+        'uuid': normalizedUuid,
+        'created_at': now,
+        'updated_at': now,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<_RowIdentity?> _loadRowIdentity(
+    String table,
+    int recordId, {
+      String? device,
+      int? local,
+    }) async {
+    if (recordId <= 0) return null;
+
+    String resolvedDevice = _normalizeDeviceId(device);
+    int? resolvedLocal = local;
+
+    if (resolvedLocal == null || resolvedLocal <= 0 || device == null) {
+      final cols = await _getLocalColumns(table);
+      final deviceCol = device == null ? _col(cols, 'deviceId', 'device_id') : null;
+      final localCol = (resolvedLocal == null || resolvedLocal <= 0)
+          ? _col(cols, 'localId', 'local_id')
+          : null;
+
+      final queryCols = <String>[];
+      if (deviceCol != null) queryCols.add(deviceCol);
+      if (localCol != null) queryCols.add(localCol);
+
+      if (queryCols.isNotEmpty) {
+        final res = await _db.query(
+          table,
+          columns: queryCols,
+          where: 'id = ?',
+          whereArgs: [recordId],
+          limit: 1,
+        );
+        if (res.isNotEmpty) {
+          final row = res.first;
+          if (deviceCol != null) {
+            final dv = row[deviceCol]?.toString();
+            if (dv != null && dv.trim().isNotEmpty) {
+              resolvedDevice = _normalizeDeviceId(dv);
+            }
+          }
+          if (localCol != null) {
+            final li = row[localCol];
+            final parsed = (li is num) ? li.toInt() : int.tryParse('${li ?? ''}');
+            if (parsed != null && parsed > 0) {
+              resolvedLocal = parsed;
+            }
+          }
+        }
+      }
+    }
+
+    final int safeLocal = (resolvedLocal != null && resolvedLocal > 0) ? resolvedLocal : recordId;
+    return _RowIdentity(
+      deviceId: resolvedDevice,
+      localId: safeLocal,
+      recordId: recordId,
+    );
+  }
+
+  Future<String?> _ensureUuidForRecord({
+    required String table,
+    required int recordId,
+    String? device,
+    int? local,
+  }) async {
+    if (recordId <= 0) return null;
+
+    final existing = await _getUuidForRecord(table, recordId);
+    if (existing != null) return existing;
+
+    final identity = await _loadRowIdentity(table, recordId, device: device, local: local);
+    if (identity == null) return null;
+
+    final cached = await _getUuidForSyncKey(table, identity.deviceId, identity.localId);
+    final uuid = cached ??
+        _uuidGen.v5(
+          Uuid.NAMESPACE_URL,
+          _uuidKey(table, identity.deviceId, identity.localId),
+        );
+
+    await _saveUuidMapping(
+      table: table,
+      recordId: identity.recordId,
+      uuid: uuid,
+      device: identity.deviceId,
+      local: identity.localId,
+    );
+    return uuid;
+  }
+
+  Future<int?> _getRecordIdForUuid(String table, String uuid) async {
+    if (uuid.trim().isEmpty) return null;
+    final rows = await _db.query(
+      _uuidMappingTable,
+      columns: const ['record_id'],
+      where: 'table_name = ? AND uuid = ?',
+      whereArgs: [table, uuid.trim()],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final value = rows.first['record_id'];
+    if (value is num) return value.toInt();
+    return int.tryParse('${value ?? ''}');
+  }
+
+  Future<void> _deleteUuidMapping({
+    required String table,
+    int? recordId,
+    String? uuid,
+  }) async {
+    final clauses = <String>['table_name = ?'];
+    final args = <Object?>[table];
+    if (recordId != null) {
+      clauses.add('record_id = ?');
+      args.add(recordId);
+    }
+    if (uuid != null && uuid.trim().isNotEmpty) {
+      clauses.add('uuid = ?');
+      args.add(uuid.trim());
+    }
+    if (clauses.length == 1) return;
+    await _db.delete(
+      _uuidMappingTable,
+      where: clauses.join(' AND '),
+      whereArgs: args,
+    );
+  }
+
+  Future<String?> _uuidForLocalForeignKey(String table, dynamic rawValue) async {
+    if (rawValue == null) return null;
+    final str = rawValue.toString().trim();
+    if (_looksLikeUuid(str)) {
+      return str;
+    }
+    final int? recordId = (rawValue is num) ? rawValue.toInt() : int.tryParse(str);
+    if (recordId == null || recordId <= 0) return null;
+    return _ensureUuidForRecord(table: table, recordId: recordId);
+  }
 
   /*──────────────────── أدوات مساعدة ────────────────────*/
 
@@ -699,25 +931,31 @@ class SyncService {
 
   /// تحويل صف محلي إلى صف سحابي (snake_case) + حقن أعمدة التزامن.
   /// ✅ نرسل **أصل السجل** deviceId/localId إن وُجدا محليًا (قادمين من pull) دون استبدال.
-  Map<String, dynamic> _toRemoteRow({
+  Future<Map<String, dynamic>> _toRemoteRow({
     required String localTable,
     required String remoteTable,
     required Map<String, dynamic> localRow,
-  }) {
+  }) async {
     final data = Map<String, dynamic>.from(localRow);
 
-    // fallback لـ localId عند غيابه
     final dynamic localIdDyn = data['id'];
+    int localPk =
+        (localIdDyn is num) ? localIdDyn.toInt() : int.tryParse('${localIdDyn ?? 0}') ?? 0;
+
+    // fallback لـ localId عند غيابه
     int fallbackLocalId =
     (localIdDyn is num) ? localIdDyn.toInt() : int.tryParse('${localIdDyn ?? 0}') ?? 0;
     if (fallbackLocalId <= 0) {
       fallbackLocalId = DateTime.now().millisecondsSinceEpoch % 2147483647;
     }
+    if (localPk <= 0) {
+      localPk = fallbackLocalId;
+    }
 
     // استخدم أصل السجل إن وُجد (من pull السابق)، وإلا fallback لهذا الجهاز
     final String devForRow = (() {
       final dv = (data['deviceId'] ?? data['device_id'])?.toString().trim();
-      return (dv != null && dv.isNotEmpty) ? dv : _safeDeviceId;
+      return _normalizeDeviceId(dv);
     })();
 
     final int locForRow = (() {
@@ -725,6 +963,40 @@ class SyncService {
       final parsed = (li is num) ? li.toInt() : int.tryParse('${li ?? ''}');
       return parsed ?? fallbackLocalId;
     })();
+
+    final uuid = await _ensureUuidForRecord(
+          table: remoteTable,
+          recordId: localPk,
+          device: devForRow,
+          local: locForRow,
+        ) ??
+        _uuidGen.v5(
+          Uuid.NAMESPACE_URL,
+          _uuidKey(remoteTable, devForRow, locForRow),
+        );
+
+    await _saveUuidMapping(
+      table: remoteTable,
+      recordId: localPk,
+      uuid: uuid,
+      device: devForRow,
+      local: locForRow,
+    );
+
+    final fkParents = _fkMap[remoteTable];
+    if (fkParents != null && fkParents.isNotEmpty) {
+      for (final entry in fkParents.entries) {
+        final fkSnake = entry.key;
+        final parentTable = entry.value;
+        final fkCamel = _toCamel(fkSnake);
+
+        if (data.containsKey(fkCamel)) {
+          data[fkCamel] = await _uuidForLocalForeignKey(parentTable, data[fkCamel]);
+        } else if (data.containsKey(fkSnake)) {
+          data[fkSnake] = await _uuidForLocalForeignKey(parentTable, data[fkSnake]);
+        }
+      }
+    }
 
     // إزالة أعمدة محلية لا نرسلها للسحابة (النسختين camel+snake)
     for (final k in const [
@@ -761,6 +1033,7 @@ class SyncService {
     }
 
     // حقول التزامن — نرسل أصل السجل
+    snake['id'] = uuid;
     snake['account_id'] = accountId;
     snake['device_id'] = devForRow;
     snake['local_id'] = locForRow;
@@ -838,7 +1111,7 @@ class SyncService {
       final prepared = <Map<String, dynamic>>[];
       for (final row in localRows) {
         prepared.add(
-          _toRemoteRow(
+          await _toRemoteRow(
             localTable: localTable,
             remoteTable: remoteTable,
             localRow: row,
@@ -1126,6 +1399,10 @@ class SyncService {
               .eq('device_id', originDev)
               .eq('local_id', originLocal);
         });
+        await _deleteUuidMapping(
+          table: remoteTable,
+          recordId: (r['id'] as num?)?.toInt(),
+        );
       } catch (e) {
         _log('PUSH DELETE FAILED for $remoteTable: $e');
       }
@@ -1199,6 +1476,13 @@ class SyncService {
       for (final dynamic row in remoteRows) {
         final raw = Map<String, dynamic>.from(row);
 
+        final String? remoteUuid = (() {
+          final dynamic idVal = raw['id'];
+          if (idVal == null) return null;
+          final str = idVal.toString().trim();
+          return str.isEmpty ? null : str;
+        })();
+
         final dynamic rawLocalId = raw['local_id'];
         int localId =
             rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString()) ?? 0;
@@ -1240,6 +1524,19 @@ class SyncService {
         }
 
         await _upsertLocalNonDestructive(localTable, filtered, id: localId);
+
+        if (remoteUuid != null && remoteUuid.isNotEmpty) {
+          final int syncLocal = (rawLocalId is num)
+              ? rawLocalId.toInt()
+              : int.tryParse('$rawLocalId') ?? localId;
+          await _saveUuidMapping(
+            table: remoteTable,
+            recordId: localId,
+            uuid: remoteUuid,
+            device: _normalizeDeviceId(remoteDeviceId),
+            local: syncLocal,
+          );
+        }
       }
 
       await _clampAutoincrement(localTable);
@@ -1275,8 +1572,21 @@ class SyncService {
   }) async {
     if (currentValue == null) return null;
 
+    final colType = (await _getLocalColumnType(childLocalTable, childLocalColumnName)) ?? '';
+    final bool isText = colType.contains('TEXT');
+
+    final String strValue = currentValue.toString().trim();
+    if (_looksLikeUuid(strValue)) {
+      final int? mapped = await _getRecordIdForUuid(parentLocalTable, strValue);
+      if (mapped != null) {
+        final dynamic val = isText ? strValue : mapped;
+        return _toLocalValue(childLocalTable, childLocalColumnName, val);
+      }
+      return isText ? strValue : null;
+    }
+
     final int rawFk =
-    (currentValue is num) ? currentValue.toInt() : int.tryParse(currentValue.toString()) ?? 0;
+        (currentValue is num) ? currentValue.toInt() : int.tryParse(strValue) ?? 0;
 
     int candidate = rawFk;
     if (remoteDeviceIdOfRow.isNotEmpty &&
@@ -1292,9 +1602,6 @@ class SyncService {
     int? resolved = existA.isNotEmpty ? candidate : null;
 
     resolved ??= await _findLocalIdByRawFk(parentLocalTable, rawFk);
-
-    final colType = (await _getLocalColumnType(childLocalTable, childLocalColumnName)) ?? '';
-    final isText = colType.contains('TEXT');
 
     final int fallbackVal = resolved ?? candidate;
     final dynamic val = isText ? fallbackVal.toString() : fallbackVal;
@@ -1343,6 +1650,13 @@ class SyncService {
 
       for (final dynamic row in remoteRows) {
         final raw = Map<String, dynamic>.from(row);
+
+        final String? remoteUuid = (() {
+          final dynamic idVal = raw['id'];
+          if (idVal == null) return null;
+          final str = idVal.toString().trim();
+          return str.isEmpty ? null : str;
+        })();
 
         // id المحلي للسجل نفسه
         final dynamic rawLocalId = raw['local_id'];
@@ -1416,6 +1730,19 @@ class SyncService {
 
         // ⛔️ لا نكتب 'id' ضمن الخريطة نفسها أثناء التحديث
         await _upsertLocalNonDestructive(localTable, filtered, id: localId);
+
+        if (remoteUuid != null && remoteUuid.isNotEmpty) {
+          final int syncLocal = (rawLocalId is num)
+              ? rawLocalId.toInt()
+              : int.tryParse('$rawLocalId') ?? localId;
+          await _saveUuidMapping(
+            table: remoteTable,
+            recordId: localId,
+            uuid: remoteUuid,
+            device: _normalizeDeviceId(remoteDeviceId),
+            local: syncLocal,
+          );
+        }
       }
 
       await _clampAutoincrement(localTable); // ← منع قفزة AUTOINCREMENT بعد السحب (FK)
@@ -1526,6 +1853,12 @@ class SyncService {
     final myDeviceId = _safeDeviceId;
 
     final raw = Map<String, dynamic>.from(newRecord);
+    final String? remoteUuid = (() {
+      final dynamic idVal = raw['id'];
+      if (idVal == null) return null;
+      final str = idVal.toString().trim();
+      return str.isEmpty ? null : str;
+    })();
     final dynamic rawLocalId = raw['local_id'];
     int localId =
     rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString()) ?? 0;
@@ -1599,6 +1932,19 @@ class SyncService {
     // ⛔️ لا نضع 'id' داخل الخريطة نفسها — نستخدم upsert غير مُدمِّر
     await _upsertLocalNonDestructive(localTable, filtered, id: localId);
 
+    if (remoteUuid != null && remoteUuid.isNotEmpty) {
+      final int syncLocal = (rawLocalId is num)
+          ? rawLocalId.toInt()
+          : int.tryParse('$rawLocalId') ?? localId;
+      await _saveUuidMapping(
+        table: remoteTable,
+        recordId: localId,
+        uuid: remoteUuid,
+        device: _normalizeDeviceId(remoteDeviceId),
+        local: syncLocal,
+      );
+    }
+
     await _clampAutoincrement(localTable); // ← منع قفزة AUTOINCREMENT بعد Realtime upsert
   }
 
@@ -1612,6 +1958,12 @@ class SyncService {
     final myDeviceId = _safeDeviceId;
 
     final raw = Map<String, dynamic>.from(oldRecord);
+    final String? remoteUuid = (() {
+      final dynamic idVal = raw['id'];
+      if (idVal == null) return null;
+      final str = idVal.toString().trim();
+      return str.isEmpty ? null : str;
+    })();
     final dynamic rawLocalId = raw['local_id'];
     int localId =
     rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString()) ?? 0;
@@ -1644,6 +1996,19 @@ class SyncService {
       );
     } else {
       await _db.delete(localTable, where: 'id = ?', whereArgs: [localId]);
+    }
+
+    if (remoteUuid != null && remoteUuid.isNotEmpty) {
+      await _deleteUuidMapping(
+        table: localTable,
+        recordId: localId,
+        uuid: remoteUuid,
+      );
+    } else {
+      await _deleteUuidMapping(
+        table: localTable,
+        recordId: localId,
+      );
     }
   }
 

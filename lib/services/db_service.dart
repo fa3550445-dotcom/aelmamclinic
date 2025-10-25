@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية + خرائط UUID
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -472,6 +472,7 @@ class DBService {
     await _ensureAlertSettingsColumns(db);
     await _ensureSoftDeleteColumns(db);
     await _ensureSyncMetaColumns(db);     // ← snake_case (متوافق مع parity v3)
+    await _ensureUuidMappingTable(db);
     await _ensureCommonIndexes(db);
   }
 
@@ -717,6 +718,8 @@ class DBService {
 
     // فهارس عامة
     await _ensureCommonIndexes(db);
+
+    await _ensureUuidMappingTable(db);
   }
 
   /*────────────────── الترقيات ──────────────────*/
@@ -881,7 +884,7 @@ class DBService {
 
     if (oldVersion < 24) {
       await db.execute('''
-        CREATE TABLE IF NOT EXISTS drugs (
+      CREATE TABLE IF NOT EXISTS drugs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT UNIQUE NOT NULL,
           notes TEXT,
@@ -951,6 +954,10 @@ class DBService {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
       await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _ensureUuidMappingTable(db);
     }
   }
 
@@ -2304,6 +2311,43 @@ class DBService {
     if (!await _columnExists(db, table, column)) {
       await db.execute('ALTER TABLE $table ADD COLUMN $column $sqlType');
     }
+  }
+
+  Future<void> _ensureUuidMappingTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_uuid_mapping (
+        table_name TEXT NOT NULL,
+        record_id INTEGER NOT NULL,
+        account_id TEXT NOT NULL,
+        device_id TEXT NOT NULL,
+        local_sync_id INTEGER NOT NULL,
+        uuid TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, uuid)
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER IF NOT EXISTS tg_sync_uuid_mapping_updated_at
+      AFTER UPDATE ON sync_uuid_mapping
+      FOR EACH ROW
+      BEGIN
+        UPDATE sync_uuid_mapping
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE table_name = OLD.table_name AND uuid = OLD.uuid;
+      END;
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS uix_sync_uuid_mapping_record
+      ON sync_uuid_mapping(table_name, record_id);
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS uix_sync_uuid_mapping_sync_key
+      ON sync_uuid_mapping(table_name, account_id, device_id, local_sync_id);
+    ''');
   }
 
   Future<void> _createIndexIfMissing(DatabaseExecutor db, String indexName, String table, List<String> columns) async {
