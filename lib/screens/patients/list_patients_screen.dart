@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,6 +21,8 @@ import '../../core/tbian_ui.dart';
 
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
+import '../../models/doctor.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/db_service.dart';
 import '../../services/export_service.dart';
 import '../../services/save_file_service.dart';
@@ -65,11 +68,21 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
   Future<void> _loadPatients() async {
     setState(() => _isLoading = true);
     try {
-      final patients = await DBService.instance.getAllPatients();
+      final allPatients = await DBService.instance.getAllPatients();
+      final auth = context.read<AuthProvider>();
+      final uid = auth.uid;
+      Doctor? linkedDoctor;
+      if (uid != null && uid.isNotEmpty) {
+        linkedDoctor = await DBService.instance.getDoctorByUserUid(uid);
+      }
+
+      final patients = (linkedDoctor?.id != null)
+          ? allPatients.where((p) => p.doctorId == linkedDoctor!.id).toList()
+          : allPatients;
+
       final db = await DBService.instance.database;
 
-      final ids =
-          patients.where((p) => p.id != null).map((p) => p.id!).toList();
+      final ids = patients.where((p) => p.id != null).map((p) => p.id!).toList();
       final svcMap = <int, List<PatientService>>{};
 
       if (ids.isNotEmpty) {

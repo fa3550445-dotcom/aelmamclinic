@@ -11,6 +11,7 @@ class Doctor {
   CREATE TABLE IF NOT EXISTS $table (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     employeeId     INTEGER,
+    userUid        TEXT,
     name           TEXT,
     specialization TEXT,
     phoneNumber    TEXT,
@@ -23,6 +24,7 @@ class Doctor {
 
   final int? id;
   final int? employeeId;        // ربط الطبيب بالموظف (اختياري)
+  final String? userUid;        // ربط الطبيب بحساب Supabase (اختياري)
   final String name;
   final String specialization;  // التخصص
   final String phoneNumber;
@@ -33,6 +35,7 @@ class Doctor {
   Doctor({
     this.id,
     this.employeeId,
+    this.userUid,
     required this.name,
     required this.specialization,
     required this.phoneNumber,
@@ -60,6 +63,7 @@ class Doctor {
   Map<String, dynamic> toMap() => {
     'id': id,
     'employeeId': employeeId,
+    'userUid': userUid,
     'name': name,
     'specialization': specialization,
     'phoneNumber': phoneNumber,
@@ -74,6 +78,10 @@ class Doctor {
   factory Doctor.fromMap(Map<String, dynamic> map) => Doctor(
     id: _toIntN(map['id']),
     employeeId: _toIntN(map['employeeId'] ?? map['employee_id']),
+    userUid: () {
+      final raw = _toStr(map['userUid'] ?? map['user_uid']);
+      return raw.isEmpty ? null : raw;
+    }(),
     name: _toStr(map['name']),
     specialization: _toStr(map['specialization']),
     phoneNumber: _toStr(map['phoneNumber'] ?? map['phone_number']),
@@ -87,6 +95,7 @@ class Doctor {
   Doctor copyWith({
     int? id,
     int? employeeId,
+    String? userUid,
     String? name,
     String? specialization,
     String? phoneNumber,
@@ -97,6 +106,7 @@ class Doctor {
     return Doctor(
       id: id ?? this.id,
       employeeId: employeeId ?? this.employeeId,
+      userUid: userUid ?? this.userUid,
       name: name ?? this.name,
       specialization: specialization ?? this.specialization,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -108,7 +118,7 @@ class Doctor {
 
   @override
   String toString() =>
-      'Doctor(id:$id, empId:$employeeId, name:$name, spec:$specialization, printCounter:$printCounter)';
+      'Doctor(id:$id, empId:$employeeId, userUid:$userUid, name:$name, spec:$specialization, printCounter:$printCounter)';
 
   @override
   bool operator ==(Object other) =>
@@ -117,6 +127,7 @@ class Doctor {
               runtimeType == other.runtimeType &&
               id == other.id &&
               employeeId == other.employeeId &&
+              userUid == other.userUid &&
               name == other.name &&
               specialization == other.specialization &&
               phoneNumber == other.phoneNumber &&
@@ -128,6 +139,7 @@ class Doctor {
   int get hashCode => Object.hash(
     id,
     employeeId,
+    userUid,
     name,
     specialization,
     phoneNumber,

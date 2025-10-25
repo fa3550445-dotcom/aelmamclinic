@@ -7,7 +7,7 @@ import '../../core/neumorphism.dart';
 
 import '../../models/doctor.dart';
 import '../../services/db_service.dart';
-import 'employee_search_dialog.dart';
+import '../../widgets/user_account_picker_dialog.dart';
 
 class NewDoctorScreen extends StatefulWidget {
   const NewDoctorScreen({super.key});
@@ -24,6 +24,9 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
   final _phoneCtrl = TextEditingController();
 
   int? _selectedEmployeeId;
+  String? _selectedUserUid;
+  String? _selectedUserEmail;
+  bool _selectedAccountDisabled = false;
 
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -50,27 +53,58 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
     );
   }
 
-  Future<void> _openEmployeeSearchDialog() async {
-    final selectedEmployee = await showDialog<Map<String, dynamic>>(
+  Future<void> _openAccountPicker() async {
+    final exclude = await DBService.instance.getLinkedUserUids();
+    if (_selectedUserUid != null && _selectedUserUid!.isNotEmpty) {
+      exclude.remove(_selectedUserUid);
+    }
+
+    final selection = await showDialog<UserAccountSelection>(
       context: context,
-      builder: (_) => const EmployeeSearchDialog(),
+      builder: (_) => UserAccountPickerDialog(
+        excludeUserUids: exclude,
+        initialUserUid: _selectedUserUid,
+      ),
     );
 
-    if (selectedEmployee != null) {
-      setState(() {
-        _selectedEmployeeId = selectedEmployee['id'] as int?;
-        _doctorNameCtrl.text = selectedEmployee['name'] ?? '';
-        _specializationCtrl.text = selectedEmployee['jobTitle'] ?? '';
-        _phoneCtrl.text = selectedEmployee['phoneNumber'] ?? '';
-      });
-    }
+    if (selection == null) return;
+
+    final employee = await DBService.instance.getEmployeeByUserUid(selection.uid);
+    if (!mounted) return;
+
+    setState(() {
+      _selectedUserUid = selection.uid;
+      _selectedUserEmail = selection.email.isEmpty ? selection.uid : selection.email;
+      _selectedAccountDisabled = selection.disabled;
+      _selectedEmployeeId = employee?.id;
+
+      if (employee != null) {
+        if (employee.name.trim().isNotEmpty) {
+          _doctorNameCtrl.text = employee.name.trim();
+        }
+        if (employee.jobTitle.trim().isNotEmpty) {
+          _specializationCtrl.text = employee.jobTitle.trim();
+        }
+        if (employee.phoneNumber.trim().isNotEmpty) {
+          _phoneCtrl.text = employee.phoneNumber.trim();
+        }
+      }
+    });
   }
 
   Future<void> _saveDoctor() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedUserUid == null || _selectedUserUid!.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرجاء اختيار حساب Supabase لربط الطبيب.')),
+      );
+      return;
+    }
+
     final newDoctor = Doctor(
       employeeId: _selectedEmployeeId,
+      userUid: _selectedUserUid,
       name: _doctorNameCtrl.text.trim(),
       specialization: _specializationCtrl.text.trim(),
       phoneNumber: _phoneCtrl.text.trim(),
@@ -115,9 +149,9 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
               key: _formKey,
               child: ListView(
                 children: [
-                  // اختيار الموظف
+                  // اختيار الحساب المرتبط
                   NeuCard(
-                    onTap: _openEmployeeSearchDialog,
+                    onTap: _openAccountPicker,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
                     child: ListTile(
@@ -134,13 +168,17 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                         ),
                       ),
                       title: Text(
-                        _selectedEmployeeId == null
-                            ? 'اختيار من الموظفين'
-                            : 'تم اختيار موظف (ID: $_selectedEmployeeId)',
+                        _selectedUserEmail ?? 'اختيار حساب الموظف',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        'اضغط لاختيار موظف لربطه بالطبيب',
+                        _selectedUserEmail == null
+                            ? 'اضغط لاختيار حساب Supabase لربط الطبيب'
+                            : _selectedAccountDisabled
+                                ? '⚠️ هذا الحساب معطّل حاليًا'
+                                : (_selectedEmployeeId != null
+                                    ? 'موظف مرتبط ID: $_selectedEmployeeId'
+                                    : 'سيُربط بالحساب المختار'),
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme

@@ -19,6 +19,7 @@ import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../models/doctor.dart';
 import '../../services/db_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/repository_provider.dart';
 import 'list_patients_screen.dart';
 import 'duplicate_patients_screen.dart';
@@ -61,6 +62,8 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
   // === Doctor selection ===
   int? _selectedDoctorId;
   String? _selectedDoctorName;
+  List<Doctor>? _cachedDoctors;
+  Doctor? _linkedDoctor;
 
   // === Inventory usage ===
   List<Map<String, dynamic>> _invTypes = [];
@@ -79,6 +82,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
     if (widget.initialName != null) _nameCtrl.text = widget.initialName!;
     if (widget.initialPhone != null) _phoneCtrl.text = widget.initialPhone!;
     _loadInvTypes();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _prefillDoctorFromAccount());
   }
 
   @override
@@ -359,6 +363,43 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
     setState(() {});
   }
 
+  Future<void> _prefillDoctorFromAccount() async {
+    try {
+      await _getDoctorsForCurrentUser();
+    } catch (_) {}
+  }
+
+  Future<List<Doctor>> _getDoctorsForCurrentUser() async {
+    if (_cachedDoctors != null) return _cachedDoctors!;
+
+    final docs = await DBService.instance.getAllDoctors();
+    final auth = context.read<AuthProvider>();
+    final uid = auth.uid;
+    Doctor? linked;
+    if (uid != null && uid.isNotEmpty) {
+      linked = await DBService.instance.getDoctorByUserUid(uid);
+    }
+
+    final result = (linked != null && linked.id != null)
+        ? docs.where((d) => d.id == linked!.id).toList()
+        : docs;
+
+    _cachedDoctors = result;
+    _linkedDoctor = linked;
+
+    if (linked != null && linked.id != null && mounted) {
+      setState(() {
+        if (_selectedDoctorId == null) {
+          _selectedDoctorId = linked!.id;
+          _selectedDoctorName = 'د/${linked.name}';
+          _doctorCtrl.text = _selectedDoctorName!;
+        }
+      });
+    }
+
+    return result;
+  }
+
   void _onPaidChanged(String v) {
     final total = _parseDouble(_totalCtrl.text);
     final paid = _parseDouble(v);
@@ -367,7 +408,14 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
   }
 
   Future<void> _selectDoctorForRadLab() async {
-    final doctors = await DBService.instance.getAllDoctors();
+    final doctors = await _getDoctorsForCurrentUser();
+    if (doctors.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('لا يوجد أطباء متاحون لهذا الحساب.')),
+      );
+      return;
+    }
     List<Doctor> filtered = List.from(doctors);
     final chosen = await showDialog<Doctor>(
       context: context,
