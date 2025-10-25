@@ -132,7 +132,7 @@ END$$;
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables
-             WHERE table_schema='public' AND table_name='clinics')
+             WHERE table_schema='public' AND table_name='accounts')
      AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='fk_chat_conversations_account') THEN
 
     -- تأكد من وجود العمود أولًا
@@ -144,14 +144,14 @@ BEGIN
       SET account_id = NULL
       WHERE account_id IS NOT NULL
         AND NOT EXISTS (
-          SELECT 1 FROM public.clinics x WHERE x.id = c.account_id
+          SELECT 1 FROM public.accounts x WHERE x.id = c.account_id
         );
 
       -- الآن أضِف الـ FK بأمان
       ALTER TABLE public.chat_conversations
         ADD CONSTRAINT fk_chat_conversations_account
         FOREIGN KEY (account_id)
-        REFERENCES public.clinics(id)
+        REFERENCES public.accounts(id)
         ON DELETE SET NULL;
     END IF;
   END IF;
