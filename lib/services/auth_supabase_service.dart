@@ -26,6 +26,7 @@ import 'dart:developer' as dev;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/account_user_summary.dart';
 import '../models/clinic.dart';
 
 import './device_id_service.dart';
@@ -1098,6 +1099,84 @@ class AuthSupabaseService {
       dev.log('delete_employee RPC failed: $e');
       rethrow;
     }
+  }
+
+  Future<List<AccountUserSummary>> listAccountUsersWithEmail({
+    required String accountId,
+    bool includeDisabled = true,
+  }) async {
+    List<AccountUserSummary> mapRows(List data) {
+      final dedup = <String, AccountUserSummary>{};
+      for (final raw in data) {
+        if (raw is Map<String, dynamic>) {
+          final summary = AccountUserSummary.fromMap(raw);
+          if (summary.userUid.isEmpty) continue;
+          dedup[summary.userUid] = summary;
+        } else if (raw is Map) {
+          final summary = AccountUserSummary.fromMap(raw.cast<String, dynamic>());
+          if (summary.userUid.isEmpty) continue;
+          dedup[summary.userUid] = summary;
+        }
+      }
+      final result = dedup.values.toList();
+      result.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+      if (!includeDisabled) {
+        return result.where((e) => !e.disabled).toList();
+      }
+      return result;
+    }
+
+    // 1) RPC SECURITY DEFINER
+    try {
+      final res = await _client.rpc('list_employees_with_email', params: {'p_account': accountId});
+      if (res is List) {
+        return mapRows(res);
+      }
+      dev.log('list_employees_with_email returned non-list payload; falling back...');
+    } catch (e, st) {
+      dev.log('list_employees_with_email RPC failed, trying edge...', error: e, stackTrace: st);
+    }
+
+    // 2) Edge Function fallback
+    try {
+      final resp = await _client.functions.invoke(
+        'admin__list_employees',
+        body: {'account_id': accountId},
+      );
+      final data = resp.data;
+      if (data is List) {
+        return mapRows(data.map((e) => Map<String, dynamic>.from(e)).toList());
+      }
+      dev.log('admin__list_employees returned non-list payload; falling back to profiles...');
+    } catch (e, st) {
+      dev.log('admin__list_employees failed, falling back to profiles...', error: e, stackTrace: st);
+    }
+
+    // 3) profiles fallback
+    try {
+      final rows = await _client
+          .from('profiles')
+          .select('id')
+          .eq('account_id', accountId)
+          .eq('role', 'employee');
+      if (rows is List) {
+        final mapped = rows
+            .map((e) => (e as Map).cast<String, dynamic>())
+            .map((e) => AccountUserSummary(
+                  userUid: e['id']?.toString() ?? '',
+                  email: '—',
+                  disabled: false,
+                ))
+            .where((e) => e.userUid.isNotEmpty)
+            .toList();
+        mapped.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+        return includeDisabled ? mapped : mapped.where((e) => !e.disabled).toList();
+      }
+    } catch (e, st) {
+      dev.log('profiles fallback failed', error: e, stackTrace: st);
+      rethrow;
+    }
+    return const [];
   }
 
   // ─────────────────── أدوات مساعدة للهوية ───────────────────

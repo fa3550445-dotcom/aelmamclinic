@@ -43,6 +43,7 @@ class Employee {
   final double basicSalary;
   final double finalSalary;
   final bool isDoctor;
+  final String? userUid;
 
   /*────────────────────────── حقول مزامنة اختيارية (سحابة) ─────────────────────────*/
   /// معرّف الحساب (Supabase → accounts.id)
@@ -68,6 +69,7 @@ class Employee {
     this.basicSalary = 0.0,
     this.finalSalary = 0.0,
     this.isDoctor = false,
+    this.userUid,
     this.accountId,
     this.deviceId,
     this.localId,
@@ -119,6 +121,7 @@ class Employee {
     'basicSalary': basicSalary,
     'finalSalary': finalSalary,
     'isDoctor': isDoctor ? 1 : 0,
+    'userUid': userUid,
   };
 
   /// تمثيل سحابي (snake_case) للاستخدام عند الدفع إلى Supabase.
@@ -135,6 +138,7 @@ class Employee {
     'basic_salary': basicSalary,
     'final_salary': finalSalary,
     'is_doctor': isDoctor,
+    'user_uid': userUid,
     'updated_at': updatedAt?.toIso8601String(),
   }..removeWhere((k, v) => v == null);
 
@@ -168,6 +172,7 @@ class Employee {
         ? m['localId'] as int
         : (m['local_id'] is int ? m['local_id'] as int : m['id'] as int?);
     final updatedAt = _toDateN(m['updatedAt'] ?? m['updated_at']);
+    final userUid = _toStrN(m['userUid'] ?? m['user_uid']);
 
     return Employee(
       id: id,
@@ -184,6 +189,7 @@ class Employee {
       deviceId: deviceId,
       localId: localId,
       updatedAt: updatedAt,
+      userUid: (userUid == null || userUid.isEmpty) ? null : userUid,
     );
   }
 
@@ -200,6 +206,7 @@ class Employee {
     double? basicSalary,
     double? finalSalary,
     bool? isDoctor,
+    String? userUid,
     String? accountId,
     String? deviceId,
     int? localId,
@@ -216,6 +223,7 @@ class Employee {
         basicSalary: basicSalary ?? this.basicSalary,
         finalSalary: finalSalary ?? this.finalSalary,
         isDoctor: isDoctor ?? this.isDoctor,
+        userUid: userUid ?? this.userUid,
         accountId: accountId ?? this.accountId,
         deviceId: deviceId ?? this.deviceId,
         localId: localId ?? this.localId,
@@ -241,6 +249,7 @@ class Employee {
               basicSalary == other.basicSalary &&
               finalSalary == other.finalSalary &&
               isDoctor == other.isDoctor &&
+              userUid == other.userUid &&
               accountId == other.accountId &&
               deviceId == other.deviceId &&
               localId == other.localId &&
@@ -258,6 +267,7 @@ class Employee {
     basicSalary,
     finalSalary,
     isDoctor,
+    userUid,
     accountId,
     deviceId,
     localId,

@@ -14,18 +14,25 @@ class PatientLocalRepository {
     return id;
   }
 
-  Future<List<Patient>> getAllPatients() async {
+  Future<List<Patient>> getAllPatients({int? doctorId}) async {
     final db = await _dbService.database;
-    final rows = await db.rawQuery('''
+    final args = <Object?>[];
+    final where = StringBuffer('WHERE ifnull(p.isDeleted,0)=0');
+    if (doctorId != null) {
+      where.write(' AND p.doctorId = ?');
+      args.add(doctorId);
+    }
+    final sql = '''
       SELECT
         p.*,
         d.name AS doctorName,
         d.specialization AS doctorSpecialization
       FROM patients p
       LEFT JOIN doctors d ON d.id = p.doctorId
-      WHERE ifnull(p.isDeleted,0)=0
+      ${where.toString()}
       ORDER BY p.registerDate DESC
-    ''');
+    ''';
+    final rows = await db.rawQuery(sql, args);
     return rows
         .map((row) => Patient.fromMap(Map<String, dynamic>.from(row)))
         .toList();

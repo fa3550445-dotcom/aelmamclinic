@@ -23,6 +23,7 @@ import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../services/db_service.dart';
 import '../../providers/repository_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'list_patients_screen.dart';
 
 class EditPatientScreen extends StatefulWidget {
@@ -73,6 +74,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _dtOnly = DateFormat('yyyy-MM-dd');
+  bool _doctorRestricted = false;
+  Doctor? _linkedDoctor;
 
   // ── Helpers العامة ──
   double _parseDouble(String s) {
@@ -126,9 +129,15 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     _registerDate = p.registerDate;
     _registerTime = TimeOfDay.fromDateTime(p.registerDate);
 
-    _selectedDoctorId = p.doctorId;
-    _selectedDoctorName = p.doctorName;
-    _doctorCtrl.text = p.doctorName ?? '';
+    await _resolveDoctorAccount();
+    if (_doctorRestricted && _linkedDoctor != null) {
+      _selectedDoctorId = _linkedDoctor!.id;
+      _selectedDoctorName = 'د/${_linkedDoctor!.name}';
+    } else {
+      _selectedDoctorId = p.doctorId;
+      _selectedDoctorName = p.doctorName;
+    }
+    _doctorCtrl.text = _selectedDoctorName ?? '';
 
     _selectedServiceTypeAr = _codeToLabel(p.serviceType);
 
@@ -189,6 +198,20 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       orderBy: 'name',
     );
     setState(() => _invItems = rows);
+  }
+
+  Future<void> _resolveDoctorAccount() async {
+    final auth = context.read<AuthProvider>();
+    final uid = auth.uid;
+    if (uid == null || uid.isEmpty) return;
+    final doctor = await DBService.instance.getDoctorByUserUid(uid);
+    if (!mounted) return;
+    if (doctor != null) {
+      setState(() {
+        _linkedDoctor = doctor;
+        _doctorRestricted = true;
+      });
+    }
   }
 
   Future<void> _loadExistingConsumptions() async {
@@ -486,8 +509,17 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   }
 
   Future<void> _selectDoctorForRadLab() async {
+    if (_doctorRestricted && _linkedDoctor != null) {
+      setState(() {
+        _selectedDoctorId = _linkedDoctor!.id;
+        _selectedDoctorName = 'د/${_linkedDoctor!.name}';
+        _doctorCtrl.text = _selectedDoctorName ?? '';
+      });
+      return;
+    }
     final doctors = await DBService.instance.getAllDoctors();
-    List<Doctor> filtered = List.from(doctors);
+    final source = List<Doctor>.from(doctors);
+    List<Doctor> filtered = List.from(source);
     final chosen = await showDialog<Doctor>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -503,7 +535,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                     hintText: 'بحث عن الطبيب…',
                     prefixIcon: Icon(Icons.search),
                   ),
-                  onChanged: (v) => setDlg(() => filtered = doctors
+                  onChanged: (v) => setDlg(() => filtered = source
                       .where(
                           (d) => d.name.toLowerCase().contains(v.toLowerCase()))
                       .toList()),

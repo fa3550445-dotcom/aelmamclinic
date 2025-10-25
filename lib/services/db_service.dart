@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -465,6 +465,26 @@ class DBService {
     } catch (e) {
       print('uix_sds_service_doctor_active creation skipped: $e');
     }
+
+    try {
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS uix_doctors_userUid_active
+        ON doctors(userUid)
+        WHERE userUid IS NOT NULL AND (isDeleted IS NULL OR isDeleted = 0)
+      ''');
+    } catch (e) {
+      print('uix_doctors_userUid_active creation skipped: $e');
+    }
+
+    try {
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS uix_employees_userUid_active
+        ON employees(userUid)
+        WHERE userUid IS NOT NULL AND (isDeleted IS NULL OR isDeleted = 0)
+      ''');
+    } catch (e) {
+      print('uix_employees_userUid_active creation skipped: $e');
+    }
   }
 
   Future<void> _postOpenChecks(Database db) async {
@@ -590,6 +610,7 @@ class DBService {
   CREATE TABLE doctors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     employeeId INTEGER,
+    userUid TEXT,
     name TEXT,
     specialization TEXT,
     phoneNumber TEXT,
@@ -639,7 +660,8 @@ class DBService {
     maritalStatus TEXT,
     basicSalary REAL,
     finalSalary REAL,
-    isDoctor INTEGER DEFAULT 0
+    isDoctor INTEGER DEFAULT 0,
+    userUid TEXT
   );
 ''');
 
@@ -950,6 +972,12 @@ class DBService {
     if (oldVersion < 28) {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
+      await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _addColumnIfMissing(db, 'doctors', 'userUid', 'TEXT');
+      await _addColumnIfMissing(db, 'employees', 'userUid', 'TEXT');
       await _ensureCommonIndexes(db);
     }
   }
@@ -1299,7 +1327,8 @@ class DBService {
   //=============================== المرضى ===============================
   Future<int> insertPatient(Patient patient) => patients.insertPatient(patient);
 
-  Future<List<Patient>> getAllPatients() => patients.getAllPatients();
+  Future<List<Patient>> getAllPatients({int? doctorId}) =>
+      patients.getAllPatients(doctorId: doctorId);
 
   Future<int> updatePatient(Patient p, List<PatientService> newServices) => patients.updatePatient(p, newServices);
 
@@ -1445,6 +1474,35 @@ class DBService {
     final res = await db.query('doctors',
         where: 'ifnull(isDeleted,0)=0', orderBy: 'id DESC');
     return res.map((row) => Doctor.fromMap(row)).toList();
+  }
+
+  Future<Doctor?> getDoctorByUserUid(String userUid) async {
+    final trimmed = userUid.trim();
+    if (trimmed.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'doctors',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [trimmed],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Doctor.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getDoctorUserUids() async {
+    final db = await database;
+    final rows = await db.query(
+      'doctors',
+      columns: const ['userUid'],
+      where: 'userUid IS NOT NULL AND TRIM(userUid) <> "" AND ifnull(isDeleted,0)=0',
+    );
+    final set = <String>{};
+    for (final row in rows) {
+      final raw = row['userUid']?.toString().trim() ?? '';
+      if (raw.isNotEmpty) set.add(raw);
+    }
+    return set;
   }
 
   Future<int> updateDoctor(Doctor doctor) async {
@@ -1796,6 +1854,35 @@ class DBService {
     final db = await database;
     return db.query('employees',
         where: 'ifnull(isDeleted,0)=0', orderBy: 'id DESC');
+  }
+
+  Future<Employee?> getEmployeeByUserUid(String userUid) async {
+    final trimmed = userUid.trim();
+    if (trimmed.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [trimmed],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Employee.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getEmployeeUserUids() async {
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      columns: const ['userUid'],
+      where: 'userUid IS NOT NULL AND TRIM(userUid) <> "" AND ifnull(isDeleted,0)=0',
+    );
+    final set = <String>{};
+    for (final row in rows) {
+      final raw = row['userUid']?.toString().trim() ?? '';
+      if (raw.isNotEmpty) set.add(raw);
+    }
+    return set;
   }
 
   Future<int> updateEmployee(int employeeId, Map<String, dynamic> newData) async {

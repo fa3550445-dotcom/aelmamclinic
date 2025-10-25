@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../services/auth_supabase_service.dart';
+import '../../models/account_user_summary.dart';
 
 /// شاشة إدارة حسابات الموظفين.
 /// مسار القراءة الموصى به:
@@ -36,91 +37,17 @@ class _UsersScreenState extends State<UsersScreen> {
       return [];
     }
 
-    // 1) RPC
     try {
-      final data = await _authService.client
-          .rpc('list_employees_with_email', params: {'p_account': accountId});
-      if (data is List) {
-        final list = data.map((e) => Map<String, dynamic>.from(e)).toList();
-        final mapped = list.map((r) {
-          return {
-            'uid': (r['user_uid'] as String?) ?? '',
-            'email': (r['email'] as String?) ?? '',
-            'disabled': (r['disabled'] as bool?) ?? false,
-          };
-        }).where((m) => (m['uid'] as String).isNotEmpty);
-
-        final unique = {
-          for (final m in mapped) m['uid'] as String: m,
-        }.values.toList();
-
-        unique.sort((a, b) => (a['email'] as String)
-            .toLowerCase()
-            .compareTo((b['email'] as String).toLowerCase()));
-        return unique;
-      } else {
-        dev.log('RPC returned non-list payload; falling back...');
-      }
-    } catch (e, st) {
-      dev.log('RPC list_employees_with_email failed, trying edge...', error: e, stackTrace: st);
-    }
-
-    // 2) Edge Function (اختياري)
-    try {
-      final resp = await _authService.client.functions.invoke(
-        'admin__list_employees',
-        body: {'account_id': accountId},
-      );
-      final data = resp.data;
-      if (data is List) {
-        final list = data.map((e) => Map<String, dynamic>.from(e)).toList();
-        final mapped = list.map((r) {
-          return {
-            'uid': (r['uid'] as String?) ?? '',
-            'email': (r['email'] as String?) ?? '',
-            'disabled': (r['disabled'] as bool?) ?? false,
-          };
-        }).where((m) => (m['uid'] as String).isNotEmpty);
-
-        final unique = {
-          for (final m in mapped) m['uid'] as String: m,
-        }.values.toList();
-
-        unique.sort((a, b) => (a['email'] as String)
-            .toLowerCase()
-            .compareTo((b['email'] as String).toLowerCase()));
-        return unique;
-      } else {
-        dev.log('Edge function returned non-list payload; falling back to profiles...');
-      }
-    } catch (e, st) {
-      dev.log('Edge admin__list_employees failed, falling back to profiles...', error: e, stackTrace: st);
-    }
-
-    // 3) profiles فقط (بدون بريد/تعطيل)
-    try {
-      final rows = await _authService.client
-          .from('profiles')
-          .select('id')
-          .eq('account_id', accountId)
-          .eq('role', 'employee');
-
-      final list = (rows as List)
-          .map((r) => (r as Map).cast<String, dynamic>())
-          .map((r) => {
-        'uid': (r['id'] as String?) ?? '',
-        'email': '—',
-        'disabled': false,
-      })
-          .where((m) => (m['uid'] as String).isNotEmpty)
+      final summaries = await _authService.listAccountUsersWithEmail(accountId: accountId);
+      return summaries
+          .map((AccountUserSummary s) => {
+                'uid': s.userUid,
+                'email': s.email,
+                'disabled': s.disabled,
+              })
           .toList();
-
-      list.sort((a, b) => (a['email'] as String)
-          .toLowerCase()
-          .compareTo((b['email'] as String).toLowerCase()));
-      return list;
     } catch (e, st) {
-      dev.log('profiles fallback failed', error: e, stackTrace: st);
+      dev.log('listAccountUsersWithEmail failed', error: e, stackTrace: st);
       rethrow;
     }
   }
