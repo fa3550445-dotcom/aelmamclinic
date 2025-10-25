@@ -1,4 +1,4 @@
--- add codegen helper functions
+-- add codegen helper functions (fixed)
 create or replace function public.get_enum_types()
 returns table(name text, labels text[])
 language sql stable as $$
@@ -56,34 +56,53 @@ enums as (
   select name, labels from public.get_enum_types()
 )
 select jsonb_build_object(
-  'tables',        coalesce(jsonb_agg(distinct jsonb_build_object(
-                     'schema', t.table_schema, 'name', t.table_name)
-                   order by t.table_schema, t.table_name) filter (where true), '[]'::jsonb),
-  'columns',       (select coalesce(jsonb_agg(jsonb_build_object(
-                     'schema', c.table_schema,
-                     'table',  c.table_name,
-                     'name',   c.column_name,
-                     'data_type', c.data_type,
-                     'udt_name',  c.udt_name,
-                     'is_nullable', c.is_nullable = 'YES',
-                     'is_generated', c.is_generated,
-                     'default', c.column_default)
-                   order by c.table_schema, c.table_name, c.ordinal_position), '[]'::jsonb)
-                   from cols c),
-  'primary_keys',  (select coalesce(jsonb_agg(jsonb_build_object(
-                     'schema', p.table_schema, 'table', p.table_name, 'column', p.column_name)
-                   order by p.table_schema, p.table_name, p.column_name), '[]'::jsonb) from pks p),
-  'foreign_keys',  (select coalesce(jsonb_agg(jsonb_build_object(
-                     'schema', f.table_schema, 'table', f.table_name, 'column', f.column_name,
-                     'foreign_schema', f.foreign_table_schema,
-                     'foreign_table',  f.foreign_table_name,
-                     'foreign_column', f.foreign_column_name)
-                   order by f.table_schema, f.table_name, f.column_name), '[]'::jsonb) from fks f),
-  'enums',         (select coalesce(jsonb_agg(jsonb_build_object(
-                     'name', e.name, 'labels', e.labels)), '[]'::jsonb) from enums e)
-)
-from tbls t;
+  'tables', (
+    select coalesce(
+      jsonb_agg(jsonb_build_object('schema', s.table_schema, 'name', s.table_name)),
+      '[]'::jsonb
+    )
+    from (
+      select distinct t.table_schema, t.table_name
+      from tbls t
+      order by t.table_schema, t.table_name
+    ) s
+  ),
+  'columns', (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'schema', c.table_schema,
+      'table',  c.table_name,
+      'name',   c.column_name,
+      'data_type', c.data_type,
+      'udt_name',  c.udt_name,
+      'is_nullable', c.is_nullable = 'YES',
+      'is_generated', c.is_generated,
+      'default', c.column_default
+    ) order by c.table_schema, c.table_name, c.ordinal_position), '[]'::jsonb)
+    from cols c
+  ),
+  'primary_keys', (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'schema', p.table_schema, 'table', p.table_name, 'column', p.column_name
+    ) order by p.table_schema, p.table_name, p.column_name), '[]'::jsonb)
+    from pks p
+  ),
+  'foreign_keys', (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'schema', f.table_schema, 'table', f.table_name, 'column', f.column_name,
+      'foreign_schema', f.foreign_table_schema,
+      'foreign_table',  f.foreign_table_name,
+      'foreign_column', f.foreign_column_name
+    ) order by f.table_schema, f.table_name, f.column_name), '[]'::jsonb)
+    from fks f
+  ),
+  'enums', (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'name', e.name, 'labels', e.labels
+    )), '[]'::jsonb)
+    from enums e
+  )
+);
 $$;
 
--- اطلب من PostgREST إعادة تحميل كاش المخطط
+-- refresh PostgREST cache
 notify pgrst, 'reload schema';
