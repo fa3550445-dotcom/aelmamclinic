@@ -1,2 +1,1 @@
-@-- placeholder for remote migration storage_create_bucket
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901011300_storage_create_bucket.sql */ END --version;

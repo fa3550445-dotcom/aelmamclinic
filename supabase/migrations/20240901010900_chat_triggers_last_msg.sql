@@ -1,2 +1,1 @@
-@-- placeholder for remote migration chat_triggers_last_msg
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901010900_chat_triggers_last_msg.sql */ END --version;

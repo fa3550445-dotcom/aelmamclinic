@@ -1,2 +1,1 @@
-@-- placeholder for remote migration touch_updated_at_triggers
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901010600_touch_updated_at_triggers.sql */ END --version;

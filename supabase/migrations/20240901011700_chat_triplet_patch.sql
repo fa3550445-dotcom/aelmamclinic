@@ -1,2 +1,1 @@
-@-- placeholder for remote migration chat_triplet_patch
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901011700_chat_triplet_patch.sql */ END --version;

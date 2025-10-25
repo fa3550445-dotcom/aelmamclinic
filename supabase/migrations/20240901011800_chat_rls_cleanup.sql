@@ -1,2 +1,1 @@
-@-- placeholder for remote migration chat_rls_cleanup
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901011800_chat_rls_cleanup.sql */ END --version;

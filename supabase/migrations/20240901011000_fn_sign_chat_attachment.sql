@@ -1,2 +1,1 @@
-@-- placeholder for remote migration fn_sign_chat_attachment
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901011000_fn_sign_chat_attachment.sql */ END --version;

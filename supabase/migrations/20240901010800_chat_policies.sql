@@ -1,2 +1,1 @@
-@-- placeholder for remote migration chat_policies
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901010800_chat_policies.sql */ END --version;

@@ -1,2 +1,1 @@
-@-- placeholder for remote migration rpc_delete_employee
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901010300_rpc_delete_employee.sql */ END --version;

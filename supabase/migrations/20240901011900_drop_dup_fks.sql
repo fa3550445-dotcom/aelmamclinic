@@ -1,2 +1,1 @@
-@-- placeholder for remote migration drop_dup_fks
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901011900_drop_dup_fks.sql */ END --version;

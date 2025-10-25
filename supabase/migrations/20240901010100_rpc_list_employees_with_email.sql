@@ -1,2 +1,1 @@
-@-- placeholder for remote migration rpc_list_employees_with_email
--- already applied in cloud
+DO --version BEGIN /* placeholder for remote migration: 20240901010100_rpc_list_employees_with_email.sql */ END --version;
