@@ -40,6 +40,25 @@ CREATE INDEX IF NOT EXISTS account_users_account_idx ON public.account_users(acc
 CREATE INDEX IF NOT EXISTS account_users_user_idx ON public.account_users(user_uid);
 CREATE INDEX IF NOT EXISTS account_users_role_idx ON public.account_users(role);
 
+-- سجلات التدقيق ---------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  account_id uuid,
+  actor_uid uuid,
+  actor_email text,
+  table_name text,
+  op text,
+  row_pk text,
+  before_row jsonb,
+  after_row jsonb,
+  diff jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS audit_logs_account_created_idx
+  ON public.audit_logs(account_id, created_at);
+CREATE INDEX IF NOT EXISTS audit_logs_table_name_idx
+  ON public.audit_logs(table_name);
+
 -- الجداول التشغيلية ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.patients (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -396,6 +415,20 @@ BEGIN
 END;
 $$;
 
+-- تجهيز تريغر سجلات التدقيق --------------------------------------------------
+CREATE OR REPLACE FUNCTION public.tg_audit_logs_set_created_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.created_at = COALESCE(NEW.created_at, now());
+  END IF;
+  -- TODO: إرفاق تسجيل العمليات التفصيلي عند تجهيز نظام التدقيق الكامل.
+  RETURN NEW;
+END;
+$$;
+
 DO $$
 DECLARE
   tbl text;
@@ -412,6 +445,12 @@ BEGIN
   END LOOP;
 END $$;
 
+DROP TRIGGER IF EXISTS audit_logs_set_created_at ON public.audit_logs;
+CREATE TRIGGER audit_logs_set_created_at
+  BEFORE INSERT ON public.audit_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.tg_audit_logs_set_created_at();
+
 -- تمكين الصلاحيات و RLS ------------------------------------------------------
 DO $$
 DECLARE
@@ -427,6 +466,29 @@ BEGIN
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', tbl);
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', tbl);
   END LOOP;
+END $$;
+
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+GRANT SELECT ON public.audit_logs TO authenticated;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='audit_logs' AND policyname='audit_logs_select'
+  ) THEN
+    CREATE POLICY audit_logs_select ON public.audit_logs
+      FOR SELECT TO authenticated
+      USING (
+        fn_is_super_admin() = true OR (
+          audit_logs.account_id IS NOT NULL AND EXISTS (
+            SELECT 1 FROM public.account_users au
+            WHERE au.account_id = audit_logs.account_id
+              AND au.user_uid::text = auth.uid()::text
+              AND au.disabled IS NOT TRUE
+          )
+        )
+      );
+  END IF;
 END $$;
 
 ALTER TABLE public.accounts ENABLE ROW LEVEL SECURITY;
