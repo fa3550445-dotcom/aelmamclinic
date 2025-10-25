@@ -368,6 +368,21 @@ CREATE TABLE IF NOT EXISTS public.patient_services (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- صلاحيات الميزات ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
+  account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
+  user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  allowed_features text[],
+  can_create boolean NOT NULL DEFAULT false,
+  can_update boolean NOT NULL DEFAULT false,
+  can_delete boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, user_uid)
+);
+CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
+  ON public.account_feature_permissions(account_id);
+
 -- الفهارس العامة على triplet --------------------------------------------------
 DO $$
 DECLARE
@@ -401,7 +416,7 @@ DECLARE
   tbl text;
 BEGIN
   FOR tbl IN SELECT unnest(ARRAY[
-    'account_users','patients','returns','consumptions','drugs','prescriptions','prescription_items',
+    'account_users','account_feature_permissions','patients','returns','consumptions','drugs','prescriptions','prescription_items',
     'complaints','appointments','doctors','consumption_types','medical_services',
     'service_doctor_share','employees','employees_loans','employees_salaries',
     'employees_discounts','item_types','items','purchases','alert_settings',
@@ -433,6 +448,105 @@ ALTER TABLE public.accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.account_users ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.accounts TO authenticated;
 GRANT SELECT ON public.account_users TO authenticated;
+
+ALTER TABLE public.account_feature_permissions ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.account_feature_permissions TO authenticated;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_select_admin'
+  ) THEN
+    CREATE POLICY account_feature_permissions_select_admin ON public.account_feature_permissions
+    FOR SELECT TO authenticated
+    USING (
+      fn_is_super_admin() = true OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid::text = auth.uid()::text
+          AND au.disabled IS NOT TRUE
+          AND lower(au.role) IN ('owner','manager')
+      )
+    );
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_select_self'
+  ) THEN
+    CREATE POLICY account_feature_permissions_select_self ON public.account_feature_permissions
+    FOR SELECT TO authenticated
+    USING (account_feature_permissions.user_uid::text = auth.uid()::text);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_insert_manage'
+  ) THEN
+    CREATE POLICY account_feature_permissions_insert_manage ON public.account_feature_permissions
+    FOR INSERT TO authenticated
+    WITH CHECK (
+      fn_is_super_admin() = true OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid::text = auth.uid()::text
+          AND au.disabled IS NOT TRUE
+          AND lower(au.role) IN ('owner','manager')
+      )
+    );
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_update_manage'
+  ) THEN
+    CREATE POLICY account_feature_permissions_update_manage ON public.account_feature_permissions
+    FOR UPDATE TO authenticated
+    USING (
+      fn_is_super_admin() = true OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid::text = auth.uid()::text
+          AND au.disabled IS NOT TRUE
+          AND lower(au.role) IN ('owner','manager')
+      )
+    )
+    WITH CHECK (
+      fn_is_super_admin() = true OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid::text = auth.uid()::text
+          AND au.disabled IS NOT TRUE
+          AND lower(au.role) IN ('owner','manager')
+      )
+    );
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_delete_manage'
+  ) THEN
+    CREATE POLICY account_feature_permissions_delete_manage ON public.account_feature_permissions
+    FOR DELETE TO authenticated
+    USING (
+      fn_is_super_admin() = true OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid::text = auth.uid()::text
+          AND au.disabled IS NOT TRUE
+          AND lower(au.role) IN ('owner','manager')
+      )
+    );
+  END IF;
+END $$;
 
 DO $$
 DECLARE
@@ -621,3 +735,5 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO service_role;
+
+NOTIFY pgrst, 'reload schema';
