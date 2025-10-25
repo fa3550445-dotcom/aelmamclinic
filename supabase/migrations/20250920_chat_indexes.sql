@@ -2,7 +2,7 @@
 -- فهارس للدردشة + تهيئة أعمدة الردّ إن لم تكن موجودة
 
 -- للبحث النصّي الجزئي
-create extension if not exists pg_trgm;
+-- ملاحظة: امتداد pg_trgm يجب تفعيله من لوحة التحكم (غير متاح هنا)
 
 -- ✅ تأكّد من وجود أعمدة الردود قبل إنشاء الفهارس
 alter table public.chat_messages
@@ -22,11 +22,19 @@ create index if not exists chat_messages_reply_to_idx
   on public.chat_messages (reply_to_message_id);
 
 -- فهرس بحث نصي سريع على النص/المتن (اختياري لكنه مفيد للـ ilike)
-create index if not exists chat_messages_trgm_idx
-  on public.chat_messages
-  using gin (
-    (coalesce(body,'') || ' ' || coalesce(text,'')) gin_trgm_ops
-  );
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_opclass WHERE opcname = 'gin_trgm_ops') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname='public' AND indexname='chat_messages_body_trgm_idx'
+    ) THEN
+      EXECUTE 'CREATE INDEX chat_messages_body_trgm_idx ON public.chat_messages USING gin ((coalesce(body, '''')) gin_trgm_ops)';
+    END IF;
+  ELSE
+    RAISE NOTICE 'skip chat_messages_body_trgm_idx: gin_trgm_ops not available';
+  END IF;
+END $;
 
 -- فهارس المشاركين
 create index if not exists chat_participants_conv_user_idx
@@ -56,3 +64,4 @@ begin
       on public.chat_attachments (bucket, path);
   end if;
 end$$;
+
