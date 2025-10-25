@@ -11,10 +11,12 @@
 
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:postgrest/postgrest.dart';
 
 import '../core/features.dart'; // FeatureKeys.chat
 import '../services/auth_supabase_service.dart';
@@ -275,21 +277,36 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _networkRefreshAndMark() async {
-    await _refreshUser();      // يجلب من RPCs/fallbacks
-    // إن ظلّ accountId فارغًا جرّب resolver المباشر
-    if ((currentUser?['accountId'] ?? '').toString().isEmpty) {
-      try {
-        final acc = await _auth.resolveAccountId();
-        if (acc != null && acc.isNotEmpty) {
-          currentUser ??= {};
-          currentUser!['accountId'] = acc;
-        }
-      } catch (_) {}
+    bool success = false;
+    try {
+      await _refreshUser();      // يجلب من RPCs/fallbacks
+      if ((currentUser?['accountId'] ?? '').toString().isEmpty) {
+        try {
+          final acc = await _auth.resolveAccountId();
+          if (acc != null && acc.isNotEmpty) {
+            currentUser ??= {};
+            currentUser!['accountId'] = acc;
+          }
+        } catch (_) {}
+      }
+      success = ((currentUser?['accountId'] ?? '').toString().isNotEmpty);
+    } catch (e, st) {
+      dev.log('_networkRefreshAndMark failed', error: e, stackTrace: st);
     }
+
     await _persistUser();
 
-    final sp = await SharedPreferences.getInstance();
-    await sp.setString(_kLastNetCheckAt, DateTime.now().toIso8601String());
+    if (success) {
+      final sp = await SharedPreferences.getInstance();
+      await sp.setString(_kLastNetCheckAt, DateTime.now().toIso8601String());
+    }
+  }
+
+  bool _isTransientNetworkError(Object error) {
+    return error is SocketException ||
+        error is TimeoutException ||
+        error is PostgrestException ||
+        error is AuthException;
   }
 
   Future<bool> _isNetCheckDue() async {
@@ -369,22 +386,37 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _ensureActiveAccountOrSignOut() async {
     if (!isLoggedIn) return;
     if (isSuperAdmin) return; // السوبر أدمن خارج نطاق الحسابات
-    try {
-      final aa = await _auth.resolveActiveAccountOrThrow();
-      // تحديث role/accountId لو تغيّرت
-      currentUser ??= {};
-      currentUser!['accountId'] = aa.id;
-      currentUser!['role'] = aa.role.toLowerCase();
-      currentUser!['disabled'] = false;
-      await _persistUser();
-    } catch (e) {
-      dev.log('Active account invalid: $e');
-      // اعتبر المستخدم معطّلًا/غير مخوّل على الحساب الحالي
-      currentUser ??= {};
-      currentUser!['disabled'] = true;
-      await _persistUser();
-      // خروج صامت
-      await signOut();
+    const maxAttempts = 3;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final aa = await _auth.resolveActiveAccountOrThrow();
+        currentUser ??= {};
+        currentUser!['accountId'] = aa.id;
+        currentUser!['role'] = aa.role.toLowerCase();
+        currentUser!['disabled'] = false;
+        await _persistUser();
+        return;
+      } catch (e, st) {
+        if (_isTransientNetworkError(e)) {
+          final delay = Duration(milliseconds: 300 * (1 << (attempt - 1)));
+          dev.log(
+            'Transient error while validating active account (attempt $attempt/$maxAttempts): $e',
+          );
+          if (attempt >= maxAttempts) {
+            dev.log('Keeping session after transient failure to validate account.');
+            return;
+          }
+          await Future.delayed(delay);
+          continue;
+        }
+
+        dev.log('Active account invalid: $e', stackTrace: st);
+        currentUser ??= {};
+        currentUser!['disabled'] = true;
+        await _persistUser();
+        await signOut();
+        return;
+      }
     }
   }
 
