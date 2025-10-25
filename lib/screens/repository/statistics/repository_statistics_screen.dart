@@ -39,7 +39,7 @@ class _RepositoryStatisticsScreenState
   Future<int> _purchasedQty(Item item) async {
     final db = await RepositoryService.instance.database;
     final res = await db.rawQuery(
-      'SELECT COALESCE(SUM(quantity),0) AS bought FROM purchases WHERE itemId = ?',
+      'SELECT COALESCE(SUM(quantity),0) AS bought FROM purchases WHERE item_id = ?',
       [item.id],
     );
     return (res.first['bought'] as num).toInt();
@@ -48,7 +48,7 @@ class _RepositoryStatisticsScreenState
   Future<double> _totalPurchasedCost(Item item) async {
     final db = await RepositoryService.instance.database;
     final res = await db.rawQuery(
-      'SELECT COALESCE(SUM(quantity*unit_price),0) AS total FROM purchases WHERE itemId = ?',
+      'SELECT COALESCE(SUM(quantity*unit_price),0) AS total FROM purchases WHERE item_id = ?',
       [item.id],
     );
     return (res.first['total'] as num).toDouble();

@@ -190,7 +190,7 @@ class StatisticsProvider extends ChangeNotifier {
     final sql = '''
       SELECT COUNT(*) AS cnt
         FROM ${AlertSetting.table} AS a
-        JOIN ${Item.table}         AS i ON i.id = a.itemId
+        JOIN ${Item.table}         AS i ON i.id = a.item_id
        WHERE a.is_enabled = 1
          AND i.stock      <= a.threshold
     ''';

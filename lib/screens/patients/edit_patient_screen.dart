@@ -17,6 +17,7 @@ import '../../core/formatters.dart';
 
 import '../../models/attachment.dart';
 import '../../models/consumption.dart';
+import '../../models/item.dart';
 import '../../models/doctor.dart';
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
@@ -880,6 +881,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       await DBService.instance.updatePatient(updated, _selectedServices);
 
       // Inventory: حذف/إضافة + تعديل الرصيد
+      var touchedConsumptions = false;
+      var touchedItems = false;
       for (final id in _deletedUsageIds) {
         final u = _existingUsages.firstWhere((e) => e['consId'] == id);
         await db.delete('consumptions', where: 'id = ?', whereArgs: [id]);
@@ -887,6 +890,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
           'UPDATE items SET stock = stock + ? WHERE id = ?',
           [u['quantity'], u['itemId']],
         );
+        touchedConsumptions = true;
+        touchedItems = true;
       }
       for (final u in _newUsages) {
         await DBService.instance.insertConsumption(Consumption(
@@ -900,6 +905,15 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
           'UPDATE items SET stock = stock - ? WHERE id = ?',
           [u['quantity'], u['itemId']],
         );
+        touchedItems = true;
+        touchedConsumptions = true;
+      }
+
+      if (touchedConsumptions) {
+        await DBService.instance.notifyTableChanged(Consumption.table);
+      }
+      if (touchedItems) {
+        await DBService.instance.notifyTableChanged(Item.table);
       }
 
       // Attachments

@@ -15,6 +15,7 @@ import '../../core/tbian_ui.dart';
 
 import '../../models/attachment.dart';
 import '../../models/consumption.dart';
+import '../../models/item.dart';
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../models/doctor.dart';
@@ -769,6 +770,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
       await batch.commit(noResult: true);
 
       // 3) Inventory usages
+      var touchedItems = false;
       for (final u in _invUsages) {
         final itemId = u['itemId'] as int;
         final qty = u['quantity'] as int;
@@ -785,6 +787,11 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
           'UPDATE items SET stock = stock - ? WHERE id = ? AND stock >= ?',
           [qty, itemId, qty],
         );
+        touchedItems = true;
+      }
+
+      if (touchedItems) {
+        await DBService.instance.notifyTableChanged(Item.table);
       }
 
       // 4) Attachments
