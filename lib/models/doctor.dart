@@ -16,6 +16,7 @@ class Doctor {
     phoneNumber    TEXT,
     startTime      TEXT,
     endTime        TEXT,
+    userUid        TEXT,
     printCounter   INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE SET NULL
   );
@@ -28,6 +29,7 @@ class Doctor {
   final String phoneNumber;
   final String startTime;       // نص (HH:mm أو ISO)
   final String endTime;         // نص (HH:mm أو ISO)
+  final String? userUid;        // مرجع مستخدم Supabase (اختياري)
   final int printCounter;       // عدّاد الطباعة (محلي فقط)
 
   Doctor({
@@ -38,6 +40,7 @@ class Doctor {
     required this.phoneNumber,
     required this.startTime,
     required this.endTime,
+    this.userUid,
     this.printCounter = 0,
   });
 
@@ -65,6 +68,7 @@ class Doctor {
     'phoneNumber': phoneNumber,
     'startTime': startTime,
     'endTime': endTime,
+    'userUid': userUid,
     'printCounter': printCounter,
   };
 
@@ -79,6 +83,7 @@ class Doctor {
     phoneNumber: _toStr(map['phoneNumber'] ?? map['phone_number']),
     startTime: _toStr(map['startTime'] ?? map['start_time']),
     endTime: _toStr(map['endTime'] ?? map['end_time']),
+    userUid: map['userUid']?.toString() ?? map['user_uid']?.toString(),
     printCounter: _toInt0(map['printCounter'] ?? map['print_counter']),
   );
 
@@ -92,6 +97,7 @@ class Doctor {
     String? phoneNumber,
     String? startTime,
     String? endTime,
+    String? userUid,
     int? printCounter,
   }) {
     return Doctor(
@@ -102,13 +108,14 @@ class Doctor {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
+      userUid: userUid ?? this.userUid,
       printCounter: printCounter ?? this.printCounter,
     );
   }
 
   @override
   String toString() =>
-      'Doctor(id:$id, empId:$employeeId, name:$name, spec:$specialization, printCounter:$printCounter)';
+      'Doctor(id:$id, empId:$employeeId, name:$name, spec:$specialization, user:$userUid, printCounter:$printCounter)';
 
   @override
   bool operator ==(Object other) =>
@@ -122,6 +129,7 @@ class Doctor {
               phoneNumber == other.phoneNumber &&
               startTime == other.startTime &&
               endTime == other.endTime &&
+              userUid == other.userUid &&
               printCounter == other.printCounter;
 
   @override
@@ -133,6 +141,7 @@ class Doctor {
     phoneNumber,
     startTime,
     endTime,
+    userUid,
     printCounter,
   );
 }

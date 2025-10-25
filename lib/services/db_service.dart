@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق userUid للأطباء/الموظفين
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -595,6 +595,7 @@ class DBService {
     phoneNumber TEXT,
     startTime TEXT,
     endTime TEXT,
+    userUid TEXT,
     printCounter INTEGER DEFAULT 0
   );
 ''');
@@ -639,7 +640,8 @@ class DBService {
     maritalStatus TEXT,
     basicSalary REAL,
     finalSalary REAL,
-    isDoctor INTEGER DEFAULT 0
+    isDoctor INTEGER DEFAULT 0,
+    userUid TEXT
   );
 ''');
 
@@ -768,7 +770,8 @@ class DBService {
           maritalStatus TEXT,
           basicSalary REAL,
           finalSalary REAL,
-          doctorId INTEGER DEFAULT 0
+          doctorId INTEGER DEFAULT 0,
+          userUid TEXT
         );
       ''');
 
@@ -951,6 +954,11 @@ class DBService {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
       await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _addColumnIfMissing(db, 'doctors', 'userUid', 'TEXT');
+      await _addColumnIfMissing(db, 'employees', 'userUid', 'TEXT');
     }
   }
 
