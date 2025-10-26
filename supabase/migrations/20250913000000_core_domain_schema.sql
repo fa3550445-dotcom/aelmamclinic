@@ -462,7 +462,7 @@ BEGIN
     'complaints','appointments','doctors','consumption_types','medical_services',
     'service_doctor_share','employees','employees_loans','employees_salaries',
     'employees_discounts','item_types','items','purchases','alert_settings',
-    'financial_logs','patient_services'
+    'financial_logs','patient_services','account_feature_permissions'
   ]) LOOP
     cond := format(cond_template, tbl);
     policy := tbl || '_select_own';
