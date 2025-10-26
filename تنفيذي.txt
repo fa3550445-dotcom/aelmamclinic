@@ -1,0 +1,133 @@
+هنالك خربطة كبيرة حصلت في بنية البناء للخادم الذي مرتبط به مشروعي في "https://supabase.com/dashboard/project/wiypiofuyrayywciovoo/advisors/security" واريد منك ان تساعدني في اعادة بنائها بشكل صحيح 100% تتوافق مع كل ما لدي في مشروعي في ملفات مجلد lib وايضا مجلد supabase اريد منك ا تقوم بقرائتها جيدا وتقوم بقرائة الملف المرفق ايضا الذي باسم C:\Users\zidan\AndroidStudioProjects\aelmamclinic\supabase_snapshot.sql فهو كان نتيجة الامر "PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic>   supabase db dump --linked -f supabase_snapshot.sql"
+بحيثت تعطيني خطة اصلاح وتنفيذ شاملة وتفصيليه ودقيقة ليعمل كل شي بنسبة 100% دون اي نقصان او اخطاء
+
+
+مع العلم حاليا في صفحة ويب الخادم وجدت خربطة وجداول تم حذفها وهي كالتالي: 
+في شاشة "Table Editor" لم اجد الا فقط:
+- pg_stat_statements
+- pg_stat_statements_info
+- buckets
+- buckets_analytics
+- objects
+- prefixes
+- s3_multipart_uploads
+- s3_multipart_uploads_parts
+
+في شاشة Authentication قسم users:
+- اريد إضافة الايميل : "admin6069@elmam.com" حساب سوبر ادمن وكلمة السر "admin6069"
+
+
+في شاشة Advisors قسم Security Advisor وجدت هذه الأخطاء:
+[
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.v_chat_last_message\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "v_chat_last_message",
+      "type": "view",
+      "schema": "public"
+    },
+    "cache_key": "security_definer_view_public_v_chat_last_message"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.v_chat_messages_with_attachments\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "v_chat_messages_with_attachments",
+      "type": "view",
+      "schema": "public"
+    },
+    "cache_key": "security_definer_view_public_v_chat_messages_with_attachments"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.v_chat_reads_for_me\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "v_chat_reads_for_me",
+      "type": "view",
+      "schema": "public"
+    },
+    "cache_key": "security_definer_view_public_v_chat_reads_for_me"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.v_chat_conversations_for_me\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "v_chat_conversations_for_me",
+      "type": "view",
+      "schema": "public"
+    },
+    "cache_key": "security_definer_view_public_v_chat_conversations_for_me"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.clinics\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "clinics",
+      "type": "view",
+      "schema": "public"
+    },
+    "cache_key": "security_definer_view_public_clinics"
+  },
+  {
+    "name": "rls_disabled_in_public",
+    "title": "RLS Disabled in Public",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has not been enabled on tables in schemas exposed to PostgREST",
+    "detail": "Table \\`public.super_admins\\` is public, but RLS has not been enabled.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0013_rls_disabled_in_public",
+    "metadata": {
+      "name": "super_admins",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "rls_disabled_in_public_public_super_admins"
+  }
+]
+
+
+
