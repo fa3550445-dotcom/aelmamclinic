@@ -43,9 +43,7 @@ serve(async (req) => {
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
-    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-      global: { headers: { Authorization: auth } },
-    });
+    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
     // 3) تحقق أن المتصل سوبر أدمن
     if (!internal) {
@@ -106,7 +104,9 @@ serve(async (req) => {
 
     // 6) نادِ الـ RPC المسؤول عن bootstrap
     //   ملاحظة: تعتمد على أسماء المعاملات في الدالة في DB (clinic_name, owner_email).
-    const { data: rpc, error: rerr } = await adminClient.rpc(
+    const rpcClient = hasBearer ? adminClient.withHeaders({ Authorization: auth }) : adminClient;
+
+    const { data: rpc, error: rerr } = await rpcClient.rpc(
       "admin_bootstrap_clinic_for_email",
       { clinic_name, owner_email },
     );
