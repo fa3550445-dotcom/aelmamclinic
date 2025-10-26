@@ -819,12 +819,22 @@ class AuthSupabaseService {
     try {
       final res = await _client.rpc(
         'admin_bootstrap_clinic_for_email',
-        params: {'p_email': email, 'p_name': clinicName},
+        params: {
+          'clinic_name': clinicName,
+          'owner_email': email,
+          'owner_role': 'owner',
+        },
       );
-      if (res != null && '$res'.isNotEmpty && '$res' != 'null') {
-        return;
+      final accountId = res?.toString().trim();
+      if (accountId == null || accountId.isEmpty || accountId == 'null') {
+        throw Exception('RPC returned null/empty result.');
       }
-      throw Exception('RPC returned null/empty result.');
+      const uuidPattern =
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
+      if (!RegExp(uuidPattern).hasMatch(accountId)) {
+        throw Exception('RPC returned non-UUID result: $accountId');
+      }
+      return;
     } catch (rpcErr, st) {
       dev.log('registerOwner RPC fallback failed', error: rpcErr, stackTrace: st);
       rethrow;
