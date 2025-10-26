@@ -414,6 +414,24 @@ class DBService {
     }
   }
 
+  Future<void> _ensureSyncFkMappingTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_fk_mapping (
+        table_name TEXT NOT NULL,
+        local_id INTEGER NOT NULL,
+        remote_id TEXT NOT NULL,
+        remote_device_id TEXT,
+        remote_local_id INTEGER,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, local_id)
+      );
+    ''');
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_fk_mapping_table_remote
+      ON sync_fk_mapping(table_name, remote_id)
+    ''');
+  }
+
   /// فهارس مشتركة للأداء (JOIN/WHERE شائعة)
   Future<void> _ensureCommonIndexes(Database db) async {
     await _createIndexIfMissing(db, 'idx_patients_doctorId', 'patients', ['doctorId']);
@@ -472,11 +490,13 @@ class DBService {
     await _ensureAlertSettingsColumns(db);
     await _ensureSoftDeleteColumns(db);
     await _ensureSyncMetaColumns(db);     // ← snake_case (متوافق مع parity v3)
+    await _ensureSyncFkMappingTable(db);
     await _ensureCommonIndexes(db);
   }
 
   /*──────────────── إنشاء الجداول ───────────────*/
   Future<void> _onCreate(Database db, int version) async {
+    await _ensureSyncFkMappingTable(db);
     await db.execute('''
   CREATE TABLE patients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
