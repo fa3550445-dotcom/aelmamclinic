@@ -20,6 +20,18 @@
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
 
+   بديلًا عن إعادة بناء التطبيق يمكن وضع ملف ‎`config.json`‎ في مجلد البيانات الخاص
+   بالمنصّة (مثل `C:\aelmam_clinic\config.json` على ويندوز) يحتوي على:
+
+   ```json
+   {
+     "supabaseUrl": "https://your-project.supabase.co",
+     "supabaseAnonKey": "ey..."
+   }
+   ```
+
+   تُحمَّل هذه القيم تلقائيًا عند الإقلاع وتتفوق على الإعدادات المضمّنة.
+
 3. **تهيئة Firebase (اختياري)**
    استورد إعدادات `firebase_options.dart` المطابقة لبيئتك.
 

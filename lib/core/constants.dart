@@ -1,5 +1,9 @@
 // lib/core/constants.dart
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 
 class AppConstants {
   AppConstants._();
@@ -17,11 +21,114 @@ class AppConstants {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeXBpb2Z1eXJheXl3Y2lvdm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NjczOTcsImV4cCI6MjA3MDE0MzM5N30.TwveOqJJfM3eDVwsxaL76YkyVAAzZxeMVxGzLT8EC3E',
   );
 
-  static String get supabaseUrl =>
-      _requireEnv(_envSupabaseUrl, 'SUPABASE_URL');
+  static String? _overrideSupabaseUrl;
+  static String? _overrideSupabaseAnonKey;
+  static bool _overridesLoaded = false;
 
-  static String get supabaseAnonKey =>
-      _requireEnv(_envSupabaseAnonKey, 'SUPABASE_ANON_KEY');
+  static String get supabaseUrl {
+    final override = _overrideSupabaseUrl?.trim();
+    if (override != null && override.isNotEmpty) {
+      return override;
+    }
+    return _requireEnv(_envSupabaseUrl, 'SUPABASE_URL');
+  }
+
+  static String get supabaseAnonKey {
+    final override = _overrideSupabaseAnonKey?.trim();
+    if (override != null && override.isNotEmpty) {
+      return override;
+    }
+    return _requireEnv(_envSupabaseAnonKey, 'SUPABASE_ANON_KEY');
+  }
+
+  /// Loads runtime overrides for Supabase configuration from the platform
+  /// data directory (e.g. `C:\aelmam_clinic\config.json` on Windows).
+  ///
+  /// The JSON file supports the keys `supabaseUrl` and `supabaseAnonKey`.
+  /// Values in this file take precedence over the compile-time defaults but
+  /// are still superseded by `--dart-define` values when provided.
+  static Future<void> loadRuntimeOverrides() async {
+    if (_overridesLoaded || kIsWeb) {
+      _overridesLoaded = true;
+      return;
+    }
+    _overridesLoaded = true;
+
+    final candidatePaths = <String>{};
+
+    void addPath(String? path) {
+      if (path == null || path.isEmpty) return;
+      candidatePaths.add(path);
+    }
+
+    try {
+      if (Platform.isWindows) {
+        addPath(p.join(windowsDataDir, 'config.json'));
+      } else if (Platform.isLinux) {
+        addPath(p.join(_expandHome(linuxDataDir), 'config.json'));
+      } else if (Platform.isMacOS) {
+        addPath(p.join(_expandHome(macOsDataDir), 'config.json'));
+      } else if (Platform.isAndroid) {
+        addPath(p.join(androidDataDir, 'config.json'));
+      } else if (Platform.isIOS) {
+        addPath(p.join(iosLogicalDataDir, 'config.json'));
+      }
+    } catch (_) {
+      // ignore platform detection failures
+    }
+
+    try {
+      addPath(p.join(Directory.current.path, 'config.json'));
+    } catch (_) {
+      // ignore inability to resolve current directory (e.g. in tests)
+    }
+
+    for (final path in candidatePaths) {
+      try {
+        final file = File(path);
+        if (!await file.exists()) continue;
+        final raw = await file.readAsString();
+        if (raw.trim().isEmpty) continue;
+
+        final data = jsonDecode(raw);
+        if (data is! Map) {
+          continue;
+        }
+
+        String? readKey(String key) {
+          final value = data[key] ?? data[_lowerSnake(key)];
+          if (value == null) return null;
+          if (value is String) {
+            return value.trim();
+          }
+          return '$value'.trim();
+        }
+
+        final url = readKey('supabaseUrl');
+        final anonKey = readKey('supabaseAnonKey');
+
+        if ((url == null || url.isEmpty) &&
+            (anonKey == null || anonKey.isEmpty)) {
+          continue;
+        }
+
+        if (url != null && url.isNotEmpty) {
+          _overrideSupabaseUrl = url;
+        }
+        if (anonKey != null && anonKey.isNotEmpty) {
+          _overrideSupabaseAnonKey = anonKey;
+        }
+
+        debugLog(
+          'Loaded Supabase config overrides from ${file.path}',
+          tag: 'CONFIG',
+        );
+        break;
+      } catch (e) {
+        debugLog('Failed to read config override at $path: $e', tag: 'CONFIG');
+      }
+    }
+  }
 
   // -------------------- مخازن محلية --------------------
   static const String windowsDataDir = r'C:\aelmam_clinic';
@@ -66,6 +173,28 @@ class AppConstants {
       // ignore: avoid_print
       print('[$tag] $msg');
     }
+  }
+
+  static String _expandHome(String value) {
+    if (!value.startsWith('~')) return value;
+    final home = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'];
+    if (home == null || home.isEmpty) {
+      return value.replaceFirst('~', '');
+    }
+    return value.replaceFirst('~', home);
+  }
+
+  static String _lowerSnake(String camel) {
+    final buffer = StringBuffer();
+    for (var i = 0; i < camel.length; i++) {
+      final char = camel[i];
+      if (char.toUpperCase() == char && char.toLowerCase() != char && i > 0) {
+        buffer.write('_');
+      }
+      buffer.write(char.toLowerCase());
+    }
+    return buffer.toString();
   }
 
   static String _requireEnv(String value, String key) {
