@@ -27,16 +27,14 @@ class RepositoryService {
 
   /*────────── جلب البيانات ──────────*/
   Future<List<ItemType>> fetchItemTypes() async {
-    final db = await _db.database;
-    final maps = await db.query(ItemType.table, orderBy: 'name');
-    return maps.map(ItemType.fromMap).toList();
+    return _db.getAllItemTypes();
   }
 
   Future<List<Item>> fetchItemsByType(int typeId) async {
     final db = await _db.database;
     final maps = await db.query(
       Item.table,
-      where: 'type_id = ?',
+      where: 'type_id = ? AND ifnull(isDeleted, 0) = 0',
       whereArgs: [typeId],
       orderBy: 'name',
     );
@@ -47,7 +45,7 @@ class RepositoryService {
     final db = await _db.database;
     final maps = await db.query(
       Item.table,
-      where: 'id = ?',
+      where: 'id = ? AND ifnull(isDeleted, 0) = 0',
       whereArgs: [id],
       limit: 1,
     );
