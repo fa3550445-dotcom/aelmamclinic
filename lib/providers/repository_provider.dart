@@ -157,7 +157,7 @@ class RepositoryProvider extends ChangeNotifier {
   /* ─── تنبيهات المخزون ─── */
   Future<void> setAlert({
     required int itemId,
-    required int threshold,
+    required double threshold,
   }) async {
     await _service.setAlert(itemId: itemId, threshold: threshold);
     await _checkAlerts();

@@ -49,9 +49,10 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final threshold = double.parse(_thresholdCtrl.text.trim());
       await context.read<RepositoryProvider>().setAlert(
             itemId: _selectedItem!.id!,
-            threshold: int.parse(_thresholdCtrl.text),
+            threshold: threshold,
           );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -211,9 +212,9 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
                       controller: _thresholdCtrl,
                       labelText: 'العدد الذي عنده يصدر التنبيه',
                       keyboardType:
-                          const TextInputType.numberWithOptions(decimal: false),
+                          const TextInputType.numberWithOptions(decimal: true),
                       validator: (v) {
-                        final n = int.tryParse(v?.trim() ?? '');
+                        final n = double.tryParse(v?.trim() ?? '');
                         if (n == null || n <= 0) return 'أدخل رقمًا موجبًا';
                         return null;
                       },

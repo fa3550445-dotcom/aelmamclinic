@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -363,6 +363,124 @@ class DBService {
       ''');
     } catch (e) {
       print('ensureAlertSettingsColumns: $e');
+    }
+  }
+
+  Future<void> _migrateAlertThresholdToReal(Database db) async {
+    try {
+      final cols = await db.rawQuery("PRAGMA table_info(alert_settings)");
+      bool has(String name) => cols.any((c) =>
+          ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
+
+      final thresholdInfo = cols.cast<Map<String, Object?>>().firstWhere(
+            (c) =>
+                ((c['name'] ?? '') as String).toLowerCase() == 'threshold',
+            orElse: () => const {},
+          );
+      final currentType =
+          ((thresholdInfo['type'] ?? '') as String).toUpperCase().trim();
+      if (currentType.isNotEmpty && !currentType.contains('INT')) {
+        return;
+      }
+
+      if (!has('threshold_tmp')) {
+        await db.execute(
+            'ALTER TABLE alert_settings ADD COLUMN threshold_tmp REAL NOT NULL DEFAULT 0');
+      }
+      await db.execute('UPDATE alert_settings SET threshold_tmp = threshold');
+
+      try {
+        await db.execute('ALTER TABLE alert_settings DROP COLUMN threshold');
+        await db.execute(
+            'ALTER TABLE alert_settings RENAME COLUMN threshold_tmp TO threshold');
+        await _ensureAlertSettingsColumns(db);
+      } catch (_) {
+        await _rebuildAlertSettingsWithRealThreshold(db);
+      }
+    } catch (e) {
+      print('migrateAlertThresholdToReal: $e');
+    }
+  }
+
+  Future<void> _rebuildAlertSettingsWithRealThreshold(Database db) async {
+    try {
+      final cols = await db.rawQuery("PRAGMA table_info(alert_settings)");
+      bool has(String name) => cols.any((c) =>
+          ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
+
+      await db.execute('ALTER TABLE alert_settings RENAME TO alert_settings_old');
+      await db.execute('DROP TABLE IF EXISTS alert_settings_new');
+
+      final columnDefs = <String>[
+        'id INTEGER PRIMARY KEY AUTOINCREMENT',
+        'item_id INTEGER NOT NULL UNIQUE',
+        if (has('itemId')) 'itemId INTEGER',
+        'threshold REAL NOT NULL',
+        'is_enabled INTEGER NOT NULL DEFAULT 1',
+        if (has('isEnabled')) 'isEnabled INTEGER',
+        'last_triggered TEXT',
+        if (has('lastTriggered')) 'lastTriggered TEXT',
+        if (has('notify_time')) 'notify_time TEXT',
+        if (has('notifyTime')) 'notifyTime TEXT',
+        "created_at TEXT NOT NULL DEFAULT (datetime('now'))",
+        if (has('createdAt')) 'createdAt TEXT',
+      ];
+
+      final createSql = '''
+        CREATE TABLE alert_settings_new (
+          ${columnDefs.join(',\n          ')},
+          FOREIGN KEY(item_id) REFERENCES ${Item.table}(id) ON DELETE CASCADE
+        );
+      ''';
+      await db.execute(createSql);
+
+      final insertCols = <String>['id', 'item_id'];
+      final selectCols = <String>['id', 'item_id'];
+      if (has('itemId')) {
+        insertCols.add('itemId');
+        selectCols.add('itemId');
+      }
+      insertCols.add('threshold');
+      selectCols.add('threshold_tmp');
+      insertCols.add('is_enabled');
+      selectCols.add('is_enabled');
+      if (has('isEnabled')) {
+        insertCols.add('isEnabled');
+        selectCols.add('isEnabled');
+      }
+      insertCols.add('last_triggered');
+      selectCols.add('last_triggered');
+      if (has('lastTriggered')) {
+        insertCols.add('lastTriggered');
+        selectCols.add('lastTriggered');
+      }
+      if (has('notify_time')) {
+        insertCols.add('notify_time');
+        selectCols.add('notify_time');
+      }
+      if (has('notifyTime')) {
+        insertCols.add('notifyTime');
+        selectCols.add('notifyTime');
+      }
+      insertCols.add('created_at');
+      selectCols.add('created_at');
+      if (has('createdAt')) {
+        insertCols.add('createdAt');
+        selectCols.add('createdAt');
+      }
+
+      final insertSql = '''
+        INSERT INTO alert_settings_new (${insertCols.join(', ')})
+        SELECT ${selectCols.join(', ')}
+        FROM alert_settings_old;
+      ''';
+      await db.execute(insertSql);
+
+      await db.execute('DROP TABLE alert_settings_old');
+      await db.execute('ALTER TABLE alert_settings_new RENAME TO alert_settings');
+      await _ensureAlertSettingsColumns(db);
+    } catch (e) {
+      print('rebuildAlertSettingsWithRealThreshold: $e');
     }
   }
 
@@ -951,6 +1069,10 @@ class DBService {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
       await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _migrateAlertThresholdToReal(db);
     }
   }
 
