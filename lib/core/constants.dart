@@ -56,29 +56,76 @@ class AppConstants {
 
     final candidatePaths = <String>{};
 
-    void addPath(String? path) {
-      if (path == null || path.isEmpty) return;
-      candidatePaths.add(path);
+    String? _normalize(String? path) {
+      final trimmed = path?.trim();
+      if (trimmed == null || trimmed.isEmpty) return null;
+      return trimmed;
+    }
+
+    void addFile(String? path) {
+      final normalized = _normalize(path);
+      if (normalized != null) {
+        candidatePaths.add(normalized);
+      }
+    }
+
+    void addDirConfig(String? dir, {bool expandHome = false}) {
+      final base = dir == null ? null : (expandHome ? _expandHome(dir) : dir);
+      addFile(base == null ? null : p.join(base, 'config.json'));
+    }
+
+    Map<String, String>? env;
+    try {
+      env = Platform.environment;
+    } catch (_) {
+      env = null;
+    }
+
+    if (env != null) {
+      addFile(env['AELMAM_SUPABASE_CONFIG'] ?? env['AELMAM_CONFIG']);
+      addFile(env['AELMAM_CLINIC_CONFIG'] ?? env['SUPABASE_CONFIG_PATH']);
+      final envDir = env['AELMAM_DIR'] ?? env['AELMAM_CLINIC_DIR'];
+      if (envDir != null) {
+        addDirConfig(envDir, expandHome: true);
+      }
     }
 
     try {
       if (Platform.isWindows) {
-        addPath(p.join(windowsDataDir, 'config.json'));
+        addDirConfig(windowsDataDir);
+        addDirConfig(legacyWindowsDataDir);
+        if (env != null) {
+          addDirConfig(env['APPDATA'] == null
+              ? null
+              : p.join(env['APPDATA']!, 'aelmam_clinic'));
+          addDirConfig(env['LOCALAPPDATA'] == null
+              ? null
+              : p.join(env['LOCALAPPDATA']!, 'aelmam_clinic'));
+        }
       } else if (Platform.isLinux) {
-        addPath(p.join(_expandHome(linuxDataDir), 'config.json'));
+        addDirConfig(linuxDataDir, expandHome: true);
+        addDirConfig('~/.config/aelmam_clinic', expandHome: true);
+        if (env != null) {
+          final xdg = env['XDG_CONFIG_HOME'];
+          if (xdg != null && xdg.trim().isNotEmpty) {
+            addDirConfig(
+              p.join(_expandHome(xdg), 'aelmam_clinic'),
+            );
+          }
+        }
       } else if (Platform.isMacOS) {
-        addPath(p.join(_expandHome(macOsDataDir), 'config.json'));
+        addDirConfig(macOsDataDir, expandHome: true);
       } else if (Platform.isAndroid) {
-        addPath(p.join(androidDataDir, 'config.json'));
+        addDirConfig(androidDataDir);
       } else if (Platform.isIOS) {
-        addPath(p.join(iosLogicalDataDir, 'config.json'));
+        addDirConfig(iosLogicalDataDir);
       }
     } catch (_) {
       // ignore platform detection failures
     }
 
     try {
-      addPath(p.join(Directory.current.path, 'config.json'));
+      addDirConfig(Directory.current.path);
     } catch (_) {
       // ignore inability to resolve current directory (e.g. in tests)
     }
