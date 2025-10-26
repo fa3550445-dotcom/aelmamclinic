@@ -415,14 +415,15 @@ $$;
 DO $$
 DECLARE
   tbl text;
-BEGIN
-  FOR tbl IN SELECT unnest(ARRAY[
+  managed_tables constant text[] := ARRAY[
     'account_users','account_feature_permissions','patients','returns','consumptions','drugs','prescriptions','prescription_items',
     'complaints','appointments','doctors','consumption_types','medical_services',
     'service_doctor_share','employees','employees_loans','employees_salaries',
     'employees_discounts','item_types','items','purchases','alert_settings',
-    'financial_logs','patient_services','account_feature_permissions'
-  ]) LOOP
+    'financial_logs','patient_services'
+  ];
+BEGIN
+  FOR tbl IN SELECT unnest(managed_tables) LOOP
     EXECUTE format('DROP TRIGGER IF EXISTS %I_set_updated_at ON public.%I', tbl, tbl);
     EXECUTE format('CREATE TRIGGER %I_set_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at()', tbl, tbl);
   END LOOP;
@@ -432,14 +433,15 @@ END $$;
 DO $$
 DECLARE
   tbl text;
-BEGIN
-  FOR tbl IN SELECT unnest(ARRAY[
+  account_scoped_tables constant text[] := ARRAY[
     'patients','returns','consumptions','drugs','prescriptions','prescription_items',
     'complaints','appointments','doctors','consumption_types','medical_services',
     'service_doctor_share','employees','employees_loans','employees_salaries',
     'employees_discounts','item_types','items','purchases','alert_settings',
     'financial_logs','patient_services','account_feature_permissions'
-  ]) LOOP
+  ];
+BEGIN
+  FOR tbl IN SELECT unnest(account_scoped_tables) LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', tbl);
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', tbl);
   END LOOP;
@@ -456,14 +458,15 @@ DECLARE
   policy text;
   cond text;
   cond_template constant text := 'fn_is_super_admin() = true OR EXISTS (SELECT 1 FROM public.account_users au WHERE au.account_id = %I.account_id AND au.user_uid::text = auth.uid()::text AND au.disabled IS NOT TRUE)';
-BEGIN
-  FOR tbl IN SELECT unnest(ARRAY[
+  policy_tables constant text[] := ARRAY[
     'patients','returns','consumptions','drugs','prescriptions','prescription_items',
     'complaints','appointments','doctors','consumption_types','medical_services',
     'service_doctor_share','employees','employees_loans','employees_salaries',
     'employees_discounts','item_types','items','purchases','alert_settings',
     'financial_logs','patient_services','account_feature_permissions'
-  ]) LOOP
+  ];
+BEGIN
+  FOR tbl IN SELECT unnest(policy_tables) LOOP
     cond := format(cond_template, tbl);
     policy := tbl || '_select_own';
     IF NOT EXISTS (
