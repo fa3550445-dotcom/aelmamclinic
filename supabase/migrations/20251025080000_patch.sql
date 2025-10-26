@@ -74,6 +74,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS account_feature_permissions_uix
 
 ALTER TABLE public.account_feature_permissions ENABLE ROW LEVEL SECURITY;
 
+CREATE OR REPLACE FUNCTION public.tg_account_feature_permissions_touch()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS account_feature_permissions_touch ON public.account_feature_permissions;
+CREATE TRIGGER account_feature_permissions_touch
+BEFORE UPDATE ON public.account_feature_permissions
+FOR EACH ROW
+EXECUTE FUNCTION public.tg_account_feature_permissions_touch();
+
 DO $$
 BEGIN
   -- قراءة المالك/العضو أو السوبر أدمن
@@ -92,6 +108,77 @@ BEGIN
           AND au.user_uid   = auth.uid()
       )
       OR EXISTS (SELECT 1 FROM public.super_admins sa WHERE sa.user_uid = auth.uid())
+    );
+  END IF;
+
+  -- إدارة الصلاحيات للمالكين/المديرين أو السوبر أدمن
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='afp_manage_account_admins_insert'
+  ) THEN
+    CREATE POLICY afp_manage_account_admins_insert
+    ON public.account_feature_permissions
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (
+      fn_is_super_admin() = true
+      OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid   = auth.uid()
+          AND coalesce(au.disabled, false) = false
+          AND lower(coalesce(au.role, '')) IN ('owner','admin','superadmin')
+      )
+    );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='afp_manage_account_admins_update'
+  ) THEN
+    CREATE POLICY afp_manage_account_admins_update
+    ON public.account_feature_permissions
+    FOR UPDATE
+    TO authenticated
+    USING (
+      fn_is_super_admin() = true
+      OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid   = auth.uid()
+          AND coalesce(au.disabled, false) = false
+          AND lower(coalesce(au.role, '')) IN ('owner','admin','superadmin')
+      )
+    )
+    WITH CHECK (
+      fn_is_super_admin() = true
+      OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid   = auth.uid()
+          AND coalesce(au.disabled, false) = false
+          AND lower(coalesce(au.role, '')) IN ('owner','admin','superadmin')
+      )
+    );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='afp_manage_account_admins_delete'
+  ) THEN
+    CREATE POLICY afp_manage_account_admins_delete
+    ON public.account_feature_permissions
+    FOR DELETE
+    TO authenticated
+    USING (
+      fn_is_super_admin() = true
+      OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = account_feature_permissions.account_id
+          AND au.user_uid   = auth.uid()
+          AND coalesce(au.disabled, false) = false
+          AND lower(coalesce(au.role, '')) IN ('owner','admin','superadmin')
+      )
     );
   END IF;
 
@@ -221,7 +308,91 @@ BEGIN
 END$$;
 
 ---------------------------
--- 7) إجراءات مساعدة للإدارة (RPC)
+-- 7) chat_participants: أعمدة email/joined_at للتماشي مع التطبيق
+---------------------------
+ALTER TABLE public.chat_participants
+  ADD COLUMN IF NOT EXISTS email text;
+
+ALTER TABLE public.chat_participants
+  ADD COLUMN IF NOT EXISTS joined_at timestamptz;
+
+UPDATE public.chat_participants
+SET joined_at = COALESCE(joined_at, created_at)
+WHERE joined_at IS NULL;
+
+ALTER TABLE public.chat_participants
+  ALTER COLUMN joined_at SET DEFAULT now();
+
+ALTER TABLE public.chat_participants
+  ALTER COLUMN joined_at SET NOT NULL;
+
+---------------------------
+-- 8) إنشاء جدول audit_logs وسياسات القراءة
+---------------------------
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id          bigserial PRIMARY KEY,
+  account_id  uuid NOT NULL,
+  actor_uid   uuid,
+  actor_email text,
+  table_name  text NOT NULL,
+  op          text NOT NULL,
+  row_pk      text,
+  before_row  jsonb,
+  after_row   jsonb,
+  diff        jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS audit_logs_account_created_idx
+  ON public.audit_logs (account_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS audit_logs_table_idx
+  ON public.audit_logs (table_name);
+
+CREATE INDEX IF NOT EXISTS audit_logs_actor_idx
+  ON public.audit_logs (actor_uid);
+
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT ON TABLE public.audit_logs TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.audit_logs TO service_role;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='audit_logs' AND policyname='audit_logs_select_account_members'
+  ) THEN
+    CREATE POLICY audit_logs_select_account_members
+    ON public.audit_logs
+    FOR SELECT
+    TO authenticated
+    USING (
+      fn_is_super_admin() = true
+      OR EXISTS (
+        SELECT 1 FROM public.account_users au
+        WHERE au.account_id = audit_logs.account_id
+          AND au.user_uid = auth.uid()
+          AND coalesce(au.disabled, false) = false
+      )
+    );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='audit_logs' AND policyname='audit_logs_service_all'
+  ) THEN
+    CREATE POLICY audit_logs_service_all
+    ON public.audit_logs
+    FOR ALL
+    TO service_role
+    USING (true)
+    WITH CHECK (true);
+  END IF;
+END$$;
+
+---------------------------
+-- 9) إجراءات مساعدة للإدارة (RPC)
 ---------------------------
 
 CREATE OR REPLACE FUNCTION public.admin_list_clinics()
@@ -443,3 +614,93 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_create_employee_full(uuid, text, text) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.chat_admin_start_dm(
+  target_email text
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_uid uuid := nullif(claims->>'sub', '')::uuid;
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'aelmam.app@gmail.com';
+  normalized_email text := lower(coalesce(target_email, ''));
+  target_uid uuid;
+  target_account uuid;
+  existing_conv uuid;
+  conv_id uuid;
+  now_ts timestamptz := now();
+BEGIN
+  IF caller_uid IS NULL THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  IF normalized_email = '' THEN
+    RAISE EXCEPTION 'target_email is required';
+  END IF;
+
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  SELECT id
+    INTO target_uid
+  FROM auth.users
+  WHERE lower(email) = normalized_email
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF target_uid IS NULL THEN
+    RAISE EXCEPTION 'target user not found' USING errcode = 'P0002';
+  END IF;
+
+  IF target_uid = caller_uid THEN
+    RAISE EXCEPTION 'cannot start conversation with yourself';
+  END IF;
+
+  SELECT au.account_id
+    INTO target_account
+  FROM public.account_users au
+  WHERE au.user_uid = target_uid
+    AND coalesce(au.disabled, false) = false
+  ORDER BY CASE WHEN lower(coalesce(au.role, '')) IN ('owner','admin','superadmin') THEN 0 ELSE 1 END,
+           au.created_at DESC
+  LIMIT 1;
+
+  SELECT p.conversation_id
+    INTO existing_conv
+  FROM public.chat_participants p
+  JOIN public.chat_participants p2
+    ON p.conversation_id = p2.conversation_id
+  JOIN public.chat_conversations c
+    ON c.id = p.conversation_id
+  WHERE p.user_uid = caller_uid
+    AND p2.user_uid = target_uid
+    AND coalesce(c.is_group, false) = false
+  ORDER BY c.created_at DESC
+  LIMIT 1;
+
+  IF existing_conv IS NOT NULL THEN
+    RETURN existing_conv;
+  END IF;
+
+  conv_id := gen_random_uuid();
+
+  INSERT INTO public.chat_conversations(id, account_id, is_group, title, created_by, created_at, updated_at)
+  VALUES (conv_id, target_account, false, NULL, caller_uid, now_ts, now_ts);
+
+  INSERT INTO public.chat_participants(conversation_id, user_uid, role, email, joined_at)
+  VALUES
+    (conv_id, caller_uid, 'superadmin', NULLIF(caller_email, ''), now_ts),
+    (conv_id, target_uid, NULL, normalized_email, now_ts);
+
+  RETURN conv_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.chat_admin_start_dm(text) FROM public;
+GRANT EXECUTE ON FUNCTION public.chat_admin_start_dm(text) TO authenticated;
