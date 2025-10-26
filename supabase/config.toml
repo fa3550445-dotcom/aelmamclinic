@@ -2,7 +2,7 @@ project_id = "wiypiofuyrayywciovoo"
 
 [api]
 port = 54321
-schemas = ["public", "graphql_public"]   # لاحظ: بدون "storage"
+schemas = ["public", "graphql_public", "storage"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
