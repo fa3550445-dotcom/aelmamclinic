@@ -76,9 +76,12 @@ class NotificationService {
     _initFuture = future;
     try {
       await future;
-    } catch (error) {
+    } catch (error, stackTrace) {
       _initFuture = null;
-      rethrow;
+      _initialized = false;
+      debugPrint(
+        '🚫 NotificationService initialize() suppressed failure: $error\n$stackTrace',
+      );
     }
   }
 
