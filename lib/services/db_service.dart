@@ -2035,6 +2035,7 @@ class DBService {
       Prescription.table,
       PrescriptionItem.table,
       'complaints',
+      'sync_fk_mapping',
     ];
     for (final t in tables) {
       batch.delete(t);
