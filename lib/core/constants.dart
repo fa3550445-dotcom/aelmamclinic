@@ -1,9 +1,8 @@
 // lib/core/constants.dart
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
+import 'constants_supabase_override_loader_stub.dart'
+    if (dart.library.io) 'constants_supabase_override_loader_io.dart'
+    as override_loader;
 
 class AppConstants {
   AppConstants._();
@@ -48,132 +47,46 @@ class AppConstants {
   /// Values in this file take precedence over the compile-time defaults but
   /// are still superseded by `--dart-define` values when provided.
   static Future<void> loadRuntimeOverrides() async {
-    if (_overridesLoaded || kIsWeb) {
-      _overridesLoaded = true;
+    if (_overridesLoaded) {
       return;
     }
     _overridesLoaded = true;
 
-    final candidatePaths = <String>{};
-
-    String? _normalize(String? path) {
-      final trimmed = path?.trim();
-      if (trimmed == null || trimmed.isEmpty) return null;
-      return trimmed;
+    if (kIsWeb) {
+      return;
     }
 
-    void addFile(String? path) {
-      final normalized = _normalize(path);
-      if (normalized != null) {
-        candidatePaths.add(normalized);
-      }
+    final result = await override_loader.loadSupabaseRuntimeOverrides(
+      windowsDataDir: windowsDataDir,
+      legacyWindowsDataDir: legacyWindowsDataDir,
+      linuxDataDir: linuxDataDir,
+      macOsDataDir: macOsDataDir,
+      androidDataDir: androidDataDir,
+      iosLogicalDataDir: iosLogicalDataDir,
+    );
+
+    if (result == null) {
+      return;
     }
 
-    void addDirConfig(String? dir, {bool expandHome = false}) {
-      final base = dir == null ? null : (expandHome ? _expandHome(dir) : dir);
-      addFile(base == null ? null : p.join(base, 'config.json'));
+    final (
+      supabaseUrl: url,
+      supabaseAnonKey: anonKey,
+      source: source,
+    ) = result;
+
+    if (url != null && url.isNotEmpty) {
+      _overrideSupabaseUrl = url;
+    }
+    if (anonKey != null && anonKey.isNotEmpty) {
+      _overrideSupabaseAnonKey = anonKey;
     }
 
-    Map<String, String>? env;
-    try {
-      env = Platform.environment;
-    } catch (_) {
-      env = null;
-    }
-
-    if (env != null) {
-      addFile(env['AELMAM_SUPABASE_CONFIG'] ?? env['AELMAM_CONFIG']);
-      addFile(env['AELMAM_CLINIC_CONFIG'] ?? env['SUPABASE_CONFIG_PATH']);
-      final envDir = env['AELMAM_DIR'] ?? env['AELMAM_CLINIC_DIR'];
-      if (envDir != null) {
-        addDirConfig(envDir, expandHome: true);
-      }
-    }
-
-    try {
-      if (Platform.isWindows) {
-        addDirConfig(windowsDataDir);
-        addDirConfig(legacyWindowsDataDir);
-        if (env != null) {
-          addDirConfig(env['APPDATA'] == null
-              ? null
-              : p.join(env['APPDATA']!, 'aelmam_clinic'));
-          addDirConfig(env['LOCALAPPDATA'] == null
-              ? null
-              : p.join(env['LOCALAPPDATA']!, 'aelmam_clinic'));
-        }
-      } else if (Platform.isLinux) {
-        addDirConfig(linuxDataDir, expandHome: true);
-        addDirConfig('~/.config/aelmam_clinic', expandHome: true);
-        if (env != null) {
-          final xdg = env['XDG_CONFIG_HOME'];
-          if (xdg != null && xdg.trim().isNotEmpty) {
-            addDirConfig(
-              p.join(_expandHome(xdg), 'aelmam_clinic'),
-            );
-          }
-        }
-      } else if (Platform.isMacOS) {
-        addDirConfig(macOsDataDir, expandHome: true);
-      } else if (Platform.isAndroid) {
-        addDirConfig(androidDataDir);
-      } else if (Platform.isIOS) {
-        addDirConfig(iosLogicalDataDir);
-      }
-    } catch (_) {
-      // ignore platform detection failures
-    }
-
-    try {
-      addDirConfig(Directory.current.path);
-    } catch (_) {
-      // ignore inability to resolve current directory (e.g. in tests)
-    }
-
-    for (final path in candidatePaths) {
-      try {
-        final file = File(path);
-        if (!await file.exists()) continue;
-        final raw = await file.readAsString();
-        if (raw.trim().isEmpty) continue;
-
-        final data = jsonDecode(raw);
-        if (data is! Map) {
-          continue;
-        }
-
-        String? readKey(String key) {
-          final value = data[key] ?? data[_lowerSnake(key)];
-          if (value == null) return null;
-          if (value is String) {
-            return value.trim();
-          }
-          return '$value'.trim();
-        }
-
-        final url = readKey('supabaseUrl');
-        final anonKey = readKey('supabaseAnonKey');
-
-        if ((url == null || url.isEmpty) &&
-            (anonKey == null || anonKey.isEmpty)) {
-          continue;
-        }
-
-        if (url != null && url.isNotEmpty) {
-          _overrideSupabaseUrl = url;
-        }
-        if (anonKey != null && anonKey.isNotEmpty) {
-          _overrideSupabaseAnonKey = anonKey;
-        }
-
-        debugLog(
-          'Loaded Supabase config overrides from ${file.path}',
-          tag: 'CONFIG',
-        );
-        break;
-      } catch (e) {
-        debugLog('Failed to read config override at $path: $e', tag: 'CONFIG');
-      }
+    if (source != null && source.isNotEmpty) {
+      debugLog(
+        'Loaded Supabase config overrides from $source',
+        tag: 'CONFIG',
+      );
     }
   }
 
@@ -220,28 +133,6 @@ class AppConstants {
       // ignore: avoid_print
       print('[$tag] $msg');
     }
-  }
-
-  static String _expandHome(String value) {
-    if (!value.startsWith('~')) return value;
-    final home = Platform.environment['HOME'] ??
-        Platform.environment['USERPROFILE'];
-    if (home == null || home.isEmpty) {
-      return value.replaceFirst('~', '');
-    }
-    return value.replaceFirst('~', home);
-  }
-
-  static String _lowerSnake(String camel) {
-    final buffer = StringBuffer();
-    for (var i = 0; i < camel.length; i++) {
-      final char = camel[i];
-      if (char.toUpperCase() == char && char.toLowerCase() != char && i > 0) {
-        buffer.write('_');
-      }
-      buffer.write(char.toLowerCase());
-    }
-    return buffer.toString();
   }
 
   static String _requireEnv(String value, String key) {
