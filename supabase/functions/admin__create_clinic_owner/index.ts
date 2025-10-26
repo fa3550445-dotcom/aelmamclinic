@@ -43,7 +43,9 @@ serve(async (req) => {
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
-    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+      global: { headers: { Authorization: auth } },
+    });
 
     // 3) تحقق أن المتصل سوبر أدمن
     if (!internal) {
@@ -112,6 +114,11 @@ serve(async (req) => {
     if (rerr) {
       return json(500, { error: "rpc admin_bootstrap_clinic_for_email failed", details: rerr.message });
     }
+
+    console.log(
+      "[admin__create_clinic_owner] rpc admin_bootstrap_clinic_for_email succeeded",
+      { clinic_name, owner_email, usedBearer: hasBearer },
+    );
 
     return json(200, { ok: true, result: rpc });
   } catch (e) {
