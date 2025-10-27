@@ -1,3 +1,4 @@
+PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic> flutter analyze
 Analyzing aelmamclinic...
 
    info - Use 'package:' imports for files in the 'lib' directory - lib\core\constants.dart:3:8 - always_use_package_imports
@@ -4087,5 +4088,5 @@ warning - Unused import: 'dart:math' - tool\sync_cross_device_smoke_test.dart:6:
 warning - The value of the local variable 'ownerLocal' isn't used - tool\sync_cross_device_smoke_test.dart:86:9 -
        unused_local_variable
 
-2565 issues found. (ran in 11.6s)
+2565 issues found. (ran in 183.9s)
 PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic>
