@@ -19,21 +19,21 @@ import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
 
 /*─────────────────── موديلات ───────────────────*/
-import '../models/patient_service.dart';
-import '../models/drug.dart';
-import '../models/prescription.dart';
-import '../models/prescription_item.dart';
-import '../models/patient.dart';
-import '../models/return_entry.dart';
-import '../models/consumption.dart';
-import '../models/appointment.dart';
-import '../models/doctor.dart';
-import '../models/employee.dart';
-import '../models/item_type.dart';
-import '../models/item.dart';
-import '../models/purchase.dart';
-import '../models/alert_setting.dart';
-import '../models/attachment.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/models/drug.dart';
+import 'package:aelmamclinic/models/prescription.dart';
+import 'package:aelmamclinic/models/prescription_item.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/models/appointment.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/employee.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/purchase.dart';
+import 'package:aelmamclinic/models/alert_setting.dart';
+import 'package:aelmamclinic/models/attachment.dart';
 
 /*─────────────── خدمة الإشعارات ───────────────*/
 import 'notification_service.dart';

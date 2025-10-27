@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 // شاشات نحتاجها
-import '../doctors/doctors_home_screen.dart';
+import 'package:aelmamclinic/screens/doctors/doctors_home_screen.dart';
 import 'new_employee_screen.dart';
 import 'list_employees_screen.dart';
 
@@ -178,7 +178,7 @@ class _ActionTile extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -203,7 +203,7 @@ class _ActionTile extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.65),
+                color: scheme.onSurface.withValues(alpha: .65),
                 fontSize: 13.2,
                 fontWeight: FontWeight.w600,
                 height: 1.25,

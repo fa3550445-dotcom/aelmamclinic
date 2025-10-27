@@ -3,11 +3,11 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── TBIAN ─*/
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 /*── الخدمات ─*/
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 
 /// ── ثوابت الألوان الموحدة ──
 const Color accentColor = Color(0xFF004A61);
@@ -330,7 +330,7 @@ class _NonDoctorSalaryDetailScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: Colors.black12.withOpacity(.25)),
+        border: Border.all(color: Colors.black12.withValues(alpha: .25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -338,7 +338,7 @@ class _NonDoctorSalaryDetailScreenState
           Text(
             '$label: ',
             style: TextStyle(
-                color: Colors.black87.withOpacity(.7),
+                color: Colors.black87.withValues(alpha: .7),
                 fontWeight: FontWeight.w700),
           ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w900)),

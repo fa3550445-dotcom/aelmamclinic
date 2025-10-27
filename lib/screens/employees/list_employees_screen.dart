@@ -6,12 +6,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
 import 'view_employee_screen.dart';
 import 'edit_employee_screen.dart';
 import 'new_employee_screen.dart';
@@ -104,7 +104,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
       final filePath = '${dir.path}/قائمة-الموظفين.xlsx';
       final file = File(filePath);
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles([XFile(file.path)],
+      await SharePlus.instance.shareXFiles(files: [XFile(file.path)],
           text: 'قائمة الموظفين المحفوظة');
     } catch (e) {
       if (!mounted) return;
@@ -252,7 +252,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                   child: Text(
                     'النتائج: ${_filteredEmployees.length}',
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(.65),
+                      color: cs.onSurface.withValues(alpha: .65),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -274,7 +274,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                       child: Text(
                                         'لا توجد نتائج',
                                         style: TextStyle(
-                                          color: cs.onSurface.withOpacity(.6),
+                                          color: cs.onSurface.withValues(alpha: .6),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -313,7 +313,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                         leading: Container(
                                           decoration: BoxDecoration(
                                             color:
-                                                kPrimaryColor.withOpacity(.10),
+                                                kPrimaryColor.withValues(alpha: .10),
                                             borderRadius:
                                                 BorderRadius.circular(12),
                                           ),
@@ -336,7 +336,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                               ? (phone.isEmpty ? '—' : phone)
                                               : jobTitle,
                                           style: TextStyle(
-                                            color: cs.onSurface.withOpacity(.7),
+                                            color: cs.onSurface.withValues(alpha: .7),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),

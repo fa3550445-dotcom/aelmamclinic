@@ -1,8 +1,8 @@
 // lib/screens/employees/finance/employee_discount_home_screen.dart
 import 'package:flutter/material.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 import 'employee_discount_select_employee_screen.dart';
 
@@ -80,7 +80,7 @@ class EmployeeDiscountHomeScreen extends StatelessWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(.65),
+                          .withValues(alpha: .65),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -143,7 +143,7 @@ class EmployeeDiscountHomeScreen extends StatelessWidget {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(8),
@@ -158,7 +158,7 @@ class EmployeeDiscountHomeScreen extends StatelessWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(.75),
+                                .withValues(alpha: .75),
                             fontWeight: FontWeight.w600,
                             height: 1.25,
                           ),
@@ -209,7 +209,7 @@ class _ActionCard extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Container(
                 decoration: BoxDecoration(
-                  color: kPrimaryColor.withOpacity(.10),
+                  color: kPrimaryColor.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 padding: const EdgeInsets.all(10),
@@ -238,7 +238,7 @@ class _ActionCard extends StatelessWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(.65),
+                  color: scheme.onSurface.withValues(alpha: .65),
                   fontSize: 13.2,
                   fontWeight: FontWeight.w600,
                   height: 1.25,

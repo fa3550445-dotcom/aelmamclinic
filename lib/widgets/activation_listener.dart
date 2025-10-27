@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../providers/activation_provider.dart';
+import 'package:aelmamclinic/providers/activation_provider.dart';
 
 class ActivationListener extends StatefulWidget {
   final Widget child;

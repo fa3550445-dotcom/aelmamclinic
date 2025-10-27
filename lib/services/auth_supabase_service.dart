@@ -25,15 +25,14 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:postgrest/postgrest.dart';
 
-import '../models/account_user_summary.dart';
-import '../models/clinic.dart';
+import 'package:aelmamclinic/models/account_user_summary.dart';
+import 'package:aelmamclinic/models/clinic.dart';
 
-import './device_id_service.dart';
-import './db_service.dart';
-import './sync_service.dart';
-import './db_parity_v3.dart'; // مواءمة محليّة مع السحابة (parity v3)
+import 'package:aelmamclinic/services/device_id_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/sync_service.dart';
+import 'package:aelmamclinic/services/db_parity_v3.dart'; // مواءمة محليّة مع السحابة (parity v3)
 // ملاحظة: استيراد realtime_hub/chat_service اختياريان. إن لم تكن الملفات موجودة فلا تستوردها.
 // import './realtime_hub.dart';
 // import './chat_service.dart';

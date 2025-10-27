@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 // لاستخراج أول محرف (grapheme)
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'employee_loan_create_screen.dart';
 import 'employee_loans_of_employee_screen.dart';
 
@@ -131,7 +131,7 @@ class _EmployeeLoanSelectEmployeeScreenState
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -185,7 +185,7 @@ class _EmployeeLoanSelectEmployeeScreenState
                             child: Text(
                               'لا توجد نتائج',
                               style: TextStyle(
-                                color: scheme.onSurface.withOpacity(.6),
+                                color: scheme.onSurface.withValues(alpha: .6),
                                 fontSize: 15.5,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -241,7 +241,7 @@ class _EmployeeLoanSelectEmployeeScreenState
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color:
-                                              scheme.onSurface.withOpacity(.75),
+                                              scheme.onSurface.withValues(alpha: .75),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),

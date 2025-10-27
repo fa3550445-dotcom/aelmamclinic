@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 import 'package:provider/provider.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../models/doctor.dart';
-import '../../models/account_user_summary.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/db_service.dart';
-import '../../services/auth_supabase_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/account_user_summary.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
 import 'employee_search_dialog.dart';
 
 class NewDoctorScreen extends StatefulWidget {
@@ -260,7 +260,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -289,7 +289,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(.6),
+                              .withValues(alpha: .6),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -305,7 +305,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -326,7 +326,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                                 ? 'لا توجد حسابات موظفين متاحة للربط'
                                 : 'اضغط لاختيار حساب الموظف المرتبط بهذا الطبيب',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .6),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -443,7 +443,7 @@ class _TimePickerCard extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -456,7 +456,7 @@ class _TimePickerCard extends StatelessWidget {
         subtitle: Text(
           value,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .6),
             fontWeight: FontWeight.w600,
           ),
         ),

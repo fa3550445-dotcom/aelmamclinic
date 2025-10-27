@@ -5,14 +5,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/consumption.dart';
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
-import '../../services/save_file_service.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
+import 'package:aelmamclinic/services/save_file_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class ListConsumptionScreen extends StatefulWidget {
   const ListConsumptionScreen({super.key});
@@ -132,7 +132,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-استهلاك-العيادة.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(
+      await SharePlus.instance.shareXFiles(
         [XFile(file.path)],
         text: 'ملف كشف استهلاك العيادة',
       );
@@ -207,7 +207,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.1),
+                        color: kPrimaryColor.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
@@ -304,7 +304,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                         child: Text(
                           'لا توجد بيانات',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.6),
+                            color: scheme.onSurface.withValues(alpha: .6),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -324,7 +324,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                               contentPadding: EdgeInsets.zero,
                               leading: Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.1),
+                                  color: kPrimaryColor.withValues(alpha: .1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(8),
@@ -343,7 +343,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                                 child: Text(
                                   'تاريخ: $date | نوع: ${c.note}',
                                   style: TextStyle(
-                                    color: scheme.onSurface.withOpacity(.65),
+                                    color: scheme.onSurface.withValues(alpha: .65),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -397,7 +397,7 @@ class _DateTile extends StatelessWidget {
             ? Text(
                 'اضغط للاختيار',
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(.55),
+                  color: scheme.onSurface.withValues(alpha: .55),
                   fontWeight: FontWeight.w600,
                 ),
               )
@@ -406,7 +406,7 @@ class _DateTile extends StatelessWidget {
                 child: Text(
                   value!,
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.8),
+                    color: scheme.onSurface.withValues(alpha: .8),
                     fontWeight: FontWeight.w800,
                   ),
                 ),

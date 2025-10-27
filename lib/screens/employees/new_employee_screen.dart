@@ -3,16 +3,16 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/validators.dart';
-import '../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/validators.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../models/account_user_summary.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/db_service.dart';
-import '../../services/auth_supabase_service.dart';
-import '../../widgets/user_account_picker_dialog.dart';
+import 'package:aelmamclinic/models/account_user_summary.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
+import 'package:aelmamclinic/widgets/user_account_picker_dialog.dart';
 
 class NewEmployeeScreen extends StatefulWidget {
   const NewEmployeeScreen({super.key});
@@ -372,7 +372,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                           child: ListTile(
                             leading: Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -392,7 +392,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                                       ? '⚠️ الحساب المحدد معطّل'
                                       : 'سيُربط بالمعرّف ${_selectedUserUid ?? ''}',
                               style: TextStyle(
-                                color: scheme.onSurface.withOpacity(.65),
+                                color: scheme.onSurface.withValues(alpha: .65),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -448,7 +448,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                             contentPadding: EdgeInsets.zero,
                             leading: Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -469,7 +469,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                                       ? 'لا توجد حسابات موظفين متاحة للربط'
                                       : 'اضغط لاختيار حساب Supabase المرتبط بهذا الموظف',
                               style: TextStyle(
-                                color: scheme.onSurface.withOpacity(.6),
+                                color: scheme.onSurface.withValues(alpha: .6),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

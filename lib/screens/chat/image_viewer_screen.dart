@@ -335,7 +335,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
     return Directionality(
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.black.withOpacity(_bgOpacity),
+        backgroundColor: Colors.black.withValues(alpha: _bgOpacity),
         body: Stack(
           children: [
             PageView.builder(
@@ -761,7 +761,7 @@ class _TopBar extends StatelessWidget {
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(.35),
+        color: Colors.black.withValues(alpha: .35),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -811,7 +811,7 @@ class _CaptionBar extends StatelessWidget {
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(.35),
+        color: Colors.black.withValues(alpha: .35),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Text(

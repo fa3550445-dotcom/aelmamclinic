@@ -6,15 +6,15 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../models/patient.dart';
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
-import '../patients/view_patient_screen.dart';
-import '../patients/edit_patient_screen.dart';
-import '../patients/duplicate_patients_screen.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
+import 'package:aelmamclinic/screens/patients/view_patient_screen.dart';
+import 'package:aelmamclinic/screens/patients/edit_patient_screen.dart';
+import 'package:aelmamclinic/screens/patients/duplicate_patients_screen.dart';
 
 class PatientsByDoctorScreen extends StatefulWidget {
   final Doctor doctor;
@@ -133,7 +133,7 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/قائمة-مرضى-د_${widget.doctor.name}.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(
+      await SharePlus.instance.shareXFiles(
         [XFile(file.path)],
         text: 'قائمة المرضى للطبيب ${widget.doctor.name}',
       );
@@ -295,7 +295,7 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
-                                  .withOpacity(.6),
+                                  .withValues(alpha: .6),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -334,7 +334,7 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                 },
                                 leading: Container(
                                   decoration: BoxDecoration(
-                                    color: kPrimaryColor.withOpacity(.10),
+                                    color: kPrimaryColor.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   padding: const EdgeInsets.all(10),
@@ -356,7 +356,7 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(.7),
+                                        .withValues(alpha: .7),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -464,7 +464,7 @@ class _StatPill extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(.25),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: .25),
         ),
       ),
       child: Row(
@@ -472,7 +472,7 @@ class _StatPill extends StatelessWidget {
           Text(
             '$label: ',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),

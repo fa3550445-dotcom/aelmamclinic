@@ -24,11 +24,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../providers/chat_provider.dart';
-import '../../services/chat_service.dart';
-import '../../utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/providers/chat_provider.dart';
+import 'package:aelmamclinic/services/chat_service.dart';
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
 import 'attachment_chip.dart';
 
 class ChatComposer extends StatefulWidget {
@@ -264,7 +264,7 @@ class _ChatComposerState extends State<ChatComposer> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 8),
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.06),
+                                color: kPrimaryColor.withValues(alpha: .06),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: Theme.of(context).dividerColor),
@@ -337,7 +337,7 @@ class _ChatComposerState extends State<ChatComposer> {
                             onPressed:
                             (_sending || !widget.enableImages) ? null : _pickImages,
                             icon: const Icon(Icons.photo_library_rounded),
-                            color: scheme.onSurface.withOpacity(.85),
+                            color: scheme.onSurface.withValues(alpha: .85),
                           ),
 
                           // TextField (مرن)
@@ -360,7 +360,7 @@ class _ChatComposerState extends State<ChatComposer> {
                                     border: InputBorder.none,
                                     isDense: true,
                                     hintStyle: TextStyle(
-                                      color: scheme.onSurface.withOpacity(.45),
+                                      color: scheme.onSurface.withValues(alpha: .45),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),

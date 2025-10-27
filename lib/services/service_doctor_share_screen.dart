@@ -4,13 +4,13 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
-import '../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
 /*── البيانات ─*/
-import '../models/doctor.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 import 'db_service.dart';
 
 class ServiceDoctorShareScreen extends StatefulWidget {
@@ -141,7 +141,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(8),
@@ -209,7 +209,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: scheme.onSurface.withOpacity(.75))),
+                                    color: scheme.onSurface.withValues(alpha: .75))),
                             trailing: const Icon(Icons.chevron_left_rounded),
                           ),
                         ),
@@ -307,7 +307,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               padding: const EdgeInsets.all(8),
@@ -506,7 +506,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(.10),
+              color: kPrimaryColor.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.all(10),
@@ -520,7 +520,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.95),
+                color: scheme.onSurface.withValues(alpha: .95),
                 fontWeight: FontWeight.w800,
                 fontSize: 14.5,
               ),
@@ -578,7 +578,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.10),
+                        color: kPrimaryColor.withValues(alpha: .10),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(8),
@@ -699,7 +699,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -720,7 +720,7 @@ class _ServiceDoctorShareScreenState extends State<ServiceDoctorShareScreen> {
                             Text(
                                 'السعر: ${widget.serviceCost.toStringAsFixed(2)}',
                                 style: TextStyle(
-                                    color: scheme.onSurface.withOpacity(.75),
+                                    color: scheme.onSurface.withValues(alpha: .75),
                                     fontWeight: FontWeight.w700)),
                           ],
                         ),

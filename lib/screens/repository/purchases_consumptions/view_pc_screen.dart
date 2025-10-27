@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-import '../../../models/item.dart';
-import '../../../models/item_type.dart';
-import '../../../models/consumption.dart';
-import '../../../providers/repository_provider.dart';
-import '../../../services/repository_service.dart';
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
+import 'package:aelmamclinic/services/repository_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 /*──────── ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);

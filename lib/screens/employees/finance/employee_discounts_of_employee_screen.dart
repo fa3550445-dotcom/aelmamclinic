@@ -3,10 +3,10 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart'; // TDateButton, TOutlinedButton
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart'; // TDateButton, TOutlinedButton
+import 'package:aelmamclinic/services/db_service.dart';
 
 class EmployeeDiscountsOfEmployeeScreen extends StatefulWidget {
   final int empId;
@@ -216,7 +216,7 @@ class _EmployeeDiscountsOfEmployeeScreenState
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         padding: const EdgeInsets.all(14),
@@ -306,13 +306,13 @@ class _EmployeeDiscountsOfEmployeeScreenState
                                     const SizedBox(height: 120),
                                     Icon(Icons.inbox_rounded,
                                         size: 48,
-                                        color: cs.onSurface.withOpacity(.35)),
+                                        color: cs.onSurface.withValues(alpha: .35)),
                                     const SizedBox(height: 10),
                                     Center(
                                       child: Text(
                                         'لا توجد خصومات',
                                         style: TextStyle(
-                                          color: cs.onSurface.withOpacity(.6),
+                                          color: cs.onSurface.withValues(alpha: .6),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -344,7 +344,7 @@ class _EmployeeDiscountsOfEmployeeScreenState
                                           Container(
                                             decoration: BoxDecoration(
                                               color: kPrimaryColor
-                                                  .withOpacity(.10),
+                                                  .withValues(alpha: .10),
                                               borderRadius:
                                                   BorderRadius.circular(14),
                                             ),
@@ -384,7 +384,7 @@ class _EmployeeDiscountsOfEmployeeScreenState
                                                               .format(dt),
                                                       style: TextStyle(
                                                         color: cs.onSurface
-                                                            .withOpacity(.65),
+                                                            .withValues(alpha: .65),
                                                         fontWeight:
                                                             FontWeight.w700,
                                                         fontSize: 12.5,
@@ -401,7 +401,7 @@ class _EmployeeDiscountsOfEmployeeScreenState
                                                         TextOverflow.ellipsis,
                                                     style: TextStyle(
                                                       color: cs.onSurface
-                                                          .withOpacity(.85),
+                                                          .withValues(alpha: .85),
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
@@ -450,14 +450,14 @@ class _StatPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: cs.outline.withOpacity(.25)),
+        border: Border.all(color: cs.outline.withValues(alpha: .25)),
       ),
       child: Row(
         children: [
           Text(
             '$label: ',
             style: TextStyle(
-              color: cs.onSurface.withOpacity(.7),
+              color: cs.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),

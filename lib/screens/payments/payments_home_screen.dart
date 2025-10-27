@@ -2,12 +2,12 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
-import '../consumption/list_consumption_screen.dart';
-import '../consumption/new_consumption_screen.dart';
-import '../employees/finance/employees_finance_home_screen.dart';
+import 'package:aelmamclinic/screens/consumption/list_consumption_screen.dart';
+import 'package:aelmamclinic/screens/consumption/new_consumption_screen.dart';
+import 'package:aelmamclinic/screens/employees/finance/employees_finance_home_screen.dart';
 
 /* تصميم TBIAN */
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class PaymentsHomeScreen extends StatelessWidget {
   const PaymentsHomeScreen({super.key});
@@ -31,7 +31,7 @@ class PaymentsHomeScreen extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: scheme.outlineVariant.withOpacity(.6),
+                  color: scheme.outlineVariant.withValues(alpha: .6),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -175,7 +175,7 @@ class _ActionCard extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: scheme.primary.withOpacity(.10),
+                color: scheme.primary.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(12),
@@ -190,7 +190,7 @@ class _ActionCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.90),
+                        color: scheme.onSurface.withValues(alpha: .90),
                         fontWeight: FontWeight.w800,
                         fontSize: 14.5,
                       )),
@@ -201,7 +201,7 @@ class _ActionCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.65),
+                        color: scheme.onSurface.withValues(alpha: .65),
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
@@ -212,7 +212,7 @@ class _ActionCard extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Icon(Icons.chevron_left_rounded,
-                color: scheme.onSurface.withOpacity(.6)),
+                color: scheme.onSurface.withValues(alpha: .6)),
           ],
         ),
       ),

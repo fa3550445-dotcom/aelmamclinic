@@ -9,9 +9,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-import '../models/drug.dart';
-import '../models/doctor.dart';
-import '../models/patient.dart';
+import 'package:aelmamclinic/models/drug.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/patient.dart';
 
 /*── ألوان موحَّدة ──*/
 const PdfColor kAccent = PdfColor.fromInt(0xFF004A61);

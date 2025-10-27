@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /*── TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /*── الخدمات ─*/
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 
 class FinancialLogsScreen extends StatefulWidget {
   const FinancialLogsScreen({super.key});
@@ -299,7 +299,7 @@ class _FinancialLogsScreenState extends State<FinancialLogsScreen> {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -338,12 +338,12 @@ class _FinancialLogsScreenState extends State<FinancialLogsScreen> {
               if (desc.isNotEmpty) 'التفاصيل: $desc',
               'التوقيت: $ts',
             ].join('\n'),
-            style: TextStyle(color: scheme.onSurface.withOpacity(.8)),
+            style: TextStyle(color: scheme.onSurface.withValues(alpha: .8)),
           ),
         ),
         trailing: emp.isNotEmpty
             ? CircleAvatar(
-                backgroundColor: kPrimaryColor.withOpacity(.10),
+                backgroundColor: kPrimaryColor.withValues(alpha: .10),
                 child: Text(
                   emp,
                   style: const TextStyle(
@@ -513,7 +513,7 @@ class _FinancialLogsScreenState extends State<FinancialLogsScreen> {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: scheme.outlineVariant.withOpacity(.6)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .6)),
       ),
       child: Text(text,
           style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),

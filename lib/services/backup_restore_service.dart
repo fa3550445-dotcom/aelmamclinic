@@ -20,8 +20,8 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
 import 'db_service.dart';
-import '../models/storage_type.dart';
-import '../models/attachment.dart';
+import 'package:aelmamclinic/models/storage_type.dart';
+import 'package:aelmamclinic/models/attachment.dart';
 
 /*──────────────── Google auth helper ───────────────*/
 class GoogleHttpClient extends http.BaseClient {

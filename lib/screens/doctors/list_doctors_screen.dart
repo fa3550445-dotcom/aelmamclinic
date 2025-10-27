@@ -5,12 +5,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
 import 'edit_doctor_screen.dart';
 import 'view_doctor_screen.dart';
 
@@ -87,7 +87,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/قائمة-الأطباء.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles([XFile(file.path)], text: 'قائمة الأطباء');
+      await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'قائمة الأطباء');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
@@ -170,7 +170,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                         child: Text(
                           'لا توجد نتائج',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.6),
+                            color: scheme.onSurface.withValues(alpha: .6),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -196,7 +196,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                               },
                               leading: Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.10),
+                                  color: kPrimaryColor.withValues(alpha: .10),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(10),
@@ -215,7 +215,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                               subtitle: Text(
                                 d.specialization,
                                 style: TextStyle(
-                                  color: scheme.onSurface.withOpacity(.65),
+                                  color: scheme.onSurface.withValues(alpha: .65),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

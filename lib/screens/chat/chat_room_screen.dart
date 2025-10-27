@@ -25,16 +25,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../local/chat_local_store.dart';
-import '../../models/chat_models.dart';
-import '../../providers/chat_provider.dart';
-import '../../services/chat_service.dart';
-import '../../utils/text_direction.dart' as td;
-import '../../widgets/chat/attachment_chip.dart';
-import '../../widgets/chat/message_actions_sheet.dart';
-import '../../widgets/chat/message_bubble.dart';
-import '../../widgets/chat/typing_indicator.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/local/chat_local_store.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/providers/chat_provider.dart';
+import 'package:aelmamclinic/services/chat_service.dart';
+import 'package:aelmamclinic/utils/text_direction.dart' as td;
+import 'package:aelmamclinic/widgets/chat/attachment_chip.dart';
+import 'package:aelmamclinic/widgets/chat/message_actions_sheet.dart';
+import 'package:aelmamclinic/widgets/chat/message_bubble.dart';
+import 'package:aelmamclinic/widgets/chat/typing_indicator.dart';
 import 'chat_search_screen.dart';
 import 'image_viewer_screen.dart';
 
@@ -691,8 +691,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        scheme.surfaceVariant.withOpacity(.40),
-        scheme.surface.withOpacity(.95),
+        scheme.surfaceVariant.withValues(alpha: .40),
+        scheme.surface.withValues(alpha: .95),
       ],
     );
 
@@ -712,8 +712,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  scheme.primary.withOpacity(.20),
-                  scheme.surface.withOpacity(.00),
+                  scheme.primary.withValues(alpha: .20),
+                  scheme.surface.withValues(alpha: .00),
                 ],
               ),
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
@@ -745,7 +745,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: scheme.onSurface.withOpacity(.65),
+                    color: scheme.onSurface.withValues(alpha: .65),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -814,7 +814,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   Text(
                                     'لا توجد رسائل بعد',
                                     style: TextStyle(
-                                      color: scheme.onSurface.withOpacity(.7),
+                                      color: scheme.onSurface.withValues(alpha: .7),
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -822,7 +822,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   Text(
                                     'ابدأ بكتابة رسالتك في الأسفل',
                                     style: TextStyle(
-                                      color: scheme.onSurface.withOpacity(.55),
+                                      color: scheme.onSurface.withValues(alpha: .55),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12.5,
                                     ),
@@ -835,7 +835,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: scheme.surface.withOpacity(.55),
+                                  color: scheme.surface.withValues(alpha: .55),
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                                 child: ListView.builder(
@@ -957,12 +957,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 alignment: Alignment.center,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: scheme.surface.withOpacity(.55),
+                                    color: scheme.surface.withValues(alpha: .55),
                                     borderRadius: BorderRadius.circular(14),
                                     boxShadow: [
                                       BoxShadow(
                                         blurRadius: 10,
-                                        color: Colors.black.withOpacity(.06),
+                                        color: Colors.black.withValues(alpha: .06),
                                       )
                                     ],
                                   ),
@@ -1032,7 +1032,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                             padding:
                             const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(.06),
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: .06),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Theme.of(context).dividerColor),
                             ),
@@ -1101,19 +1101,19 @@ class _DayDivider extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 8),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: c.surface.withOpacity(.75),
+              color: c.surface.withValues(alpha: .75),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   blurRadius: 10,
-                  color: Colors.black.withOpacity(.05),
+                  color: Colors.black.withValues(alpha: .05),
                 ),
               ],
             ),
             child: Text(
               label,
               style: TextStyle(
-                color: c.onSurface.withOpacity(.75),
+                color: c.onSurface.withValues(alpha: .75),
                 fontWeight: FontWeight.w800,
                 fontSize: 11.5,
               ),
@@ -1138,9 +1138,9 @@ class _NewMessagesDivider extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: c.primary.withOpacity(.10),
+            color: c.primary.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: c.primary.withOpacity(.35)),
+            border: Border.all(color: c.primary.withValues(alpha: .35)),
           ),
           child: Text(
             'رسائل جديدة',
@@ -1182,7 +1182,7 @@ class _JumpToBottomFab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.20),
+                    color: Colors.white.withValues(alpha: .20),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -1236,7 +1236,7 @@ class _ComposerBar extends StatelessWidget {
             // زر إرفاق داخل بطاقة زجاجية (ضغط مطوّل = كاميرا)
             Container(
               decoration: BoxDecoration(
-                color: scheme.surface.withOpacity(.55),
+                color: scheme.surface.withValues(alpha: .55),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: GestureDetector(
@@ -1254,13 +1254,13 @@ class _ComposerBar extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: scheme.surface.withOpacity(.65),
+                  color: scheme.surface.withValues(alpha: .65),
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 14,
                       offset: const Offset(0, 6),
-                      color: Colors.black.withOpacity(.07),
+                      color: Colors.black.withValues(alpha: .07),
                     ),
                   ],
                 ),

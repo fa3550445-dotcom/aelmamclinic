@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../providers/auth_provider.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/constants.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/constants.dart';
 
 // 👇 إضافات مهمة
-import '../admin/admin_dashboard_screen.dart';
-import '../../services/auth_supabase_service.dart';
+import 'package:aelmamclinic/screens/admin/admin_dashboard_screen.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -220,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: kPrimaryColor.withOpacity(.1),
+                            color: kPrimaryColor.withValues(alpha: .1),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           padding: const EdgeInsets.all(10),

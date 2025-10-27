@@ -17,10 +17,10 @@ import 'package:flutter/foundation.dart' show consolidateHttpClientResponseBytes
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/theme.dart' show kPrimaryColor;
-import '../../core/storage_service.dart';
-import '../../models/chat_models.dart' show ChatAttachment;
-import '../../utils/time.dart' as time;
+import 'package:aelmamclinic/core/theme.dart' show kPrimaryColor;
+import 'package:aelmamclinic/core/storage_service.dart';
+import 'package:aelmamclinic/models/chat_models.dart' show ChatAttachment;
+import 'package:aelmamclinic/utils/time.dart' as time;
 
 /// عنصر داخلي موحّد لتمثيل صورة للعرض
 class _ImageItem {

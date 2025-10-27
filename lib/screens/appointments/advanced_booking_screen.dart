@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../models/appointment.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/appointment.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class AdvancedBookingScreen extends StatefulWidget {
   final Appointment? appointment; // عند التعديل
@@ -145,7 +145,7 @@ class _AdvancedBookingScreenState extends State<AdvancedBookingScreen> {
                     ),
                     trailing: Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.1),
+                        color: kPrimaryColor.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.all(8),
@@ -175,12 +175,12 @@ class _AdvancedBookingScreenState extends State<AdvancedBookingScreen> {
                     borderRadius: BorderRadius.circular(kRadius),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.white.withOpacity(.9),
+                        color: Colors.white.withValues(alpha: .9),
                         offset: const Offset(-6, -6),
                         blurRadius: 12,
                       ),
                       BoxShadow(
-                        color: const Color(0xFFCFD8DC).withOpacity(.6),
+                        color: const Color(0xFFCFD8DC).withValues(alpha: .6),
                         offset: const Offset(6, 6),
                         blurRadius: 14,
                       ),

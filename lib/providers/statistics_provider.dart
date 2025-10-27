@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../services/db_service.dart';
-import '../models/alert_setting.dart';
-import '../models/item.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/models/alert_setting.dart';
+import 'package:aelmamclinic/models/item.dart';
 
 /// يجمع إحصاءات حيّة لتعبئة بطاقات Hero في لوحة الإحصاءات.
 class StatisticsProvider extends ChangeNotifier {

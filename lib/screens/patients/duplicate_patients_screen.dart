@@ -6,14 +6,14 @@ import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
-import '../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../models/patient.dart';
-import '../../models/patient_service.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'view_patient_screen.dart';
 import 'edit_patient_screen.dart';
 
@@ -515,7 +515,7 @@ class _DuplicatePatientsScreenState extends State<DuplicatePatientsScreen> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(.75),
+                                        .withValues(alpha: .75),
                                   ),
                                 ),
                                 trailing: IconButton(
@@ -593,7 +593,7 @@ class _DuplicatePatientsScreenState extends State<DuplicatePatientsScreen> {
                                               .map((s) => Chip(
                                                     backgroundColor:
                                                         kPrimaryColor
-                                                            .withOpacity(.10),
+                                                            .withValues(alpha: .10),
                                                     label: Text(
                                                         '${s.serviceName} • ${s.serviceCost.toStringAsFixed(2)}'),
                                                   ))

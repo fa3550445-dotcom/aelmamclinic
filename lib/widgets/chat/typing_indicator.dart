@@ -17,8 +17,8 @@
 
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class TypingIndicator extends StatefulWidget {
   /// القائمة الموحدة للأسماء/الإيميلات.
@@ -151,7 +151,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
               text: typingText,
               textStyle: widget.textStyle ??
                   TextStyle(
-                    color: scheme.onSurface.withOpacity(.80),
+                    color: scheme.onSurface.withValues(alpha: .80),
                     fontWeight: FontWeight.w800,
                     fontSize: 13.5,
                   ),
@@ -159,7 +159,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
           )
               : Container(
             decoration: BoxDecoration(
-              color: scheme.surface.withOpacity(.6),
+              color: scheme.surface.withValues(alpha: .6),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: scheme.outlineVariant),
             ),
@@ -172,7 +172,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
               text: typingText,
               textStyle: widget.textStyle ??
                   TextStyle(
-                    color: scheme.onSurface.withOpacity(.80),
+                    color: scheme.onSurface.withValues(alpha: .80),
                     fontWeight: FontWeight.w800,
                     fontSize: 13.5,
                   ),
@@ -277,11 +277,11 @@ class _DotsRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _Dot(anim: a1, size: size, color: base.withOpacity(.85)),
+        _Dot(anim: a1, size: size, color: base.withValues(alpha: .85)),
         SizedBox(width: size * .6),
-        _Dot(anim: a2, size: size, color: base.withOpacity(.7)),
+        _Dot(anim: a2, size: size, color: base.withValues(alpha: .7)),
         SizedBox(width: size * .6),
-        _Dot(anim: a3, size: size, color: base.withOpacity(.55)),
+        _Dot(anim: a3, size: size, color: base.withValues(alpha: .55)),
       ],
     );
   }
@@ -314,7 +314,7 @@ class _Dot extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(.35),
+                    color: color.withValues(alpha: .35),
                     blurRadius: 4 * anim.value,
                     spreadRadius: .2,
                   ),

@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui show TextDirection;
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../models/doctor.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 import 'edit_doctor_screen.dart';
 
 class ViewDoctorScreen extends StatelessWidget {
@@ -53,7 +53,7 @@ class ViewDoctorScreen extends StatelessWidget {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         padding: const EdgeInsets.all(14),
@@ -75,7 +75,7 @@ class ViewDoctorScreen extends StatelessWidget {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
-                                    .withOpacity(.7),
+                                    .withValues(alpha: .7),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -160,7 +160,7 @@ class _InfoRow extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -169,7 +169,7 @@ class _InfoRow extends StatelessWidget {
         title: Text(
           label,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
             fontWeight: FontWeight.w700,
           ),
         ),

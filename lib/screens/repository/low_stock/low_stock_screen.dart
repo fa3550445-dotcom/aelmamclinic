@@ -3,9 +3,9 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../models/item.dart';
-import '../../../providers/repository_provider.dart';
-import '../purchases_consumptions/new_purchase_screen.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
+import 'package:aelmamclinic/screens/repository/purchases_consumptions/new_purchase_screen.dart';
 
 /*──────── لوحة ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);
@@ -142,7 +142,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       label: const Text('الحرِجة فقط'),
                       selected: _criticalOnly,
                       onSelected: (v) => setState(() => _criticalOnly = v),
-                      selectedColor: Colors.red.withOpacity(.12),
+                      selectedColor: Colors.red.withValues(alpha: .12),
                       checkmarkColor: Colors.red,
                     ),
                     _SortDropdown(
@@ -188,10 +188,10 @@ class _HeaderStats extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -237,9 +237,9 @@ class _StatPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: c.withOpacity(.08),
+          color: c.withValues(alpha: .08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: c.withOpacity(.25)),
+          border: Border.all(color: c.withValues(alpha: .25)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -269,7 +269,7 @@ class _SortDropdown extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: DropdownButton<String>(
@@ -302,7 +302,7 @@ class _EmptyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
       ),
       child: Text(message, style: const TextStyle(fontWeight: FontWeight.w700)),
     );
@@ -323,11 +323,11 @@ class _ItemCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: (critical ? Colors.red : Colors.orange).withOpacity(.25),
+          color: (critical ? Colors.red : Colors.orange).withValues(alpha: .25),
         ),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(.05),
+              color: Colors.black.withValues(alpha: .05),
               blurRadius: 8,
               offset: const Offset(0, 4)),
         ],
@@ -337,7 +337,7 @@ class _ItemCard extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         leading: CircleAvatar(
           backgroundColor:
-              (critical ? Colors.red : Colors.orange).withOpacity(.12),
+              (critical ? Colors.red : Colors.orange).withValues(alpha: .12),
           child: Icon(
             critical ? Icons.error_outline : Icons.warning_amber_outlined,
             color: critical ? Colors.red : Colors.orange,

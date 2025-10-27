@@ -5,8 +5,8 @@ import 'package:aelmamclinic/core/theme.dart';
 import 'package:aelmamclinic/core/neumorphism.dart';
 import 'package:aelmamclinic/core/validators.dart';
 
-import '../../services/db_service.dart';
-import '../../models/drug.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/models/drug.dart';
 
 class NewDrugScreen extends StatefulWidget {
   final Drug? initialDrug; // إن كانت موجودة → وضع تعديل

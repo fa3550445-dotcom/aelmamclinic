@@ -15,8 +15,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:flutter/material.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 enum AttachmentUploadStatus { queued, uploading, uploaded, failed }
 
@@ -171,7 +171,7 @@ class AttachmentChip extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: scheme.onSurface.withOpacity(.7),
+                                  color: scheme.onSurface.withValues(alpha: .7),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12.5,
                                 ),
@@ -195,8 +195,8 @@ class AttachmentChip extends StatelessWidget {
                           style: IconButton.styleFrom(
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-                            foregroundColor: scheme.onSurface.withOpacity(.75),
-                            disabledForegroundColor: scheme.onSurface.withOpacity(.35),
+                            foregroundColor: scheme.onSurface.withValues(alpha: .75),
+                            disabledForegroundColor: scheme.onSurface.withValues(alpha: .35),
                           ),
                         ),
                       ),
@@ -254,7 +254,7 @@ class AttachmentChip extends StatelessWidget {
   void _defaultPreview(BuildContext context, ImageProvider img) {
     showDialog<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(.85),
+      barrierColor: Colors.black.withValues(alpha: .85),
       builder: (_) {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -295,16 +295,16 @@ class _ThumbnailBox extends StatelessWidget {
     Color borderColor;
     switch (status) {
       case AttachmentUploadStatus.failed:
-        borderColor = scheme.error.withOpacity(.65);
+        borderColor = scheme.error.withValues(alpha: .65);
         break;
       case AttachmentUploadStatus.uploaded:
-        borderColor = kPrimaryColor.withOpacity(.55);
+        borderColor = kPrimaryColor.withValues(alpha: .55);
         break;
       case AttachmentUploadStatus.uploading:
-        borderColor = kPrimaryColor.withOpacity(.35);
+        borderColor = kPrimaryColor.withValues(alpha: .35);
         break;
       case AttachmentUploadStatus.queued:
-        borderColor = scheme.outline.withOpacity(.35);
+        borderColor = scheme.outline.withValues(alpha: .35);
         break;
     }
 
@@ -322,7 +322,7 @@ class _ThumbnailBox extends StatelessWidget {
             color: scheme.surfaceContainerHighest,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.06),
+                color: Colors.black.withValues(alpha: .06),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               )
@@ -336,14 +336,14 @@ class _ThumbnailBox extends StatelessWidget {
             errorBuilder: (_, __, ___) {
               return Icon(
                 Icons.broken_image_rounded,
-                color: scheme.onSurface.withOpacity(.45),
+                color: scheme.onSurface.withValues(alpha: .45),
                 size: size * .55,
               );
             },
           )
               : Icon(
             Icons.image_outlined,
-            color: scheme.onSurface.withOpacity(.45),
+            color: scheme.onSurface.withValues(alpha: .45),
             size: size * .55,
           ),
         ),

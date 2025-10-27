@@ -14,9 +14,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../providers/auth_provider.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
 
 class AuditLogsScreen extends StatefulWidget {
   const AuditLogsScreen({super.key});
@@ -233,7 +233,7 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: opColor(e.op).withOpacity(.12),
+                            color: opColor(e.op).withValues(alpha: .12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -265,7 +265,7 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                     Text(
                       'المنفّذ: ${e.actorEmail ?? e.actorUid ?? 'غير معروف'}',
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.7),
+                        color: scheme.onSurface.withValues(alpha: .7),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -273,7 +273,7 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                     Text(
                       _dateTimeFmt.format(e.createdAt),
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.6),
+                        color: scheme.onSurface.withValues(alpha: .6),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -356,7 +356,7 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.10),
+                                  color: kPrimaryColor.withValues(alpha: .10),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 padding: const EdgeInsets.all(8),
@@ -394,7 +394,7 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.10),
+                                  color: kPrimaryColor.withValues(alpha: .10),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 padding: const EdgeInsets.all(8),
@@ -669,7 +669,7 @@ class _AuditLogTile extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: _opColor(entry.op, scheme).withOpacity(.12),
+              color: _opColor(entry.op, scheme).withValues(alpha: .12),
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.all(10),
@@ -705,7 +705,7 @@ class _AuditLogTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.7),
+                    color: scheme.onSurface.withValues(alpha: .7),
                     fontWeight: FontWeight.w700,
                     fontSize: 12.5,
                   ),
@@ -719,7 +719,7 @@ class _AuditLogTile extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: _opColor(entry.op, scheme).withOpacity(.12),
+                  color: _opColor(entry.op, scheme).withValues(alpha: .12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding:
@@ -737,7 +737,7 @@ class _AuditLogTile extends StatelessWidget {
               Text(
                 dateTimeFmt.format(entry.createdAt),
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(.6),
+                  color: scheme.onSurface.withValues(alpha: .6),
                   fontSize: 11.5,
                 ),
               ),
@@ -772,7 +772,7 @@ class _JsonBlock extends StatelessWidget {
             title,
             textAlign: TextAlign.right,
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.85),
+              color: scheme.onSurface.withValues(alpha: .85),
               fontWeight: FontWeight.w900,
               fontSize: 14.5,
             ),
@@ -780,7 +780,7 @@ class _JsonBlock extends StatelessWidget {
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withOpacity(.5),
+              color: scheme.surfaceContainerHighest.withValues(alpha: .5),
               borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.all(10),
@@ -790,7 +790,7 @@ class _JsonBlock extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 12.5,
-                color: scheme.onSurface.withOpacity(.95),
+                color: scheme.onSurface.withValues(alpha: .95),
               ),
             ),
           ),

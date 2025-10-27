@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 import 'employee_loan_create_screen.dart';
 
 class EmployeeLoansOfEmployeeScreen extends StatefulWidget {
@@ -243,7 +243,7 @@ class _EmployeeLoansOfEmployeeScreenState
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -345,7 +345,7 @@ class _EmployeeLoansOfEmployeeScreenState
                               child: Text(
                                 'لا توجد سلف لهذا الموظف',
                                 style: TextStyle(
-                                  color: scheme.onSurface.withOpacity(.6),
+                                  color: scheme.onSurface.withValues(alpha: .6),
                                   fontSize: 15.5,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -398,7 +398,7 @@ class _EmployeeLoansOfEmployeeScreenState
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             color: scheme.onSurface
-                                                .withOpacity(.75),
+                                                .withValues(alpha: .75),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -447,7 +447,7 @@ class _StatChip extends StatelessWidget {
           Text(
             '$label: ',
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.75),
+              color: scheme.onSurface.withValues(alpha: .75),
               fontWeight: FontWeight.w700,
             ),
           ),

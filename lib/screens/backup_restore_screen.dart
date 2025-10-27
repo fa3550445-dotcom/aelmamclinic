@@ -10,11 +10,11 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../models/storage_type.dart';
-import '../services/backup_restore_service.dart';
+import 'package:aelmamclinic/models/storage_type.dart';
+import 'package:aelmamclinic/services/backup_restore_service.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
   const BackupRestoreScreen({super.key});
@@ -271,7 +271,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 icon: const Icon(Icons.share_rounded),
                 onPressed: () async {
                   try {
-                    await Share.shareXFiles([XFile(_lastBackupPath!)],
+                    await SharePlus.instance.shareXFiles(files: [XFile(_lastBackupPath!)],
                         text: 'نسخة ELMAM Clinic');
                   } catch (e) {
                     _showSnack('تعذّرت المشاركة: $e', error: true);
@@ -337,7 +337,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                                       label: 'مشاركة',
                                       onPressed: () async {
                                         try {
-                                          await Share.shareXFiles(
+                                          await SharePlus.instance.shareXFiles(
                                               [XFile(_lastBackupPath!)],
                                               text: 'نسخة ELMAM Clinic');
                                         } catch (e) {
@@ -407,7 +407,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                         Text(
                           'ملاحظة: في وضع "استبدال كامل" سيتم حذف البيانات الحالية واستبدالها بالكامل.',
                           style: TextStyle(
-                              color: scheme.onSurface.withOpacity(.75)),
+                              color: scheme.onSurface.withValues(alpha: .75)),
                         ),
                       ],
                     ),
@@ -419,7 +419,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               if (_busy)
                 Positioned.fill(
                   child: Container(
-                    color: scheme.scrim.withOpacity(.06),
+                    color: scheme.scrim.withValues(alpha: .06),
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),

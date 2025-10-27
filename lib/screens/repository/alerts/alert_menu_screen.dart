@@ -3,9 +3,9 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /// القائمة الفرعيّة لتنبيهات «قرب النفاد» بتصميم موحّد مع شاشات TBIAN.
 class AlertMenuScreen extends StatelessWidget {
@@ -53,7 +53,7 @@ class AlertMenuScreen extends StatelessWidget {
                 Text(
                   'اضبط تنبيهات انخفاض الكميات، واستعرض التنبيهات الحالية بسرعة.',
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.75),
+                    color: scheme.onSurface.withValues(alpha: .75),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -120,7 +120,7 @@ class _MenuTile extends StatelessWidget {
             // أيقونة داخل حاوية بلون أساسي خفيف (مطابق للنمط في بقية الشاشات)
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -149,7 +149,7 @@ class _MenuTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.75),
+                        color: scheme.onSurface.withValues(alpha: .75),
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -163,7 +163,7 @@ class _MenuTile extends StatelessWidget {
             // سهم تنقل خفيف
             Icon(
               Icons.chevron_left_rounded,
-              color: scheme.onSurface.withOpacity(.8),
+              color: scheme.onSurface.withValues(alpha: .8),
             ),
           ],
         ),

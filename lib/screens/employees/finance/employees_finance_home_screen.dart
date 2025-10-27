@@ -6,8 +6,8 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 /*── شاشات الوجهات ─*/
 import 'employee_loan_home_screen.dart';
@@ -149,7 +149,7 @@ class _ActionCard extends StatelessWidget {
               // أيقونة داخل حاوية أولية شبه شفافة
               Container(
                 decoration: BoxDecoration(
-                  color: kPrimaryColor.withOpacity(.10),
+                  color: kPrimaryColor.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 padding: const EdgeInsets.all(10),

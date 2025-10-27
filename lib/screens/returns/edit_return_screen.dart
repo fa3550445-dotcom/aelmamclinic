@@ -4,12 +4,12 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../models/return_entry.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'list_returns_screen.dart';
 
 class EditReturnScreen extends StatefulWidget {
