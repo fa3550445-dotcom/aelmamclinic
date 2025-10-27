@@ -204,6 +204,17 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
     Navigator.of(context).pop<String?>(id);
   }
 
+  String _resolveTextContent(ChatMessage message) {
+    final body = message.body;
+    if (body != null) {
+      final trimmed = body.trim();
+      if (trimmed.isNotEmpty) {
+        return trimmed;
+      }
+    }
+    return message.text;
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasQuery = _controller.text.trim().isNotEmpty;
@@ -307,7 +318,7 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
         final isImage = m.kind == ChatMessageKind.image;
         final text = isImage
             ? (m.body?.trim().isNotEmpty == true ? m.body!.trim() : '📷 صورة')
-            : (m.body ?? m.text);
+            : _resolveTextContent(m);
 
         final borderColor =
         isSelected ? kPrimaryColor : Theme.of(context).dividerColor;

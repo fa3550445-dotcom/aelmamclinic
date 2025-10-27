@@ -140,11 +140,12 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
     if (!mounted) return;
     if (doctor != null) {
       setState(() {
+        final selectedName = 'د/${doctor.name}';
         _linkedDoctor = doctor;
         _doctorRestricted = true;
         _selectedDoctorId = doctor.id;
-        _selectedDoctorName = 'د/${doctor.name}';
-        _doctorCtrl.text = _selectedDoctorName ?? '';
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
       });
     }
   }
@@ -414,9 +415,10 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
     if (linked != null && linked.id != null && mounted) {
       setState(() {
         if (_selectedDoctorId == null) {
+          final selectedName = 'د/${linked.name}';
           _selectedDoctorId = linked!.id;
-          _selectedDoctorName = 'د/${linked.name}';
-          _doctorCtrl.text = _selectedDoctorName!;
+          _selectedDoctorName = selectedName;
+          _doctorCtrl.text = selectedName;
         }
       });
     }
@@ -434,9 +436,10 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
   Future<void> _selectDoctorForRadLab() async {
     if (_doctorRestricted && _linkedDoctor != null) {
       setState(() {
+        final selectedName = 'د/${_linkedDoctor!.name}';
         _selectedDoctorId = _linkedDoctor!.id;
-        _selectedDoctorName = 'د/${_linkedDoctor!.name}';
-        _doctorCtrl.text = _selectedDoctorName ?? '';
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
       });
       return;
     }
@@ -511,9 +514,10 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
 
     if (chosen != null) {
       setState(() {
+        final selectedName = 'د/${chosen.name}';
         _selectedDoctorId = chosen.id;
-        _selectedDoctorName = 'د/${chosen.name}';
-        _doctorCtrl.text = _selectedDoctorName!;
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
       });
     }
   }

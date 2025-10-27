@@ -429,7 +429,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     _showProgress();
     try {
       // نص تم تحويله (إن وجد)
-      final rawTxt = (msg.body ?? msg.text).trim();
+      final rawTxt = _extractForwardText(msg);
       final hasText = rawTxt.isNotEmpty;
 
       // مرفقات (إن وُجدت)
@@ -479,6 +479,17 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       Navigator.of(context).maybePop();
       _snack('تعذّر إعادة التوجيه: $e');
     }
+  }
+
+  String _extractForwardText(ChatMessage msg) {
+    final body = msg.body;
+    if (body != null) {
+      final trimmed = body.trim();
+      if (trimmed.isNotEmpty) {
+        return trimmed;
+      }
+    }
+    return msg.text.trim();
   }
 
   Future<File> _downloadTempFile(String url) async {
