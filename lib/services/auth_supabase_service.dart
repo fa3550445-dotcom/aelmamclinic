@@ -805,13 +805,20 @@ class AuthSupabaseService {
     required String clinicName,
     required String ownerEmail,
     required String ownerPassword,
+    String? ownerRole,
   }) =>
-      registerOwner(clinicName: clinicName, email: ownerEmail, password: ownerPassword);
+      registerOwner(
+        clinicName: clinicName,
+        email: ownerEmail,
+        password: ownerPassword,
+        ownerRole: ownerRole,
+      );
 
   Future<void> registerOwner({
     required String clinicName,
     required String email,
     required String password,
+    String? ownerRole,
   }) async {
     if (!isSuperAdmin) {
       dev.log('registerOwner called by non-super admin. This may fail due to RLS.');
@@ -845,6 +852,10 @@ class AuthSupabaseService {
       'ownerPassword': password,
     };
 
+    if (ownerRole != null && ownerRole.isNotEmpty) {
+      body['owner_role'] = ownerRole;
+    }
+
     try {
       final data = await _invokeTryMany(
         names: const [
@@ -865,13 +876,16 @@ class AuthSupabaseService {
     }
 
     try {
+      final params = <String, dynamic>{
+        'clinic_name': clinicName,
+        'owner_email': email,
+      };
+      if (ownerRole != null && ownerRole.isNotEmpty) {
+        params['owner_role'] = ownerRole;
+      }
       final res = await _client.rpc(
         'admin_bootstrap_clinic_for_email',
-        params: {
-          'clinic_name': clinicName,
-          'owner_email': email,
-          'owner_role': 'owner',
-        },
+        params: params,
       );
       final accountId = res?.toString().trim();
       if (accountId == null || accountId.isEmpty || accountId == 'null') {
