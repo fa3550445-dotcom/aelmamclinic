@@ -742,6 +742,10 @@ CREATE OR REPLACE VIEW public.clinics AS
 SELECT id, name, frozen, created_at
 FROM public.accounts;
 
+REVOKE ALL ON TABLE public.clinics FROM PUBLIC;
+GRANT SELECT ON TABLE public.clinics TO authenticated;
+GRANT SELECT ON TABLE public.clinics TO service_role;
+
 -- إجراءات خدمية --------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.admin_attach_employee(p_account uuid, p_user_uid uuid, p_role text DEFAULT 'employee')
 RETURNS void
