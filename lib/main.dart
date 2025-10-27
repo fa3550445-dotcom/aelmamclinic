@@ -78,6 +78,9 @@ void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
+    // تحميل إعدادات Supabase المخصّصة قبل التهيئة.
+    await AppConstants.loadRuntimeOverrides();
+
     // Supabase
     await Supabase.initialize(
       url: AppConstants.supabaseUrl,

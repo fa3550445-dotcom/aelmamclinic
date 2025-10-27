@@ -3,8 +3,10 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,6 +22,7 @@ import '../../core/tbian_ui.dart';
 
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/db_service.dart';
 import '../../services/export_service.dart';
 import '../../services/save_file_service.dart';
@@ -42,11 +45,15 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
 
   bool _isLoading = false;
   Timer? _debounce;
+  int? _activeDoctorId;
+  bool _doctorRestricted = false;
 
   @override
   void initState() {
     super.initState();
-    _loadPatients();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _resolveDoctorAndLoad();
+    });
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -62,14 +69,35 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
     _debounce = Timer(const Duration(milliseconds: 250), _filterPatients);
   }
 
-  Future<void> _loadPatients() async {
+  Future<void> _resolveDoctorAndLoad() async {
     setState(() => _isLoading = true);
     try {
-      final patients = await DBService.instance.getAllPatients();
+      final auth = context.read<AuthProvider>();
+      final uid = auth.uid;
+      int? doctorId;
+      if (uid != null && uid.isNotEmpty) {
+        final doctor = await DBService.instance.getDoctorByUserUid(uid);
+        doctorId = doctor?.id;
+      }
+      if (!mounted) return;
+      _activeDoctorId = doctorId;
+      _doctorRestricted = doctorId != null;
+      await _loadPatients(showSpinner: false);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadPatients({bool showSpinner = true}) async {
+    if (showSpinner) {
+      setState(() => _isLoading = true);
+    }
+    try {
+      final patients = await DBService.instance
+          .getAllPatients(doctorId: _activeDoctorId);
       final db = await DBService.instance.database;
 
-      final ids =
-          patients.where((p) => p.id != null).map((p) => p.id!).toList();
+      final ids = patients.where((p) => p.id != null).map((p) => p.id!).toList();
       final svcMap = <int, List<PatientService>>{};
 
       if (ids.isNotEmpty) {

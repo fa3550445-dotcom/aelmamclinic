@@ -1,5 +1,8 @@
 // lib/core/constants.dart
 import 'package:flutter/foundation.dart';
+import 'constants_supabase_override_loader_stub.dart'
+    if (dart.library.io) 'constants_supabase_override_loader_io.dart'
+    as override_loader;
 
 class AppConstants {
   AppConstants._();
@@ -9,19 +12,82 @@ class AppConstants {
   // -------------------- Supabase --------------------
   static const String _envSupabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://wiypiofuyrayywciovoo.supabase.co',
+    defaultValue: '',
   );
   static const String _envSupabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeXBpb2Z1eXJheXl3Y2lvdm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NjczOTcsImV4cCI6MjA3MDE0MzM5N30.TwveOqJJfM3eDVwsxaL76YkyVAAzZxeMVxGzLT8EC3E',
+    defaultValue: '',
   );
 
-  static String get supabaseUrl =>
-      _requireEnv(_envSupabaseUrl, 'SUPABASE_URL');
+  static String? _overrideSupabaseUrl;
+  static String? _overrideSupabaseAnonKey;
+  static bool _overridesLoaded = false;
 
-  static String get supabaseAnonKey =>
-      _requireEnv(_envSupabaseAnonKey, 'SUPABASE_ANON_KEY');
+  static String get supabaseUrl {
+    final override = _overrideSupabaseUrl?.trim();
+    if (override != null && override.isNotEmpty) {
+      return override;
+    }
+    return _requireEnv(_envSupabaseUrl, 'SUPABASE_URL');
+  }
+
+  static String get supabaseAnonKey {
+    final override = _overrideSupabaseAnonKey?.trim();
+    if (override != null && override.isNotEmpty) {
+      return override;
+    }
+    return _requireEnv(_envSupabaseAnonKey, 'SUPABASE_ANON_KEY');
+  }
+
+  /// Loads runtime overrides for Supabase configuration from the platform
+  /// data directory (e.g. `C:\aelmam_clinic\config.json` on Windows).
+  ///
+  /// The JSON file supports the keys `supabaseUrl` and `supabaseAnonKey`.
+  /// Values in this file take precedence over the compile-time defaults but
+  /// are still superseded by `--dart-define` values when provided.
+  static Future<void> loadRuntimeOverrides() async {
+    if (_overridesLoaded) {
+      return;
+    }
+    _overridesLoaded = true;
+
+    if (kIsWeb) {
+      return;
+    }
+
+    final result = await override_loader.loadSupabaseRuntimeOverrides(
+      windowsDataDir: windowsDataDir,
+      legacyWindowsDataDir: legacyWindowsDataDir,
+      linuxDataDir: linuxDataDir,
+      macOsDataDir: macOsDataDir,
+      androidDataDir: androidDataDir,
+      iosLogicalDataDir: iosLogicalDataDir,
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    final (
+      supabaseUrl: url,
+      supabaseAnonKey: anonKey,
+      source: source,
+    ) = result;
+
+    if (url != null && url.isNotEmpty) {
+      _overrideSupabaseUrl = url;
+    }
+    if (anonKey != null && anonKey.isNotEmpty) {
+      _overrideSupabaseAnonKey = anonKey;
+    }
+
+    if (source != null && source.isNotEmpty) {
+      debugLog(
+        'Loaded Supabase config overrides from $source',
+        tag: 'CONFIG',
+      );
+    }
+  }
 
   // -------------------- مخازن محلية --------------------
   static const String windowsDataDir = r'C:\aelmam_clinic';

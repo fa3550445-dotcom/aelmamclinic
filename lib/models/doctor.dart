@@ -1,16 +1,16 @@
 // lib/models/doctor.dart
+//
+// نموذج الطبيب: يدعم تخزين SQLite (camelCase) ومزامنة Supabase (snake_case).
 
-/// موديل الطبيب.
-/// - محليًا (SQLite): مفاتيح camelCase (يتوافق مع DBService).
-/// - سحابيًا (Supabase/Postgres): مفاتيح snake_case (يُعالَج تلقائيًا عبر SyncService).
 class Doctor {
   static const String table = 'doctors';
 
-  /// تعريف SQL اختياري (محلي). يستخدم camelCase ليتطابق مع DBService.
+  /// مخطط SQLite المحلي (مستخدم من DBService).
   static const String createTable = '''
   CREATE TABLE IF NOT EXISTS $table (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     employeeId     INTEGER,
+    userUid        TEXT,
     name           TEXT,
     specialization TEXT,
     phoneNumber    TEXT,
@@ -22,17 +22,19 @@ class Doctor {
   ''';
 
   final int? id;
-  final int? employeeId;        // ربط الطبيب بالموظف (اختياري)
+  final int? employeeId;
+  final String? userUid; // Supabase auth.users.id
   final String name;
-  final String specialization;  // التخصص
+  final String specialization;
   final String phoneNumber;
-  final String startTime;       // نص (HH:mm أو ISO)
-  final String endTime;         // نص (HH:mm أو ISO)
-  final int printCounter;       // عدّاد الطباعة (محلي فقط)
+  final String startTime;
+  final String endTime;
+  final int printCounter;
 
-  Doctor({
+  const Doctor({
     this.id,
     this.employeeId,
+    this.userUid,
     required this.name,
     required this.specialization,
     required this.phoneNumber,
@@ -41,7 +43,6 @@ class Doctor {
     this.printCounter = 0,
   });
 
-  /* ── Helpers آمنة ── */
   static int? _toIntN(dynamic v) {
     if (v == null) return null;
     if (v is num) return v.toInt();
@@ -54,85 +55,94 @@ class Doctor {
     if (v == null) return fallback;
     final s = v.toString();
     return s.isEmpty ? fallback : s;
+    }
+
+  static String? _toStrN(dynamic v) {
+    final s = _toStr(v, '');
+    return s.isEmpty ? null : s;
   }
 
-  /* ── التحويلات ── */
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'employeeId': employeeId,
-    'name': name,
-    'specialization': specialization,
-    'phoneNumber': phoneNumber,
-    'startTime': startTime,
-    'endTime': endTime,
-    'printCounter': printCounter,
-  };
+        'id': id,
+        'employeeId': employeeId,
+        'userUid': userUid,
+        'name': name,
+        'specialization': specialization,
+        'phoneNumber': phoneNumber,
+        'startTime': startTime,
+        'endTime': endTime,
+        'printCounter': printCounter,
+      };
 
   Map<String, dynamic> toJson() => toMap();
 
-  /// يدعم camel + snake (للصفوف القادمة من السحابة عبر SyncService.pull()).
   factory Doctor.fromMap(Map<String, dynamic> map) => Doctor(
-    id: _toIntN(map['id']),
-    employeeId: _toIntN(map['employeeId'] ?? map['employee_id']),
-    name: _toStr(map['name']),
-    specialization: _toStr(map['specialization']),
-    phoneNumber: _toStr(map['phoneNumber'] ?? map['phone_number']),
-    startTime: _toStr(map['startTime'] ?? map['start_time']),
-    endTime: _toStr(map['endTime'] ?? map['end_time']),
-    printCounter: _toInt0(map['printCounter'] ?? map['print_counter']),
-  );
+        id: _toIntN(map['id']),
+        employeeId: _toIntN(map['employeeId'] ?? map['employee_id']),
+        userUid: _toStrN(map['userUid'] ?? map['user_uid']),
+        name: _toStr(map['name']),
+        specialization: _toStr(map['specialization']),
+        phoneNumber: _toStr(map['phoneNumber'] ?? map['phone_number']),
+        startTime: _toStr(map['startTime'] ?? map['start_time']),
+        endTime: _toStr(map['endTime'] ?? map['end_time']),
+        printCounter: _toInt0(map['printCounter'] ?? map['print_counter']),
+      );
 
   factory Doctor.fromJson(Map<String, dynamic> json) => Doctor.fromMap(json);
 
   Doctor copyWith({
     int? id,
     int? employeeId,
+    String? userUid,
     String? name,
     String? specialization,
     String? phoneNumber,
     String? startTime,
     String? endTime,
     int? printCounter,
-  }) {
-    return Doctor(
-      id: id ?? this.id,
-      employeeId: employeeId ?? this.employeeId,
-      name: name ?? this.name,
-      specialization: specialization ?? this.specialization,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      printCounter: printCounter ?? this.printCounter,
-    );
-  }
+  }) =>
+      Doctor(
+        id: id ?? this.id,
+        employeeId: employeeId ?? this.employeeId,
+        userUid: userUid ?? this.userUid,
+        name: name ?? this.name,
+        specialization: specialization ?? this.specialization,
+        phoneNumber: phoneNumber ?? this.phoneNumber,
+        startTime: startTime ?? this.startTime,
+        endTime: endTime ?? this.endTime,
+        printCounter: printCounter ?? this.printCounter,
+      );
 
   @override
   String toString() =>
-      'Doctor(id:$id, empId:$employeeId, name:$name, spec:$specialization, printCounter:$printCounter)';
+      'Doctor(id:$id, employeeId:$employeeId, userUid:$userUid, name:$name, specialization:$specialization, printCounter:$printCounter)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Doctor &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              employeeId == other.employeeId &&
-              name == other.name &&
-              specialization == other.specialization &&
-              phoneNumber == other.phoneNumber &&
-              startTime == other.startTime &&
-              endTime == other.endTime &&
-              printCounter == other.printCounter;
+      other is Doctor &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          employeeId == other.employeeId &&
+          userUid == other.userUid &&
+          name == other.name &&
+          specialization == other.specialization &&
+          phoneNumber == other.phoneNumber &&
+          startTime == other.startTime &&
+          endTime == other.endTime &&
+          printCounter == other.printCounter;
 
   @override
   int get hashCode => Object.hash(
-    id,
-    employeeId,
-    name,
-    specialization,
-    phoneNumber,
-    startTime,
-    endTime,
-    printCounter,
-  );
+        id,
+        employeeId,
+        userUid,
+        name,
+        specialization,
+        phoneNumber,
+        startTime,
+        endTime,
+        printCounter,
+      );
 }
+

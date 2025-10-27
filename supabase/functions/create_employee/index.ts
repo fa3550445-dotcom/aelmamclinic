@@ -1,6 +1,6 @@
 // supabase/functions/create_employee/index.ts
 // ينشئ موظفًا جديدًا داخل حساب معيّن:
-// 1) تحقّق أن المستدعي مسجّل دخول ومُفوّض (superAdmin).
+// 1) تحقّق أن المستدعي مسجّل دخول ومُفوّض (سوبر أدمن أو مدير حساب).
 // 2) ينشئ مستخدم Auth.
 // 3) يربطه بالحساب في account_users.
 // 4) يُدرج صفًا في profiles بالـ role=employee (⚠️ مهم لرولز RLS).
@@ -46,27 +46,42 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userErr } = await authed.auth.getUser();
     if (userErr || !user) return json({ error: "unauthenticated" }, 401);
 
-    // السماح فقط لـ superAdmin (ويُفضّل غير معطّل)
-    const service = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-    const { data: meRole, error: roleErr } = await service
-      .from("account_users")
-      .select("role, disabled")
-      .eq("user_uid", user.id)
-      .maybeSingle();
-
-    if (roleErr) throw roleErr;
-    const roleValue = String(meRole?.role ?? "");
-    if (!meRole || roleValue.toLowerCase() !== "superadmin" || meRole.disabled === true) {
-      return json({ error: "forbidden" }, 403);
-    }
-
     // بيانات الإدخال
     const body = await req.json().catch(() => ({} as any));
     const { account_id, email, password } = body as {
-      account_id?: string; email?: string; password?: string;
+      account_id?: string;
+      email?: string;
+      password?: string | null;
     };
-    if (!account_id || !email || !password) {
+    if (!account_id || !email) {
       return json({ error: "missing fields" }, 400);
+    }
+
+    const service = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+    // السماح للسوبر أدمن أو مالكي الحساب ومدرائه
+    const { data: superFlag, error: superErr } = await authed.rpc("fn_is_super_admin");
+    if (superErr) throw superErr;
+
+    let canManage = superFlag === true;
+    if (!canManage) {
+      const { data: managerRow, error: managerErr } = await service
+        .from("account_users")
+        .select("role, disabled")
+        .eq("account_id", account_id)
+        .eq("user_uid", user.id)
+        .maybeSingle();
+      if (managerErr) throw managerErr;
+
+      const roleValue = String(managerRow?.role ?? "").toLowerCase();
+      const allowedRoles = new Set(["owner", "admin", "superadmin"]);
+      if (managerRow && allowedRoles.has(roleValue) && managerRow.disabled !== true) {
+        canManage = true;
+      }
+    }
+
+    if (!canManage) {
+      return json({ error: "forbidden" }, 403);
     }
 
     // تحقّق من وجود الحساب وأنه غير مجمّد
@@ -80,62 +95,124 @@ Deno.serve(async (req) => {
     if (accountRow.frozen === true) return json({ error: "account is frozen" }, 409);
 
     // (1) إنشاء المستخدم عبر Admin API
-    const { data: created, error: adminErr } = await service.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
+    const normalizedPassword = typeof password === "string" && password.length >= 6 ? password : null;
+    let employeeUid: string | null = null;
+    let newlyCreated = false;
+    let sourceUser: {
+      id?: string;
+      app_metadata?: Record<string, unknown>;
+      user_metadata?: Record<string, unknown>;
+    } | null = null;
 
-    // في حال البريد موجود مسبقًا
-    if (adminErr) {
-      const msg = adminErr.message ?? String(adminErr);
-      if (/already exists|registered/i.test(msg)) {
-        return json({ error: "user already exists" }, 409);
-      }
-      return json({ error: msg }, 400);
-    }
-
-    const employeeUid = created.user?.id;
-    if (!employeeUid) return json({ error: "createUser returned no id" }, 500);
-
-    // (2) ربطه بالحساب كموظف في account_users
-    const { error: linkErr } = await service
-      .from("account_users")
-      .insert({
-        account_id,
-        user_uid: employeeUid,
-        role: "employee",
-        disabled: false,
+    if (normalizedPassword) {
+      const { data: created, error: adminErr } = await service.auth.admin.createUser({
+        email,
+        password: normalizedPassword,
+        email_confirm: true,
       });
 
-    if (linkErr) {
-      // تراجع عن إنشاء المستخدم إذا فشل الربط
-      await service.auth.admin.deleteUser(employeeUid).catch(() => {});
-      const msg = linkErr.message ?? String(linkErr);
-      const is409 = /duplicate key|unique/i.test(msg);
-      return json({ error: msg }, is409 ? 409 : 400);
+      if (adminErr) {
+        const msg = adminErr.message ?? String(adminErr);
+        if (!/already exists|registered/i.test(msg)) {
+          return json({ error: msg }, 400);
+        }
+      } else if (created?.user?.id) {
+        employeeUid = created.user.id;
+        newlyCreated = true;
+        sourceUser = created.user;
+      }
     }
 
-    // (3) إدراج صف في profiles (⚠️ مهم لعمل RLS)
-    const { error: profErr } = await service.from("profiles").insert({
+    if (!employeeUid) {
+      const { data: existing, error: existingErr } = await service.auth.admin.getUserByEmail(email);
+      if (existingErr || !existing?.user?.id) {
+        if (normalizedPassword) {
+          return json({ error: existingErr?.message ?? "failed to reuse employee" }, 409);
+        }
+        return json({ error: "password required to create new user" }, 400);
+      }
+      employeeUid = existing.user.id;
+      sourceUser = existing.user;
+    }
+
+    if (!employeeUid) {
+      return json({ error: "failed to resolve employee id" }, 500);
+    }
+
+      const { data: existingLink, error: fetchLinkErr } = await service
+        .from("account_users")
+        .select("role, disabled, email")
+        .eq("account_id", account_id)
+        .eq("user_uid", employeeUid)
+        .maybeSingle();
+    if (fetchLinkErr) throw fetchLinkErr;
+
+    let insertedAccountLink = false;
+    if (!existingLink) {
+      const { error: linkErr } = await service
+        .from("account_users")
+        .insert({
+          account_id,
+          user_uid: employeeUid,
+          role: "employee",
+          disabled: false,
+          email,
+        });
+      if (linkErr) {
+        if (newlyCreated) {
+          await service.auth.admin.deleteUser(employeeUid).catch(() => {});
+        }
+        const msg = linkErr.message ?? String(linkErr);
+        const is409 = /duplicate key|unique/i.test(msg);
+        return json({ error: msg }, is409 ? 409 : 400);
+      }
+      insertedAccountLink = true;
+    } else if (existingLink.disabled === true) {
+      const { error: reactivateErr } = await service
+        .from("account_users")
+        .update({ disabled: false, role: existingLink.role ?? "employee", email })
+        .eq("account_id", account_id)
+        .eq("user_uid", employeeUid);
+      if (reactivateErr) {
+        if (newlyCreated) {
+          await service.auth.admin.deleteUser(employeeUid).catch(() => {});
+        }
+        return json({ error: reactivateErr.message ?? "failed to reactivate account user" }, 400);
+      }
+    } else if (existingLink.email !== email) {
+      await service
+        .from("account_users")
+        .update({ email })
+        .eq("account_id", account_id)
+        .eq("user_uid", employeeUid)
+        .catch(() => {});
+    }
+
+    // (3) إدراج أو تحديث صف في profiles (⚠️ مهم لعمل RLS)
+    const { error: profErr } = await service.from("profiles").upsert({
       id: employeeUid,
       role: "employee",
       account_id,
-    });
+    }, { onConflict: "id" });
     if (profErr) {
-      // تراجع شامل
-      await service.from("account_users").delete().match({ account_id, user_uid: employeeUid }).catch(() => {});
-      await service.auth.admin.deleteUser(employeeUid).catch(() => {});
-      return json({ error: profErr.message ?? "failed to insert profile" }, 500);
+      if (insertedAccountLink) {
+        await service.from("account_users").delete().match({ account_id, user_uid: employeeUid }).catch(() => {});
+      }
+      if (newlyCreated) {
+        await service.auth.admin.deleteUser(employeeUid).catch(() => {});
+      }
+      return json({ error: profErr.message ?? "failed to upsert profile" }, 500);
     }
 
     // (4) تحديث ميتاداتا المستخدم ليحمل account_id + role (اختياري لكنه مفيد على العميل)
+    const baseAppMeta = sourceUser?.app_metadata ?? {};
+    const baseUserMeta = sourceUser?.user_metadata ?? {};
     await service.auth.admin.updateUserById(employeeUid, {
-      app_metadata: { ...(created.user?.app_metadata ?? {}), account_id, role: "employee" },
-      user_metadata: { ...(created.user?.user_metadata ?? {}), account_id, role: "employee" },
+      app_metadata: { ...baseAppMeta, account_id, role: "employee" },
+      user_metadata: { ...baseUserMeta, account_id, role: "employee" },
     }).catch(() => {});
 
-    return json({ ok: true, user_uid: employeeUid });
+    return json({ ok: true, user_uid: employeeUid, reused: newlyCreated ? false : true });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     return json({ error: msg }, 500);

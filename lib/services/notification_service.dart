@@ -1,4 +1,5 @@
 // lib/services/notification_service.dart
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -68,106 +69,134 @@ class NotificationService {
       !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
 
   // -------- تهيئة --------
-  Future<void> initialize() async {
+  Future<void> initialize({int maxRetries = 3}) async {
     if (_initFuture != null) return _initFuture!;
-    _initFuture = _doInitialize();
-    return _initFuture!;
+    final retries = maxRetries < 1 ? 1 : maxRetries;
+    final future = _doInitialize(maxRetries: retries);
+    _initFuture = future;
+    try {
+      await future;
+    } catch (error, stackTrace) {
+      _initFuture = null;
+      _initialized = false;
+      debugPrint(
+        '🚫 NotificationService initialize() suppressed failure: $error\n$stackTrace',
+      );
+    }
   }
 
-  Future<void> _doInitialize() async {
+  Future<void> _doInitialize({required int maxRetries}) async {
     if (!_supportedPlatform) {
       debugPrint(
           '🔕 Notifications disabled on this platform (non-Android/iOS/macOS).');
       _initialized = false; // ستتجاهل show* النداءات لاحقًا
       return;
     }
-    try {
-      if (!_tzReady) {
-        try {
-          tz_data.initializeTimeZones();
-          final String timeZoneName = await _getLocalTimeZone();
-          tz.setLocalLocation(tz.getLocation(timeZoneName));
-          _tzReady = true;
-        } catch (e) {
-          debugPrint('⚠️ timezone init failed, fallback to UTC: $e');
-          tz_data.initializeTimeZones();
-          tz.setLocalLocation(tz.getLocation('UTC'));
-          _tzReady = true;
+    var attempt = 0;
+    while (true) {
+      attempt++;
+      try {
+        if (!_tzReady) {
+          try {
+            tz_data.initializeTimeZones();
+            final String timeZoneName = await _getLocalTimeZone();
+            tz.setLocalLocation(tz.getLocation(timeZoneName));
+            _tzReady = true;
+          } catch (e) {
+            debugPrint('⚠️ timezone init failed, fallback to UTC: $e');
+            tz_data.initializeTimeZones();
+            tz.setLocalLocation(tz.getLocation('UTC'));
+            _tzReady = true;
+          }
         }
-      }
 
-      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-      final darwinInit = DarwinInitializationSettings(
-        requestSoundPermission: true,
-        requestBadgePermission: true,
-        requestAlertPermission: true,
-        onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
-      );
-      final initSettings = InitializationSettings(
-        android: androidInit,
-        iOS: darwinInit,
-        macOS: darwinInit,
-      );
-
-      await _flnp.initialize(
-        initSettings,
-        onDidReceiveNotificationResponse: _onSelectNotification,
-        // 👇 مهم: ممرّر للتاب اللوفلي أعلاه لكي يعمل حتى بالخلفية
-        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-      );
-
-      if (Platform.isAndroid) {
-        final androidImpl = _flnp
-            .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-
-        // طلب صلاحية الإشعارات (Android 13+) — استدعاء ديناميكي لتوافق كل الإصدارات
-        try {
-          (androidImpl as dynamic)?.requestPermission?.call();
-        } catch (_) {}
-
-        // قناة الدردشة (مع صوت raw/notification1.mp3)
-        await androidImpl?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            _messagesChannelId,
-            _messagesChannelName,
-            description: _messagesChannelDesc,
-            importance: Importance.high,
-            playSound: true,
-            sound: RawResourceAndroidNotificationSound('notification1'),
-            enableVibration: true,
-          ),
+        const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+        final darwinInit = DarwinInitializationSettings(
+          requestSoundPermission: true,
+          requestBadgePermission: true,
+          requestAlertPermission: true,
+          onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
+        );
+        final initSettings = InitializationSettings(
+          android: androidInit,
+          iOS: darwinInit,
+          macOS: darwinInit,
         );
 
-        // قناة التذكيرات
-        await androidImpl?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            _returnsChannelId,
-            _returnsChannelName,
-            description: _returnsChannelDesc,
-            importance: Importance.high,
-            playSound: true,
-            enableVibration: true,
-          ),
+        await _flnp.initialize(
+          initSettings,
+          onDidReceiveNotificationResponse: _onSelectNotification,
+          // 👇 مهم: ممرّر للتاب اللوفلي أعلاه لكي يعمل حتى بالخلفية
+          onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
         );
-      } else if (Platform.isIOS || Platform.isMacOS) {
-        try {
-          final ios = _flnp
-              .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-          final mac = _flnp
-              .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>();
-          await ios?.requestPermissions(alert: true, badge: true, sound: true);
-          await mac?.requestPermissions(alert: true, badge: true, sound: true);
-        } catch (_) {}
-      }
 
-      _initialized = true;
-      debugPrint('🔔 NotificationService initialized. Channels ready.');
-    } catch (e) {
-      _initialized = false;
-      debugPrint('❌ NotificationService init error: $e');
+        if (Platform.isAndroid) {
+          final androidImpl = _flnp
+              .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+
+          // طلب صلاحية الإشعارات (Android 13+) — استدعاء ديناميكي لتوافق كل الإصدارات
+          try {
+            (androidImpl as dynamic)?.requestPermission?.call();
+          } catch (_) {}
+
+          // قناة الدردشة (مع صوت raw/notification1.mp3)
+          await androidImpl?.createNotificationChannel(
+            const AndroidNotificationChannel(
+              _messagesChannelId,
+              _messagesChannelName,
+              description: _messagesChannelDesc,
+              importance: Importance.high,
+              playSound: true,
+              sound: RawResourceAndroidNotificationSound('notification1'),
+              enableVibration: true,
+            ),
+          );
+
+          // قناة التذكيرات
+          await androidImpl?.createNotificationChannel(
+            const AndroidNotificationChannel(
+              _returnsChannelId,
+              _returnsChannelName,
+              description: _returnsChannelDesc,
+              importance: Importance.high,
+              playSound: true,
+              enableVibration: true,
+            ),
+          );
+        } else if (Platform.isIOS || Platform.isMacOS) {
+          try {
+            final ios = _flnp
+                .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+            final mac = _flnp
+                .resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin>();
+            await ios?.requestPermissions(alert: true, badge: true, sound: true);
+            await mac?.requestPermissions(alert: true, badge: true, sound: true);
+          } catch (_) {}
+        }
+
+        _initialized = true;
+        debugPrint(
+          '🔔 NotificationService initialized. Channels ready (attempt $attempt).',
+        );
+        return;
+      } catch (e, stackTrace) {
+        _initialized = false;
+        final attemptLabel = 'attempt $attempt/$maxRetries';
+        debugPrint('❌ NotificationService init error ($attemptLabel): $e');
+        if (attempt >= maxRetries) {
+          debugPrint('🚫 NotificationService init gave up after $attempt attempts.');
+          // الحفاظ على الـ stacktrace الأصلي للمساعدة في التشخيص.
+          Error.throwWithStackTrace(e, stackTrace);
+        }
+        final backoffSeconds = attempt * 2;
+        debugPrint(
+          '⏳ Retrying notification init in $backoffSeconds seconds...',
+        );
+        await Future.delayed(Duration(seconds: backoffSeconds));
+      }
     }
   }
 

@@ -145,7 +145,14 @@ class ChatProvider extends ChangeNotifier {
       final accId = accountId ?? await fetchAccountIdForCurrentUser();
 
       // بدء Realtime الموحّد
-      _rt.start(accountId: accId, myUid: currentUid);
+      try {
+        await _rt.start(accountId: accId, myUid: currentUid);
+      } catch (error, stackTrace) {
+        debugPrint(
+            'ChatProvider.bootstrap: فشل بدء Realtime: $error\n$stackTrace');
+        lastError = 'تعذّرت تهيئة المحادثات، حاول مرة أخرى لاحقًا.';
+        return;
+      }
 
       // تحميل القائمة والمشاركين مبدئياً
       await _loadMyConversationsAndParticipants();
@@ -176,8 +183,10 @@ class ChatProvider extends ChangeNotifier {
       });
 
       ready = true;
-    } catch (e) {
-      lastError = '$e';
+    } catch (e, stackTrace) {
+      debugPrint('ChatProvider.bootstrap: حدث خطأ غير متوقّع: $e');
+      debugPrint('$stackTrace');
+      lastError ??= 'حدث خطأ غير متوقع أثناء تجهيز المحادثات.';
     } finally {
       busy = false;
       _safeNotify();

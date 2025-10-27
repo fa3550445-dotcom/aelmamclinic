@@ -17,7 +17,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
-import 'package:meta/meta.dart';
 
 /*─────────────────── موديلات ───────────────────*/
 import '../models/patient_service.dart';
@@ -29,6 +28,7 @@ import '../models/return_entry.dart';
 import '../models/consumption.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
+import '../models/employee.dart';
 import '../models/item_type.dart';
 import '../models/item.dart';
 import '../models/purchase.dart';
@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -315,9 +315,13 @@ class DBService {
       await _ensureColumn('lastTriggered', 'TEXT');
       await _ensureColumn('last_triggered', 'TEXT');
 
-      // 🔔 وقت الإشعار الجديد (حتى لو الموديل لا يستخدمه حاليًا)
+      // 🔔 وقت الإشعار الجديد (camel + snake)
       await _ensureColumn('notifyTime', 'TEXT');
       await _ensureColumn('notify_time', 'TEXT');
+
+      // 🆔 uuid العنصر المرتبط (camel + snake)
+      await _ensureColumn('itemUuid', 'TEXT');
+      await _ensureColumn('item_uuid', 'TEXT');
 
       // createdAt/created_at
       if (!has('createdAt')) {
@@ -336,6 +340,8 @@ class DBService {
       await db.execute('UPDATE alert_settings SET last_triggered = COALESCE(last_triggered, lastTriggered)');
       await db.execute('UPDATE alert_settings SET notifyTime = COALESCE(notifyTime, notify_time)');
       await db.execute('UPDATE alert_settings SET notify_time = COALESCE(notify_time, notifyTime)');
+      await db.execute('UPDATE alert_settings SET itemUuid = COALESCE(itemUuid, item_uuid)');
+      await db.execute('UPDATE alert_settings SET item_uuid = COALESCE(item_uuid, itemUuid)');
       await db.execute('UPDATE alert_settings SET createdAt = COALESCE(createdAt, created_at, CURRENT_TIMESTAMP)');
       await db.execute('UPDATE alert_settings SET created_at = COALESCE(created_at, createdAt, CURRENT_TIMESTAMP)');
 
@@ -357,12 +363,132 @@ class DBService {
                  lastTriggered  = COALESCE(NEW.lastTriggered,  NEW.last_triggered),
                  last_triggered = COALESCE(NEW.last_triggered, NEW.lastTriggered),
                  notifyTime     = COALESCE(NEW.notifyTime, NEW.notify_time),
-                 notify_time    = COALESCE(NEW.notify_time, NEW.notifyTime)
+                 notify_time    = COALESCE(NEW.notify_time, NEW.notifyTime),
+                 itemUuid       = COALESCE(NEW.itemUuid, NEW.item_uuid),
+                 item_uuid      = COALESCE(NEW.item_uuid, NEW.itemUuid)
            WHERE id = NEW.id;
         END;
       ''');
     } catch (e) {
       print('ensureAlertSettingsColumns: $e');
+    }
+  }
+
+  Future<void> _migrateAlertThresholdToReal(Database db) async {
+    try {
+      final cols = await db.rawQuery("PRAGMA table_info(alert_settings)");
+      bool has(String name) => cols.any((c) =>
+          ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
+
+      final thresholdInfo = cols.cast<Map<String, Object?>>().firstWhere(
+            (c) =>
+                ((c['name'] ?? '') as String).toLowerCase() == 'threshold',
+            orElse: () => const {},
+          );
+      final currentType =
+          ((thresholdInfo['type'] ?? '') as String).toUpperCase().trim();
+      if (currentType.isNotEmpty && !currentType.contains('INT')) {
+        return;
+      }
+
+      if (!has('threshold_tmp')) {
+        await db.execute(
+            'ALTER TABLE alert_settings ADD COLUMN threshold_tmp REAL NOT NULL DEFAULT 0');
+      }
+      await db.execute('UPDATE alert_settings SET threshold_tmp = threshold');
+
+      try {
+        await db.execute('ALTER TABLE alert_settings DROP COLUMN threshold');
+        await db.execute(
+            'ALTER TABLE alert_settings RENAME COLUMN threshold_tmp TO threshold');
+        await _ensureAlertSettingsColumns(db);
+      } catch (_) {
+        await _rebuildAlertSettingsWithRealThreshold(db);
+      }
+    } catch (e) {
+      print('migrateAlertThresholdToReal: $e');
+    }
+  }
+
+  Future<void> _rebuildAlertSettingsWithRealThreshold(Database db) async {
+    try {
+      final cols = await db.rawQuery("PRAGMA table_info(alert_settings)");
+      bool has(String name) => cols.any((c) =>
+          ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
+
+      await db.execute('ALTER TABLE alert_settings RENAME TO alert_settings_old');
+      await db.execute('DROP TABLE IF EXISTS alert_settings_new');
+
+      final columnDefs = <String>[
+        'id INTEGER PRIMARY KEY AUTOINCREMENT',
+        'item_id INTEGER NOT NULL UNIQUE',
+        if (has('itemId')) 'itemId INTEGER',
+        'threshold REAL NOT NULL',
+        'is_enabled INTEGER NOT NULL DEFAULT 1',
+        if (has('isEnabled')) 'isEnabled INTEGER',
+        'last_triggered TEXT',
+        if (has('lastTriggered')) 'lastTriggered TEXT',
+        if (has('notify_time')) 'notify_time TEXT',
+        if (has('notifyTime')) 'notifyTime TEXT',
+        "created_at TEXT NOT NULL DEFAULT (datetime('now'))",
+        if (has('createdAt')) 'createdAt TEXT',
+      ];
+
+      final createSql = '''
+        CREATE TABLE alert_settings_new (
+          ${columnDefs.join(',\n          ')},
+          FOREIGN KEY(item_id) REFERENCES ${Item.table}(id) ON DELETE CASCADE
+        );
+      ''';
+      await db.execute(createSql);
+
+      final insertCols = <String>['id', 'item_id'];
+      final selectCols = <String>['id', 'item_id'];
+      if (has('itemId')) {
+        insertCols.add('itemId');
+        selectCols.add('itemId');
+      }
+      insertCols.add('threshold');
+      selectCols.add('threshold_tmp');
+      insertCols.add('is_enabled');
+      selectCols.add('is_enabled');
+      if (has('isEnabled')) {
+        insertCols.add('isEnabled');
+        selectCols.add('isEnabled');
+      }
+      insertCols.add('last_triggered');
+      selectCols.add('last_triggered');
+      if (has('lastTriggered')) {
+        insertCols.add('lastTriggered');
+        selectCols.add('lastTriggered');
+      }
+      if (has('notify_time')) {
+        insertCols.add('notify_time');
+        selectCols.add('notify_time');
+      }
+      if (has('notifyTime')) {
+        insertCols.add('notifyTime');
+        selectCols.add('notifyTime');
+      }
+      insertCols.add('created_at');
+      selectCols.add('created_at');
+      if (has('createdAt')) {
+        insertCols.add('createdAt');
+        selectCols.add('createdAt');
+      }
+
+      final insertSql = '''
+        INSERT INTO alert_settings_new (${insertCols.join(', ')})
+        SELECT ${selectCols.join(', ')}
+        FROM alert_settings_old;
+      ''';
+      await db.execute(insertSql);
+
+      await db.execute('DROP TABLE alert_settings_old');
+      await db.execute('ALTER TABLE alert_settings_new RENAME TO alert_settings');
+      await _ensureAlertSettingsColumns(db);
+    } catch (e) {
+      print('rebuildAlertSettingsWithRealThreshold: $e');
     }
   }
 
@@ -414,6 +540,24 @@ class DBService {
     }
   }
 
+  Future<void> _ensureSyncFkMappingTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_fk_mapping (
+        table_name TEXT NOT NULL,
+        local_id INTEGER NOT NULL,
+        remote_id TEXT NOT NULL,
+        remote_device_id TEXT,
+        remote_local_id INTEGER,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, local_id)
+      );
+    ''');
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_fk_mapping_table_remote
+      ON sync_fk_mapping(table_name, remote_id)
+    ''');
+  }
+
   /// فهارس مشتركة للأداء (JOIN/WHERE شائعة)
   Future<void> _ensureCommonIndexes(Database db) async {
     await _createIndexIfMissing(db, 'idx_patients_doctorId', 'patients', ['doctorId']);
@@ -429,6 +573,7 @@ class DBService {
 
     await _createIndexIfMissing(db, 'idx_service_doctor_share_serviceId', 'service_doctor_share', ['serviceId']);
     await _createIndexIfMissing(db, 'idx_service_doctor_share_doctorId', 'service_doctor_share', ['doctorId']);
+    await _createIndexIfMissing(db, 'idx_doctors_userUid', 'doctors', ['userUid']);
 
     await _createIndexIfMissing(db, 'idx_consumptions_patientId', 'consumptions', ['patientId']);
     await _createIndexIfMissing(db, 'idx_consumptions_itemId', 'consumptions', ['itemId']);
@@ -440,6 +585,7 @@ class DBService {
     await _createIndexIfMissing(db, 'idx_employees_loans_employeeId', 'employees_loans', ['employeeId']);
     await _createIndexIfMissing(db, 'idx_employees_salaries_employeeId', 'employees_salaries', ['employeeId']);
     await _createIndexIfMissing(db, 'idx_employees_discounts_employeeId', 'employees_discounts', ['employeeId']);
+    await _createIndexIfMissing(db, 'idx_employees_userUid', 'employees', ['userUid']);
 
     // 🧪 فهرس فريد يمنع تكرار أسماء الأدوية باختلاف حالة الأحرف
     try {
@@ -465,6 +611,26 @@ class DBService {
     } catch (e) {
       print('uix_sds_service_doctor_active creation skipped: $e');
     }
+
+    try {
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS uix_doctors_userUid_active
+        ON doctors(userUid)
+        WHERE userUid IS NOT NULL AND (isDeleted IS NULL OR isDeleted = 0)
+      ''');
+    } catch (e) {
+      print('uix_doctors_userUid_active creation skipped: $e');
+    }
+
+    try {
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS uix_employees_userUid_active
+        ON employees(userUid)
+        WHERE userUid IS NOT NULL AND (isDeleted IS NULL OR isDeleted = 0)
+      ''');
+    } catch (e) {
+      print('uix_employees_userUid_active creation skipped: $e');
+    }
   }
 
   Future<void> _postOpenChecks(Database db) async {
@@ -472,11 +638,13 @@ class DBService {
     await _ensureAlertSettingsColumns(db);
     await _ensureSoftDeleteColumns(db);
     await _ensureSyncMetaColumns(db);     // ← snake_case (متوافق مع parity v3)
+    await _ensureSyncFkMappingTable(db);
     await _ensureCommonIndexes(db);
   }
 
   /*──────────────── إنشاء الجداول ───────────────*/
   Future<void> _onCreate(Database db, int version) async {
+    await _ensureSyncFkMappingTable(db);
     await db.execute('''
   CREATE TABLE patients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -590,11 +758,13 @@ class DBService {
   CREATE TABLE doctors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     employeeId INTEGER,
+    userUid TEXT,
     name TEXT,
     specialization TEXT,
     phoneNumber TEXT,
     startTime TEXT,
     endTime TEXT,
+    userUid TEXT,
     printCounter INTEGER DEFAULT 0
   );
 ''');
@@ -639,7 +809,8 @@ class DBService {
     maritalStatus TEXT,
     basicSalary REAL,
     finalSalary REAL,
-    isDoctor INTEGER DEFAULT 0
+    isDoctor INTEGER DEFAULT 0,
+    userUid TEXT
   );
 ''');
 
@@ -708,6 +879,7 @@ class DBService {
 
     // أعمدة الحذف المنطقي + الفهارس بعد الإنشاء
     await _ensureSoftDeleteColumns(db);
+    await _ensureRemoteIdMap(db);
 
     // تأكيد alert_settings بعد الإنشاء (للتوافق + notifyTime)
     await _ensureAlertSettingsColumns(db);
@@ -717,6 +889,8 @@ class DBService {
 
     // فهارس عامة
     await _ensureCommonIndexes(db);
+
+    await _ensureUuidMappingTable(db);
   }
 
   /*────────────────── الترقيات ──────────────────*/
@@ -768,7 +942,8 @@ class DBService {
           maritalStatus TEXT,
           basicSalary REAL,
           finalSalary REAL,
-          doctorId INTEGER DEFAULT 0
+          doctorId INTEGER DEFAULT 0,
+          userUid TEXT
         );
       ''');
 
@@ -881,7 +1056,7 @@ class DBService {
 
     if (oldVersion < 24) {
       await db.execute('''
-        CREATE TABLE IF NOT EXISTS drugs (
+      CREATE TABLE IF NOT EXISTS drugs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT UNIQUE NOT NULL,
           notes TEXT,
@@ -950,6 +1125,12 @@ class DBService {
     if (oldVersion < 28) {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
+      await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _addColumnIfMissing(db, 'doctors', 'userUid', 'TEXT');
+      await _addColumnIfMissing(db, 'employees', 'userUid', 'TEXT');
       await _ensureCommonIndexes(db);
     }
   }
@@ -1299,7 +1480,8 @@ class DBService {
   //=============================== المرضى ===============================
   Future<int> insertPatient(Patient patient) => patients.insertPatient(patient);
 
-  Future<List<Patient>> getAllPatients() => patients.getAllPatients();
+  Future<List<Patient>> getAllPatients({int? doctorId}) =>
+      patients.getAllPatients(doctorId: doctorId);
 
   Future<int> updatePatient(Patient p, List<PatientService> newServices) => patients.updatePatient(p, newServices);
 
@@ -1445,6 +1627,35 @@ class DBService {
     final res = await db.query('doctors',
         where: 'ifnull(isDeleted,0)=0', orderBy: 'id DESC');
     return res.map((row) => Doctor.fromMap(row)).toList();
+  }
+
+  Future<Doctor?> getDoctorByUserUid(String userUid) async {
+    final trimmed = userUid.trim();
+    if (trimmed.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'doctors',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [trimmed],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Doctor.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getDoctorUserUids() async {
+    final db = await database;
+    final rows = await db.query(
+      'doctors',
+      columns: const ['userUid'],
+      where: 'userUid IS NOT NULL AND TRIM(userUid) <> "" AND ifnull(isDeleted,0)=0',
+    );
+    final set = <String>{};
+    for (final row in rows) {
+      final raw = row['userUid']?.toString().trim() ?? '';
+      if (raw.isNotEmpty) set.add(raw);
+    }
+    return set;
   }
 
   Future<int> updateDoctor(Doctor doctor) async {
@@ -1798,6 +2009,35 @@ class DBService {
         where: 'ifnull(isDeleted,0)=0', orderBy: 'id DESC');
   }
 
+  Future<Employee?> getEmployeeByUserUid(String userUid) async {
+    final trimmed = userUid.trim();
+    if (trimmed.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [trimmed],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Employee.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getEmployeeUserUids() async {
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      columns: const ['userUid'],
+      where: 'userUid IS NOT NULL AND TRIM(userUid) <> "" AND ifnull(isDeleted,0)=0',
+    );
+    final set = <String>{};
+    for (final row in rows) {
+      final raw = row['userUid']?.toString().trim() ?? '';
+      if (raw.isNotEmpty) set.add(raw);
+    }
+    return set;
+  }
+
   Future<int> updateEmployee(int employeeId, Map<String, dynamic> newData) async {
     final db = await database;
     final rows = await db.update('employees', newData, where: 'id = ?', whereArgs: [employeeId]);
@@ -1818,6 +2058,49 @@ class DBService {
         whereArgs: [employeeId],
         limit: 1);
     return res.isEmpty ? null : res.first;
+  }
+
+  Future<Employee?> getEmployeeByUserUid(String userUid) async {
+    final uid = userUid.trim();
+    if (uid.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [uid],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Employee.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getLinkedUserUids() async {
+    final db = await database;
+    final linked = <String>{};
+
+    final doctors = await db.query(
+      'doctors',
+      columns: const ['userUid'],
+      where: 'ifnull(isDeleted,0)=0',
+    );
+    for (final row in doctors) {
+      final raw = row['userUid'] ?? row['user_uid'];
+      final uid = (raw ?? '').toString().trim();
+      if (uid.isNotEmpty) linked.add(uid);
+    }
+
+    final employees = await db.query(
+      'employees',
+      columns: const ['userUid'],
+      where: 'ifnull(isDeleted,0)=0',
+    );
+    for (final row in employees) {
+      final raw = row['userUid'] ?? row['user_uid'];
+      final uid = (raw ?? '').toString().trim();
+      if (uid.isNotEmpty) linked.add(uid);
+    }
+
+    return linked;
   }
 
   //=============================== سلف الموظفين ===============================
@@ -2015,10 +2298,12 @@ class DBService {
       Prescription.table,
       PrescriptionItem.table,
       'complaints',
+      'sync_fk_mapping',
     ];
     for (final t in tables) {
       batch.delete(t);
     }
+    batch.delete('remote_id_map');
     await batch.commit(noResult: true);
 
     // 🧽 إعادة ضبط عدّادات AUTOINCREMENT (إن وُجدت)
@@ -2304,6 +2589,43 @@ class DBService {
     if (!await _columnExists(db, table, column)) {
       await db.execute('ALTER TABLE $table ADD COLUMN $column $sqlType');
     }
+  }
+
+  Future<void> _ensureUuidMappingTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_uuid_mapping (
+        table_name TEXT NOT NULL,
+        record_id INTEGER NOT NULL,
+        account_id TEXT NOT NULL,
+        device_id TEXT NOT NULL,
+        local_sync_id INTEGER NOT NULL,
+        uuid TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, uuid)
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER IF NOT EXISTS tg_sync_uuid_mapping_updated_at
+      AFTER UPDATE ON sync_uuid_mapping
+      FOR EACH ROW
+      BEGIN
+        UPDATE sync_uuid_mapping
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE table_name = OLD.table_name AND uuid = OLD.uuid;
+      END;
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS uix_sync_uuid_mapping_record
+      ON sync_uuid_mapping(table_name, record_id);
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS uix_sync_uuid_mapping_sync_key
+      ON sync_uuid_mapping(table_name, account_id, device_id, local_sync_id);
+    ''');
   }
 
   Future<void> _createIndexIfMissing(DatabaseExecutor db, String indexName, String table, List<String> columns) async {

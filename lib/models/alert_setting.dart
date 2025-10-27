@@ -12,9 +12,11 @@ class AlertSetting {
 
   final int? id;
   final int itemId;
-  final int threshold;
+  final double threshold;
   final bool isEnabled;
   final DateTime? lastTriggered;
+  final DateTime? notifyTime;
+  final String? itemUuid;
   final DateTime createdAt;
 
   AlertSetting({
@@ -23,6 +25,8 @@ class AlertSetting {
     required this.threshold,
     this.isEnabled = true,
     this.lastTriggered,
+    this.notifyTime,
+    this.itemUuid,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -35,6 +39,14 @@ class AlertSetting {
 
   static int _toInt0(dynamic v) => _toIntN(v) ?? 0;
 
+  static double? _toDoubleN(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
+
+  static double _toDouble0(dynamic v) => _toDoubleN(v) ?? 0.0;
+
   static bool _toBool(dynamic v) {
     if (v is bool) return v;
     if (v is num) return v != 0;
@@ -45,7 +57,15 @@ class AlertSetting {
   static DateTime? _toDateN(dynamic v) {
     if (v == null) return null;
     if (v is DateTime) return v;
-    return DateTime.tryParse(v.toString());
+    final s = v.toString().trim();
+    if (s.isEmpty) return null;
+    return DateTime.tryParse(s);
+  }
+
+  static String? _toStrN(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
   }
 
   /*──────── SQL (SQLite) ────────*/
@@ -54,9 +74,11 @@ class AlertSetting {
   CREATE TABLE IF NOT EXISTS $table (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     item_id         INTEGER NOT NULL UNIQUE,
-    threshold       INTEGER NOT NULL,
+    threshold       REAL    NOT NULL,
     is_enabled      INTEGER NOT NULL DEFAULT 1,
     last_triggered  TEXT,
+    notify_time     TEXT,
+    item_uuid       TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY(item_id) REFERENCES ${Item.table}(id) ON DELETE CASCADE
   );
@@ -69,6 +91,8 @@ class AlertSetting {
       'threshold': threshold,
       'is_enabled': isEnabled ? 1 : 0,
       'last_triggered': lastTriggered?.toIso8601String(),
+      'notify_time': notifyTime?.toIso8601String(),
+      'item_uuid': itemUuid,
       'created_at': createdAt.toIso8601String(),
     };
     if (id != null && id! > 0) {
@@ -81,10 +105,12 @@ class AlertSetting {
   factory AlertSetting.fromMap(Map<String, dynamic> map) => AlertSetting(
     id: _toIntN(map['id']),
     itemId: _toInt0(map['item_id'] ?? map['itemId']),
-    threshold: _toInt0(map['threshold']),
+    threshold: _toDouble0(map['threshold']),
     isEnabled: _toBool(map['is_enabled'] ?? map['isEnabled'] ?? 1),
     lastTriggered:
     _toDateN(map['last_triggered'] ?? map['lastTriggered']),
+    notifyTime: _toDateN(map['notify_time'] ?? map['notifyTime']),
+    itemUuid: _toStrN(map['item_uuid'] ?? map['itemUuid']),
     createdAt:
     _toDateN(map['created_at'] ?? map['createdAt']) ?? DateTime.now(),
   );
@@ -92,9 +118,11 @@ class AlertSetting {
   AlertSetting copyWith({
     int? id,
     int? itemId,
-    int? threshold,
+    double? threshold,
     bool? isEnabled,
     DateTime? lastTriggered,
+    DateTime? notifyTime,
+    String? itemUuid,
     DateTime? createdAt,
   }) =>
       AlertSetting(
@@ -103,10 +131,12 @@ class AlertSetting {
         threshold: threshold ?? this.threshold,
         isEnabled: isEnabled ?? this.isEnabled,
         lastTriggered: lastTriggered ?? this.lastTriggered,
+        notifyTime: notifyTime ?? this.notifyTime,
+        itemUuid: itemUuid ?? this.itemUuid,
         createdAt: createdAt ?? this.createdAt,
       );
 
   @override
   String toString() =>
-      'AlertSetting(id: $id, itemId: $itemId, threshold: $threshold, isEnabled: $isEnabled)';
+      'AlertSetting(id: $id, itemId: $itemId, threshold: $threshold, isEnabled: $isEnabled, notifyTime: $notifyTime, itemUuid: $itemUuid)';
 }

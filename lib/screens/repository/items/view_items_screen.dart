@@ -235,11 +235,11 @@ class _ItemTileTBIAN extends StatelessWidget {
   Future<List<num>> _loadStats() async {
     final db = await RepositoryService.instance.database;
     final res1 = await db.rawQuery(
-      'SELECT COALESCE(SUM(quantity),0) AS bought FROM purchases WHERE itemId = ?',
+      'SELECT COALESCE(SUM(quantity),0) AS bought FROM purchases WHERE item_id = ?',
       [itemId],
     );
     final res2 = await db.rawQuery(
-      'SELECT COALESCE(SUM(quantity*unit_price),0) AS totalCost FROM purchases WHERE itemId = ?',
+      'SELECT COALESCE(SUM(quantity*unit_price),0) AS totalCost FROM purchases WHERE item_id = ?',
       [itemId],
     );
     final boughtQty = (res1.first['bought'] as num).toInt();

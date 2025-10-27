@@ -121,6 +121,10 @@ ALTER TABLE purchases             ADD COLUMN updated_at TEXT;
 ALTER TABLE alert_settings        ADD COLUMN device_id  TEXT;
 ALTER TABLE alert_settings        ADD COLUMN local_id   INTEGER;
 ALTER TABLE alert_settings        ADD COLUMN updated_at TEXT;
+ALTER TABLE alert_settings        ADD COLUMN notifyTime TEXT;
+ALTER TABLE alert_settings        ADD COLUMN notify_time TEXT;
+ALTER TABLE alert_settings        ADD COLUMN itemUuid   TEXT;
+ALTER TABLE alert_settings        ADD COLUMN item_uuid  TEXT;
 
 /* financial_logs */        ALTER TABLE financial_logs        ADD COLUMN account_id TEXT;
 ALTER TABLE financial_logs        ADD COLUMN device_id  TEXT;
@@ -227,6 +231,10 @@ UPDATE items                 SET updated_at = COALESCE(updated_at, CURRENT_TIMES
 UPDATE item_types            SET updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 UPDATE purchases             SET updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 UPDATE alert_settings        SET updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
+UPDATE alert_settings        SET notifyTime = COALESCE(notifyTime, notify_time);
+UPDATE alert_settings        SET notify_time = COALESCE(notify_time, notifyTime);
+UPDATE alert_settings        SET itemUuid   = COALESCE(itemUuid, item_uuid);
+UPDATE alert_settings        SET item_uuid  = COALESCE(item_uuid, itemUuid);
 UPDATE financial_logs        SET updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 UPDATE patient_services      SET updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 

@@ -25,7 +25,9 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:postgrest/postgrest.dart';
 
+import '../models/account_user_summary.dart';
 import '../models/clinic.dart';
 
 import './device_id_service.dart';
@@ -150,6 +152,25 @@ class AuditLogEntry {
   );
 }
 
+class AccountPolicyException implements Exception {
+  final String message;
+  const AccountPolicyException(this.message);
+  @override
+  String toString() => message;
+}
+
+class AccountFrozenException extends AccountPolicyException {
+  final String accountId;
+  AccountFrozenException(this.accountId)
+      : super('Account $accountId is frozen');
+}
+
+class AccountUserDisabledException extends AccountPolicyException {
+  final String accountId;
+  AccountUserDisabledException(this.accountId)
+      : super('User is disabled for account $accountId');
+}
+
 // ───────────────────── الخدمة الرئيسية ─────────────────────
 
 class AuthSupabaseService {
@@ -163,7 +184,6 @@ class AuthSupabaseService {
   // مرجع SyncService + تجميعة دفع مؤجلة لكل جدول
   SyncService? _sync;
   String? _boundAccountId; // آخر حساب تم ربط المزامنة عليه
-  final Map<String, Timer> _pushTimers = {};
   Duration _debounce = const Duration(seconds: 1);
 
   // 🔒 قنوات Realtime للحراسة (تجميد الحساب/تعطيل الموظف)
@@ -177,24 +197,14 @@ class AuthSupabaseService {
   // ───── ربط دفع المزامنة عند تغيّر DB المحلي ─────
 
   void _bindDbPush(SyncService sync) {
-    DBService.instance.onLocalChange = (String table) async {
-      _pushTimers.remove(table)?.cancel();
-      _pushTimers[table] = Timer(_debounce, () {
-        if (_sync == sync) {
-          dev.log('Sync push (debounced) → $table');
-          sync.pushFor(table);
-        }
-        _pushTimers.remove(table);
-      });
-      return;
-    };
+    DBService.instance.bindSyncPush((String table) async {
+      if (_sync != sync) return;
+      dev.log('Sync push (bound) → $table');
+      await sync.pushFor(table);
+    });
   }
 
   void _clearPushBinds() {
-    for (final t in _pushTimers.values) {
-      t.cancel();
-    }
-    _pushTimers.clear();
     DBService.instance.onLocalChange = null;
   }
 
@@ -387,6 +397,40 @@ class AuthSupabaseService {
       dev.log('_readLastSyncedAccountId failed: $e');
     }
     return null;
+  }
+
+  Future<void> _assertAccountPolicies({
+    required String accountId,
+    required String userUid,
+  }) async {
+    try {
+      final account = await _client
+          .from('accounts')
+          .select('id,frozen')
+          .eq('id', accountId)
+          .maybeSingle();
+      if (account != null && account['frozen'] == true) {
+        throw AccountFrozenException(accountId);
+      }
+    } on PostgrestException {
+      rethrow;
+    }
+
+    try {
+      final row = await _client
+          .from('account_users')
+          .select('disabled')
+          .eq('account_id', accountId)
+          .eq('user_uid', userUid)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      if (row != null && row['disabled'] == true) {
+        throw AccountUserDisabledException(accountId);
+      }
+    } on PostgrestException {
+      rethrow;
+    }
   }
 
   // ─────────────────── Helpers: Functions/RPC ───────────────────
@@ -601,6 +645,7 @@ class AuthSupabaseService {
       final pAcc = (prof?['account_id'] as String?)?.trim();
       if (pAcc != null && pAcc.isNotEmpty) {
         final role = (prof?['role'] as String?) ?? 'employee';
+        await _assertAccountPolicies(accountId: pAcc, userUid: user.id);
         return ActiveAccount(id: pAcc, role: role, canWrite: true);
       }
     } catch (e) {
@@ -622,6 +667,7 @@ class AuthSupabaseService {
               .maybeSingle();
           role = (au?['role'] as String?) ?? role;
         } catch (_) {}
+        await _assertAccountPolicies(accountId: '$acc', userUid: user.id);
         return ActiveAccount(id: '$acc', role: role, canWrite: true);
       }
     } catch (e) {
@@ -630,6 +676,7 @@ class AuthSupabaseService {
 
     final fb = await _resolveAccountIdForUid(user.id);
     if (fb != null && fb.isNotEmpty) {
+      await _assertAccountPolicies(accountId: fb, userUid: user.id);
       return ActiveAccount(id: fb, role: 'employee', canWrite: true);
     }
 
@@ -717,6 +764,7 @@ class AuthSupabaseService {
 
     _bindDbPush(_sync!);
 
+    await _sync!.pushAll();
     await _sync!.bootstrap(pull: pull, realtime: realtime);
 
     try {
@@ -757,13 +805,20 @@ class AuthSupabaseService {
     required String clinicName,
     required String ownerEmail,
     required String ownerPassword,
+    String? ownerRole,
   }) =>
-      registerOwner(clinicName: clinicName, email: ownerEmail, password: ownerPassword);
+      registerOwner(
+        clinicName: clinicName,
+        email: ownerEmail,
+        password: ownerPassword,
+        ownerRole: ownerRole,
+      );
 
   Future<void> registerOwner({
     required String clinicName,
     required String email,
     required String password,
+    String? ownerRole,
   }) async {
     if (!isSuperAdmin) {
       dev.log('registerOwner called by non-super admin. This may fail due to RLS.');
@@ -797,6 +852,10 @@ class AuthSupabaseService {
       'ownerPassword': password,
     };
 
+    if (ownerRole != null && ownerRole.isNotEmpty) {
+      body['owner_role'] = ownerRole;
+    }
+
     try {
       final data = await _invokeTryMany(
         names: const [
@@ -817,14 +876,27 @@ class AuthSupabaseService {
     }
 
     try {
+      final params = <String, dynamic>{
+        'clinic_name': clinicName,
+        'owner_email': email,
+      };
+      if (ownerRole != null && ownerRole.isNotEmpty) {
+        params['owner_role'] = ownerRole;
+      }
       final res = await _client.rpc(
         'admin_bootstrap_clinic_for_email',
-        params: {'p_email': email, 'p_name': clinicName},
+        params: params,
       );
-      if (res != null && '$res'.isNotEmpty && '$res' != 'null') {
-        return;
+      final accountId = res?.toString().trim();
+      if (accountId == null || accountId.isEmpty || accountId == 'null') {
+        throw Exception('RPC returned null/empty result.');
       }
-      throw Exception('RPC returned null/empty result.');
+      const uuidPattern =
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
+      if (!RegExp(uuidPattern).hasMatch(accountId)) {
+        throw Exception('RPC returned non-UUID result: $accountId');
+      }
+      return;
     } catch (rpcErr, st) {
       dev.log('registerOwner RPC fallback failed', error: rpcErr, stackTrace: st);
       rethrow;
@@ -1066,6 +1138,133 @@ class AuthSupabaseService {
 
   // ─────────────────── إدارة الموظفين ───────────────────
 
+  Future<List<Map<String, dynamic>>> fetchEmployeeAccountsWithLinkStatus({
+    required String accountId,
+  }) async {
+    List<Map<String, dynamic>> _mapRows(List raw) {
+      final List<Map<String, dynamic>> out = [];
+      for (final row in raw) {
+        if (row is! Map) continue;
+        final map = Map<String, dynamic>.from(row as Map);
+        final uid = (map['user_uid'] ?? map['userUid'] ?? '').toString().trim();
+        if (uid.isEmpty) continue;
+        final email = (map['email'] ?? '').toString();
+        final role = (map['role'] ?? 'employee').toString();
+        final disabled = (map['disabled'] as bool?) ?? false;
+        final employeeId = map['employee_id']?.toString();
+        final doctorId = map['doctor_id']?.toString();
+        out.add({
+          'userUid': uid,
+          'email': email,
+          'role': role,
+          'disabled': disabled,
+          'employeeId': (employeeId != null && employeeId.isNotEmpty) ? employeeId : null,
+          'doctorId': (doctorId != null && doctorId.isNotEmpty) ? doctorId : null,
+          'employeeLinked': employeeId != null && employeeId.isNotEmpty,
+          'doctorLinked': doctorId != null && doctorId.isNotEmpty,
+        });
+      }
+      out.sort((a, b) => (a['email'] as String)
+          .toLowerCase()
+          .compareTo((b['email'] as String).toLowerCase()));
+      return out;
+    }
+
+    try {
+      final res = await _client.rpc('list_employees_with_email', params: {
+        'p_account': accountId,
+      });
+      if (res is List) {
+        return _mapRows(res);
+      } else if (res is Map && res['data'] is List) {
+        return _mapRows(List<Map<String, dynamic>>.from(res['data'] as List));
+      }
+      dev.log('list_employees_with_email returned unexpected payload; falling back...',
+          error: res);
+    } catch (e, st) {
+      dev.log('list_employees_with_email RPC failed, falling back to direct queries',
+          error: e, stackTrace: st);
+    }
+
+    try {
+      final rows = await _client
+          .from('account_users')
+          .select('user_uid, role, disabled, email, created_at')
+          .eq('account_id', accountId)
+          .order('created_at', ascending: false);
+
+      final list = (rows as List)
+          .map((r) => Map<String, dynamic>.from(r as Map))
+          .toList();
+
+      final uids = list
+          .map((r) => (r['user_uid']?.toString() ?? '').trim())
+          .where((uid) => uid.isNotEmpty)
+          .toSet();
+
+      Map<String, String> employeesByUid = {};
+      Map<String, String> doctorsByUid = {};
+
+      if (uids.isNotEmpty) {
+        final employeeRows = await _client
+            .from('employees')
+            .select('id, user_uid')
+            .eq('account_id', accountId)
+            .inFilter('user_uid', uids.toList());
+
+        for (final row in (employeeRows as List? ?? const [])) {
+          if (row is! Map) continue;
+          final uid = (row['user_uid']?.toString() ?? '').trim();
+          final id = (row['id']?.toString() ?? '').trim();
+          if (uid.isEmpty || id.isEmpty) continue;
+          employeesByUid[uid] = id;
+        }
+
+        final doctorRows = await _client
+            .from('doctors')
+            .select('id, user_uid')
+            .eq('account_id', accountId)
+            .inFilter('user_uid', uids.toList());
+
+        for (final row in (doctorRows as List? ?? const [])) {
+          if (row is! Map) continue;
+          final uid = (row['user_uid']?.toString() ?? '').trim();
+          final id = (row['id']?.toString() ?? '').trim();
+          if (uid.isEmpty || id.isEmpty) continue;
+          doctorsByUid[uid] = id;
+        }
+      }
+
+      final mapped = list.map((row) {
+        final uid = (row['user_uid']?.toString() ?? '').trim();
+        final email = (row['email']?.toString() ?? '').trim();
+        final role = (row['role']?.toString() ?? 'employee').trim();
+        final disabled = (row['disabled'] as bool?) ?? false;
+        final employeeId = employeesByUid[uid];
+        final doctorId = doctorsByUid[uid];
+        return {
+          'userUid': uid,
+          'email': email,
+          'role': role.isEmpty ? 'employee' : role,
+          'disabled': disabled,
+          'employeeId': employeeId,
+          'doctorId': doctorId,
+          'employeeLinked': employeeId != null,
+          'doctorLinked': doctorId != null,
+        };
+      }).where((row) => (row['userUid'] as String).isNotEmpty).toList();
+
+      mapped.sort((a, b) => (a['email'] as String)
+          .toLowerCase()
+          .compareTo((b['email'] as String).toLowerCase()));
+
+      return mapped;
+    } catch (e, st) {
+      dev.log('Direct employee account lookup failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   Future<void> setEmployeeDisabled({
     required String accountId,
     required String userUid,
@@ -1098,6 +1297,84 @@ class AuthSupabaseService {
       dev.log('delete_employee RPC failed: $e');
       rethrow;
     }
+  }
+
+  Future<List<AccountUserSummary>> listAccountUsersWithEmail({
+    required String accountId,
+    bool includeDisabled = true,
+  }) async {
+    List<AccountUserSummary> mapRows(List data) {
+      final dedup = <String, AccountUserSummary>{};
+      for (final raw in data) {
+        if (raw is Map<String, dynamic>) {
+          final summary = AccountUserSummary.fromMap(raw);
+          if (summary.userUid.isEmpty) continue;
+          dedup[summary.userUid] = summary;
+        } else if (raw is Map) {
+          final summary = AccountUserSummary.fromMap(raw.cast<String, dynamic>());
+          if (summary.userUid.isEmpty) continue;
+          dedup[summary.userUid] = summary;
+        }
+      }
+      final result = dedup.values.toList();
+      result.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+      if (!includeDisabled) {
+        return result.where((e) => !e.disabled).toList();
+      }
+      return result;
+    }
+
+    // 1) RPC SECURITY DEFINER
+    try {
+      final res = await _client.rpc('list_employees_with_email', params: {'p_account': accountId});
+      if (res is List) {
+        return mapRows(res);
+      }
+      dev.log('list_employees_with_email returned non-list payload; falling back...');
+    } catch (e, st) {
+      dev.log('list_employees_with_email RPC failed, trying edge...', error: e, stackTrace: st);
+    }
+
+    // 2) Edge Function fallback
+    try {
+      final resp = await _client.functions.invoke(
+        'admin__list_employees',
+        body: {'account_id': accountId},
+      );
+      final data = resp.data;
+      if (data is List) {
+        return mapRows(data.map((e) => Map<String, dynamic>.from(e)).toList());
+      }
+      dev.log('admin__list_employees returned non-list payload; falling back to profiles...');
+    } catch (e, st) {
+      dev.log('admin__list_employees failed, falling back to profiles...', error: e, stackTrace: st);
+    }
+
+    // 3) profiles fallback
+    try {
+      final rows = await _client
+          .from('profiles')
+          .select('id')
+          .eq('account_id', accountId)
+          .eq('role', 'employee');
+      if (rows is List) {
+        final mapped = rows
+            .map((e) => (e as Map).cast<String, dynamic>())
+            .map((e) => AccountUserSummary(
+                  userUid: e['id']?.toString() ?? '',
+                  email: '—',
+                  disabled: false,
+                ))
+            .where((e) => e.userUid.isNotEmpty)
+            .toList();
+        mapped.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+        return includeDisabled ? mapped : mapped.where((e) => !e.disabled).toList();
+      }
+    } catch (e, st) {
+      dev.log('profiles fallback failed', error: e, stackTrace: st);
+      rethrow;
+    }
+    return const [];
   }
 
   // ─────────────────── أدوات مساعدة للهوية ───────────────────

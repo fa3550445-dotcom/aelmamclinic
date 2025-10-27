@@ -27,16 +27,14 @@ class RepositoryService {
 
   /*────────── جلب البيانات ──────────*/
   Future<List<ItemType>> fetchItemTypes() async {
-    final db = await _db.database;
-    final maps = await db.query(ItemType.table, orderBy: 'name');
-    return maps.map(ItemType.fromMap).toList();
+    return _db.getAllItemTypes();
   }
 
   Future<List<Item>> fetchItemsByType(int typeId) async {
     final db = await _db.database;
     final maps = await db.query(
       Item.table,
-      where: 'type_id = ?',
+      where: 'type_id = ? AND ifnull(isDeleted, 0) = 0',
       whereArgs: [typeId],
       orderBy: 'name',
     );
@@ -47,7 +45,7 @@ class RepositoryService {
     final db = await _db.database;
     final maps = await db.query(
       Item.table,
-      where: 'id = ?',
+      where: 'id = ? AND ifnull(isDeleted, 0) = 0',
       whereArgs: [id],
       limit: 1,
     );
@@ -56,9 +54,10 @@ class RepositoryService {
 
   /*──────── إنشاء / تحديث / حذف ────────*/
   Future<ItemType> createItemType(String name) async {
-    final db = await _db.database;
-    final id = await db.insert(ItemType.table, {'name': name});
-    return ItemType(id: id, name: name);
+    final sanitized = name.trim();
+    final type = ItemType(name: sanitized);
+    final id = await _db.insertItemType(type);
+    return type.copyWith(id: id);
   }
 
   Future<Item> createItem({
@@ -67,41 +66,43 @@ class RepositoryService {
     required double price,
     required int initialStock,
   }) async {
-    final db = await _db.database;
-    final id = await db.insert(Item.table, {
-      'type_id': typeId,
-      'name': name,
-      'price': price,
-      'stock': initialStock,
-      'created_at': DateTime.now().toIso8601String(),
-    });
-    return Item(
-      id: id,
+    final item = Item(
       typeId: typeId,
       name: name,
       price: price,
       stock: initialStock,
     );
+    final id = await _db.insertItem(item);
+    return item.copyWith(id: id);
   }
 
   Future<void> updateItem(Item item) async {
-    final db = await _db.database;
-    await db.update(
-      Item.table,
-      item.toMap(),
-      where: 'id = ?',
-      whereArgs: [item.id],
-    );
+    await _db.updateItem(item);
   }
 
   Future<void> deleteItem(int id) async {
     final db = await _db.database;
-    await db.delete(Item.table, where: 'id = ?', whereArgs: [id]);
-    await db.delete(
+    final existingAlert = await db.query(
       AlertSetting.table,
-      where: 'itemId = ?',
+      where: 'item_id = ?',
       whereArgs: [id],
+      limit: 1,
     );
+    if (existingAlert.isNotEmpty) {
+      final alert = AlertSetting.fromMap(existingAlert.first);
+      if (alert.id != null) {
+        await _db.deleteAlert(alert.id!);
+      } else {
+        await db.delete(
+          AlertSetting.table,
+          where: 'item_id = ?',
+          whereArgs: [id],
+        );
+        await _db.notifyTableChanged(AlertSetting.table);
+      }
+    }
+
+    await _db.deleteItem(id);
   }
 
   /*────────── مشتريات ──────────*/
@@ -110,23 +111,22 @@ class RepositoryService {
     required int quantity,
     required double unitPrice,
   }) async {
-    final db = await _db.database;
+    final item = await fetchItem(itemId);
+    if (item == null) {
+      throw StateError('Item $itemId not found when creating purchase');
+    }
 
-    // إدخال الشراء
-    await db.insert(Purchase.table, {
-      'itemId': itemId,
-      'quantity': quantity,
-      'unit_price': unitPrice,
-      'created_at': DateTime.now().toIso8601String(),
-    });
-
-    // تحديث المخزون
-    await db.rawUpdate(
-      'UPDATE ${Item.table} SET stock = stock + ? WHERE id = ?',
-      [quantity, itemId],
+    final purchase = Purchase(
+      itemId: itemId,
+      quantity: quantity,
+      unitPrice: unitPrice,
     );
 
-    // فحص وتنفيذ التنبيه بعد التحديث
+    await _db.insertPurchase(purchase);
+
+    final updatedItem = item.copyWith(stock: item.stock + quantity);
+    await _db.updateItem(updatedItem);
+
     await _evaluateAlertForItem(itemId);
   }
 
@@ -136,60 +136,66 @@ class RepositoryService {
     required int quantity,
     String? patientId,
   }) async {
-    final db = await _db.database;
-
-    // هات سعر الصنف لحساب المبلغ
     final item = await fetchItem(itemId);
-    final unitPrice = item?.price ?? 0.0;
-    final amount = unitPrice * quantity;
+    if (item == null) {
+      throw StateError('Item $itemId not found when recording consumption');
+    }
 
-    // سجل الاستهلاك (مربوط بمريض أو عام)
-    await db.insert(Consumption.table, {
-      'patientId': patientId, // ممكن يكون null
-      'itemId': itemId.toString(), // متوافقًا مع بياناتك الحالية
-      'quantity': quantity,
-      'date': DateTime.now().toIso8601String(),
-      'amount': amount, // ← المهم
-      'note': null, // اتركها null لو ما عندك ملاحظة
-    });
-
-    // حدّث المخزون
-    await db.rawUpdate(
-      'UPDATE ${Item.table} SET stock = stock - ? WHERE id = ?',
-      [quantity, itemId],
+    final unitPrice = item.price;
+    final consumption = Consumption(
+      patientId: patientId,
+      itemId: itemId.toString(),
+      quantity: quantity,
+      amount: unitPrice * quantity,
+      date: DateTime.now(),
     );
 
-    // فحص وتنبيه انخفاض المخزون
+    await _db.insertConsumption(consumption);
+
+    final updatedItem = item.copyWith(stock: item.stock - quantity);
+    await _db.updateItem(updatedItem);
+
     await _evaluateAlertForItem(itemId);
   }
 
   /*────────── تنبيه انخفاض المخزون ──────────*/
   Future<void> setAlert({
     required int itemId,
-    required int threshold,
+    required double threshold,
   }) async {
     final db = await _db.database;
 
-    final exists = Sqflite.firstIntValue(await db.rawQuery(
-          'SELECT COUNT(*) FROM ${AlertSetting.table} WHERE itemId = ?',
-          [itemId],
-        )) ??
-        0;
+    final existing = await db.query(
+      AlertSetting.table,
+      where: 'item_id = ?',
+      whereArgs: [itemId],
+      limit: 1,
+    );
 
-    if (exists == 0) {
-      await db.insert(AlertSetting.table, {
-        'itemId': itemId,
-        'threshold': threshold,
-        'is_enabled': 1,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-    } else {
-      await db.update(
-        AlertSetting.table,
-        {'threshold': threshold, 'is_enabled': 1},
-        where: 'itemId = ?',
-        whereArgs: [itemId],
+    if (existing.isEmpty) {
+      final alert = AlertSetting(
+        itemId: itemId,
+        threshold: threshold,
+        isEnabled: true,
       );
+      await _db.insertAlert(alert);
+    } else {
+      final alert = AlertSetting.fromMap(existing.first)
+          .copyWith(threshold: threshold, isEnabled: true);
+      if (alert.id != null) {
+        await _db.updateAlert(alert);
+      } else {
+        await db.update(
+          AlertSetting.table,
+          {
+            'threshold': threshold,
+            'is_enabled': 1,
+          },
+          where: 'item_id = ?',
+          whereArgs: [itemId],
+        );
+        await _db.notifyTableChanged(AlertSetting.table);
+      }
     }
 
     await _evaluateAlertForItem(itemId);
@@ -203,7 +209,7 @@ class RepositoryService {
 
     final maps = await db.query(
       AlertSetting.table,
-      where: 'itemId = ? AND is_enabled = 1',
+      where: 'item_id = ? AND is_enabled = 1',
       whereArgs: [itemId],
       limit: 1,
     );
@@ -224,12 +230,18 @@ class RepositoryService {
         await _notifier.triggerLowStock(item);
 
         // تحديث last_triggered
-        await db.update(
-          AlertSetting.table,
-          {'last_triggered': today.toIso8601String()},
-          where: 'id = ?',
-          whereArgs: [alert.id],
-        );
+        final updatedAlert = alert.copyWith(lastTriggered: today);
+        if (updatedAlert.id != null) {
+          await _db.updateAlert(updatedAlert);
+        } else {
+          await db.update(
+            AlertSetting.table,
+            {'last_triggered': today.toIso8601String()},
+            where: 'item_id = ?',
+            whereArgs: [itemId],
+          );
+          await _db.notifyTableChanged(AlertSetting.table);
+        }
       }
     }
   }
@@ -240,9 +252,10 @@ class RepositoryService {
     final rows = await db.rawQuery('''
       SELECT i.*
       FROM ${Item.table}         AS i
-      JOIN ${AlertSetting.table} AS a ON a.itemId = i.id
+      JOIN ${AlertSetting.table} AS a ON a.item_id = i.id
       WHERE a.is_enabled = 1
         AND i.stock     <= a.threshold
+        AND ifnull(i.isDeleted, 0) = 0
       ORDER BY i.stock ASC
     ''');
     return rows.map(Item.fromMap).toList();
@@ -254,9 +267,10 @@ class RepositoryService {
     final result = await db.rawQuery('''
       SELECT 1
       FROM ${AlertSetting.table} AS a
-      JOIN ${Item.table}         AS i ON i.id = a.itemId
+      JOIN ${Item.table}         AS i ON i.id = a.item_id
       WHERE a.is_enabled = 1
         AND i.stock     <= a.threshold
+        AND ifnull(i.isDeleted, 0) = 0
       LIMIT 1
     ''');
     return result.isNotEmpty;
