@@ -140,7 +140,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       _selectedDoctorId = p.doctorId;
       _selectedDoctorName = p.doctorName;
     }
-    _doctorCtrl.text = _selectedDoctorName ?? '';
+    final initialDoctor = _selectedDoctorName;
+    _doctorCtrl.text = initialDoctor == null ? '' : initialDoctor;
 
     await _getDoctorsForCurrentUser(forceSelection: true);
 
@@ -516,9 +517,10 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   Future<void> _selectDoctorForRadLab() async {
     if (_doctorRestricted && _linkedDoctor != null) {
       setState(() {
+        final selectedName = 'د/${_linkedDoctor!.name}';
         _selectedDoctorId = _linkedDoctor!.id;
-        _selectedDoctorName = 'د/${_linkedDoctor!.name}';
-        _doctorCtrl.text = _selectedDoctorName ?? '';
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
       });
       return;
     }
@@ -587,9 +589,10 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
 
     if (chosen != null) {
       setState(() {
+        final selectedName = 'د/${chosen.name}';
         _selectedDoctorId = chosen.id;
-        _selectedDoctorName = 'د/${chosen.name}';
-        _doctorCtrl.text = _selectedDoctorName!;
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
       });
     }
   }
