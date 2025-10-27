@@ -104,7 +104,9 @@ serve(async (req) => {
 
     // 6) نادِ الـ RPC المسؤول عن bootstrap
     //   ملاحظة: تعتمد على أسماء المعاملات في الدالة في DB (clinic_name, owner_email).
-    const { data: rpc, error: rerr } = await adminClient.rpc(
+    const rpcClient = hasBearer ? adminClient.withHeaders({ Authorization: auth }) : adminClient;
+
+    const { data: rpc, error: rerr } = await rpcClient.rpc(
       "admin_bootstrap_clinic_for_email",
       { clinic_name, owner_email },
     );
@@ -112,6 +114,11 @@ serve(async (req) => {
     if (rerr) {
       return json(500, { error: "rpc admin_bootstrap_clinic_for_email failed", details: rerr.message });
     }
+
+    console.log(
+      "[admin__create_clinic_owner] rpc admin_bootstrap_clinic_for_email succeeded",
+      { clinic_name, owner_email, usedBearer: hasBearer },
+    );
 
     return json(200, { ok: true, result: rpc });
   } catch (e) {
