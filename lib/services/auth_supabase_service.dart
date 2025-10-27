@@ -1113,6 +1113,133 @@ class AuthSupabaseService {
 
   // ─────────────────── إدارة الموظفين ───────────────────
 
+  Future<List<Map<String, dynamic>>> fetchEmployeeAccountsWithLinkStatus({
+    required String accountId,
+  }) async {
+    List<Map<String, dynamic>> _mapRows(List raw) {
+      final List<Map<String, dynamic>> out = [];
+      for (final row in raw) {
+        if (row is! Map) continue;
+        final map = Map<String, dynamic>.from(row as Map);
+        final uid = (map['user_uid'] ?? map['userUid'] ?? '').toString().trim();
+        if (uid.isEmpty) continue;
+        final email = (map['email'] ?? '').toString();
+        final role = (map['role'] ?? 'employee').toString();
+        final disabled = (map['disabled'] as bool?) ?? false;
+        final employeeId = map['employee_id']?.toString();
+        final doctorId = map['doctor_id']?.toString();
+        out.add({
+          'userUid': uid,
+          'email': email,
+          'role': role,
+          'disabled': disabled,
+          'employeeId': (employeeId != null && employeeId.isNotEmpty) ? employeeId : null,
+          'doctorId': (doctorId != null && doctorId.isNotEmpty) ? doctorId : null,
+          'employeeLinked': employeeId != null && employeeId.isNotEmpty,
+          'doctorLinked': doctorId != null && doctorId.isNotEmpty,
+        });
+      }
+      out.sort((a, b) => (a['email'] as String)
+          .toLowerCase()
+          .compareTo((b['email'] as String).toLowerCase()));
+      return out;
+    }
+
+    try {
+      final res = await _client.rpc('list_employees_with_email', params: {
+        'p_account': accountId,
+      });
+      if (res is List) {
+        return _mapRows(res);
+      } else if (res is Map && res['data'] is List) {
+        return _mapRows(List<Map<String, dynamic>>.from(res['data'] as List));
+      }
+      dev.log('list_employees_with_email returned unexpected payload; falling back...',
+          error: res);
+    } catch (e, st) {
+      dev.log('list_employees_with_email RPC failed, falling back to direct queries',
+          error: e, stackTrace: st);
+    }
+
+    try {
+      final rows = await _client
+          .from('account_users')
+          .select('user_uid, role, disabled, email, created_at')
+          .eq('account_id', accountId)
+          .order('created_at', ascending: false);
+
+      final list = (rows as List)
+          .map((r) => Map<String, dynamic>.from(r as Map))
+          .toList();
+
+      final uids = list
+          .map((r) => (r['user_uid']?.toString() ?? '').trim())
+          .where((uid) => uid.isNotEmpty)
+          .toSet();
+
+      Map<String, String> employeesByUid = {};
+      Map<String, String> doctorsByUid = {};
+
+      if (uids.isNotEmpty) {
+        final employeeRows = await _client
+            .from('employees')
+            .select('id, user_uid')
+            .eq('account_id', accountId)
+            .inFilter('user_uid', uids.toList());
+
+        for (final row in (employeeRows as List? ?? const [])) {
+          if (row is! Map) continue;
+          final uid = (row['user_uid']?.toString() ?? '').trim();
+          final id = (row['id']?.toString() ?? '').trim();
+          if (uid.isEmpty || id.isEmpty) continue;
+          employeesByUid[uid] = id;
+        }
+
+        final doctorRows = await _client
+            .from('doctors')
+            .select('id, user_uid')
+            .eq('account_id', accountId)
+            .inFilter('user_uid', uids.toList());
+
+        for (final row in (doctorRows as List? ?? const [])) {
+          if (row is! Map) continue;
+          final uid = (row['user_uid']?.toString() ?? '').trim();
+          final id = (row['id']?.toString() ?? '').trim();
+          if (uid.isEmpty || id.isEmpty) continue;
+          doctorsByUid[uid] = id;
+        }
+      }
+
+      final mapped = list.map((row) {
+        final uid = (row['user_uid']?.toString() ?? '').trim();
+        final email = (row['email']?.toString() ?? '').trim();
+        final role = (row['role']?.toString() ?? 'employee').trim();
+        final disabled = (row['disabled'] as bool?) ?? false;
+        final employeeId = employeesByUid[uid];
+        final doctorId = doctorsByUid[uid];
+        return {
+          'userUid': uid,
+          'email': email,
+          'role': role.isEmpty ? 'employee' : role,
+          'disabled': disabled,
+          'employeeId': employeeId,
+          'doctorId': doctorId,
+          'employeeLinked': employeeId != null,
+          'doctorLinked': doctorId != null,
+        };
+      }).where((row) => (row['userUid'] as String).isNotEmpty).toList();
+
+      mapped.sort((a, b) => (a['email'] as String)
+          .toLowerCase()
+          .compareTo((b['email'] as String).toLowerCase()));
+
+      return mapped;
+    } catch (e, st) {
+      dev.log('Direct employee account lookup failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   Future<void> setEmployeeDisabled({
     required String accountId,
     required String userUid,
