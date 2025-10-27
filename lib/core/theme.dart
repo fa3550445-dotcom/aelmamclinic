@@ -32,7 +32,7 @@ class AppTheme {
       onError: Colors.white,
       tertiary: const Color(0xFF00BFA6),
       onTertiary: Colors.white,
-      primaryContainer: kPrimaryColor.withOpacity(.08),
+      primaryContainer: kPrimaryColor.withValues(alpha: .08),
       onPrimaryContainer: kPrimaryColor,
       secondaryContainer: const Color(0xFFE3F2FD),
       onSecondaryContainer: const Color(0xFF0D47A1),
@@ -90,7 +90,7 @@ class AppTheme {
       ),
 
       iconTheme: IconThemeData(
-        color: scheme.onSurface.withOpacity(.8),
+        color: scheme.onSurface.withValues(alpha: .8),
         size: 22,
       ),
 
@@ -136,10 +136,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHigh,
-        hintStyle: TextStyle(color: scheme.onSurface.withOpacity(.45)),
-        labelStyle: TextStyle(color: scheme.onSurface.withOpacity(.75)),
-        suffixIconColor: scheme.onSurface.withOpacity(.7),
-        prefixIconColor: scheme.onSurface.withOpacity(.7),
+        hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: .45)),
+        labelStyle: TextStyle(color: scheme.onSurface.withValues(alpha: .75)),
+        suffixIconColor: scheme.onSurface.withValues(alpha: .7),
+        prefixIconColor: scheme.onSurface.withValues(alpha: .7),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kRadius),
           borderSide: BorderSide(color: scheme.outlineVariant),

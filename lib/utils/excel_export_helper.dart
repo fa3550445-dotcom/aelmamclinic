@@ -5,10 +5,10 @@ import 'package:excel/excel.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../models/item_type.dart';
-import '../models/item.dart';
-import '../models/consumption.dart';
-import '../models/purchase.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/models/purchase.dart';
 
 /// ‎ExcelExportHelper‎:
 /// • يُولّد ملفات ‎.xlsx‎ بتنسيقٍ يُناسب "إحصاءات وكشوفات المستودع".

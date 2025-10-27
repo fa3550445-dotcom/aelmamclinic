@@ -4,15 +4,15 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../../models/item.dart';
-import '../../../models/item_type.dart';
-import '../../../providers/repository_provider.dart';
-import '../../../services/repository_service.dart';
-import '../../../utils/excel_export_helper.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
+import 'package:aelmamclinic/services/repository_service.dart';
+import 'package:aelmamclinic/utils/excel_export_helper.dart';
 
 class RepositoryStatisticsScreen extends StatefulWidget {
   const RepositoryStatisticsScreen({super.key});
@@ -180,7 +180,7 @@ class _RepositoryStatisticsScreenState
                                       const EdgeInsets.symmetric(horizontal: 6),
                                   leading: Container(
                                     decoration: BoxDecoration(
-                                      color: kPrimaryColor.withOpacity(.10),
+                                      color: kPrimaryColor.withValues(alpha: .10),
                                       borderRadius: BorderRadius.circular(14),
                                     ),
                                     padding: const EdgeInsets.all(8),
@@ -201,7 +201,7 @@ class _RepositoryStatisticsScreenState
                                         : 'عدد الأصناف: ${items.length}',
                                     style: TextStyle(
                                         color:
-                                            scheme.onSurface.withOpacity(.75)),
+                                            scheme.onSurface.withValues(alpha: .75)),
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -254,7 +254,7 @@ class _RepositoryStatisticsScreenState
                                                   '— لا أصناف —',
                                                   style: TextStyle(
                                                       color: scheme.onSurface
-                                                          .withOpacity(.7)),
+                                                          .withValues(alpha: .7)),
                                                 ),
                                               ),
                                             ]
@@ -347,7 +347,7 @@ class _RepositoryStatisticsScreenState
                                                               style: TextStyle(
                                                                 color: scheme
                                                                     .onSurface
-                                                                    .withOpacity(
+                                                                    .withValues(alpha: 
                                                                         .80),
                                                                 fontWeight:
                                                                     FontWeight
@@ -399,7 +399,7 @@ class _InfoBadge extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -414,7 +414,7 @@ class _InfoBadge extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.85),
+                        color: scheme.onSurface.withValues(alpha: .85),
                         fontWeight: FontWeight.w800,
                         fontSize: 14.5,
                       )),

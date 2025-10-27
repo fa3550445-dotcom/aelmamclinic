@@ -7,8 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:excel/excel.dart' as xls;
 
-import '../../../models/item_type.dart';
-import '../../../providers/repository_provider.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 
 /*──────── لوحة ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);
@@ -62,7 +62,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(25),
-        borderSide: BorderSide(color: accentColor.withOpacity(.35)),
+        borderSide: BorderSide(color: accentColor.withValues(alpha: .35)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(25),
@@ -287,10 +287,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: lightAccentColor.withOpacity(.35)),
+                  border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.06),
+                      color: Colors.black.withValues(alpha: .06),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),

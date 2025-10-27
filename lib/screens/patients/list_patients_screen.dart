@@ -15,17 +15,17 @@ import 'edit_patient_screen.dart';
 import 'view_patient_screen.dart';
 import 'duplicate_patients_screen.dart';
 
-import '../../core/formatters.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../models/patient.dart';
-import '../../models/patient_service.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
-import '../../services/save_file_service.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
+import 'package:aelmamclinic/services/save_file_service.dart';
 
 class ListPatientsScreen extends StatefulWidget {
   const ListPatientsScreen({super.key});
@@ -258,7 +258,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/كشف-اسماء-المرضى.xlsx');
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], text: 'ملف المرضى المحفوظ');
+    await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'ملف المرضى المحفوظ');
   }
 
   Future<void> _downloadFile() async {
@@ -411,7 +411,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                       style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
-                        color: scheme.onSurface.withOpacity(.9),
+                        color: scheme.onSurface.withValues(alpha: .9),
                       ),
                     ),
                     Text(
@@ -419,7 +419,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                       style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
-                        color: scheme.onSurface.withOpacity(.9),
+                        color: scheme.onSurface.withValues(alpha: .9),
                       ),
                     ),
                   ],
@@ -484,7 +484,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                         },
                         leading: CircleAvatar(
                           radius: 22,
-                          backgroundColor: kPrimaryColor.withOpacity(.10),
+                          backgroundColor: kPrimaryColor.withValues(alpha: .10),
                           child: Text(
                             _avatarText(p.name),
                             style: const TextStyle(
@@ -505,7 +505,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
-                                  .withOpacity(.75)),
+                                  .withValues(alpha: .75)),
                         ),
                         trailing: PopupMenuButton<String>(
                           icon: const Icon(Icons.more_vert),

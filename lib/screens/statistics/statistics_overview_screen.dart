@@ -10,45 +10,45 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../models/return_entry.dart';
-import '../../providers/statistics_provider.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/providers/statistics_provider.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 /*── شاشات مختلفة ───────────────────────────────────────────*/
-import '../backup_restore_screen.dart';
-import '../drugs/drug_list_screen.dart';
-import '../employees/employees_home_screen.dart';
-import '../patients/list_patients_screen.dart';
-import '../patients/new_patient_screen.dart';
-import '../payments/payments_home_screen.dart';
-import '../prescriptions/patient_prescriptions_screen.dart';
-import '../prescriptions/prescription_list_screen.dart';
-import '../reminders/reminder_screen.dart';
-import '../repository/menu/repository_menu_screen.dart';
-import '../returns/list_returns_screen.dart';
-import '../returns/new_return_screen.dart';
-import '../statistics/statistics_screen.dart';
+import 'package:aelmamclinic/screens/backup_restore_screen.dart';
+import 'package:aelmamclinic/screens/drugs/drug_list_screen.dart';
+import 'package:aelmamclinic/screens/employees/employees_home_screen.dart';
+import 'package:aelmamclinic/screens/patients/list_patients_screen.dart';
+import 'package:aelmamclinic/screens/patients/new_patient_screen.dart';
+import 'package:aelmamclinic/screens/payments/payments_home_screen.dart';
+import 'package:aelmamclinic/screens/prescriptions/patient_prescriptions_screen.dart';
+import 'package:aelmamclinic/screens/prescriptions/prescription_list_screen.dart';
+import 'package:aelmamclinic/screens/reminders/reminder_screen.dart';
+import 'package:aelmamclinic/screens/repository/menu/repository_menu_screen.dart';
+import 'package:aelmamclinic/screens/returns/list_returns_screen.dart';
+import 'package:aelmamclinic/screens/returns/new_return_screen.dart';
+import 'package:aelmamclinic/screens/statistics/statistics_screen.dart';
 
 /*── شاشة الأشعة والمختبرات ─*/
 import '/services/lab_and_radiology_home_screen.dart';
 
 /*── استيرادات لإدارة الحسابات ─*/
-import '../../providers/auth_provider.dart';
-import '../users/users_screen.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/screens/users/users_screen.dart';
 
 /*── شاشات التدقيق والصلاحيات (جديدة في الـ Drawer للمالك فقط) ─*/
-import '../audit/logs_screen.dart';
-import '../audit/permissions_screen.dart';
+import 'package:aelmamclinic/screens/audit/logs_screen.dart';
+import 'package:aelmamclinic/screens/audit/permissions_screen.dart';
 
 /*── شاشة الدردشة ─*/
-import '../chat/chat_home_screen.dart';
+import 'package:aelmamclinic/screens/chat/chat_home_screen.dart';
 
 /*── لتسجيل الخروج ─*/
-import '../../services/auth_supabase_service.dart';
-import '../auth/login_screen.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
+import 'package:aelmamclinic/screens/auth/login_screen.dart';
 
 /// غيّر هذا الثابت حسب المطلوب:
 /// true  → إخفاء العناصر غير المسموح بها.
@@ -402,13 +402,13 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
     final isRtl = Directionality.of(context) == ui.TextDirection.rtl;
 
     final iconColor = enabled
-        ? scheme.onSurface.withOpacity(.85)
-        : scheme.onSurface.withOpacity(.30);
+        ? scheme.onSurface.withValues(alpha: .85)
+        : scheme.onSurface.withValues(alpha: .30);
 
     final titleStyle = TextStyle(
       fontWeight: FontWeight.w700,
       fontSize: 13.5,
-      color: enabled ? scheme.onSurface : scheme.onSurface.withOpacity(.35),
+      color: enabled ? scheme.onSurface : scheme.onSurface.withValues(alpha: .35),
     );
 
     return Padding(
@@ -671,7 +671,7 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
                     // ـــ قسم الإداري (مالك/سوبر فقط): الحسابات + الصلاحيات + السجلات
                     if (isOwnerOrSuper) ...[
                       const SizedBox(height: 8),
-                      Divider(color: scheme.outline.withOpacity(.3)),
+                      Divider(color: scheme.outline.withValues(alpha: .3)),
                       const SizedBox(height: 6),
                       _drawerItem(
                         icon: Icons.supervisor_account_rounded,
@@ -1160,7 +1160,7 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
                           title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.9),
+                            color: scheme.onSurface.withValues(alpha: .9),
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
@@ -1170,7 +1170,7 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
                           subtitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.7),
+                            color: scheme.onSurface.withValues(alpha: .7),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1243,7 +1243,7 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: kPrimaryColor.withOpacity(.10),
+                            color: kPrimaryColor.withValues(alpha: .10),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           padding: const EdgeInsets.all(10),
@@ -1256,7 +1256,7 @@ class _StatisticsOverviewScreenState extends State<StatisticsOverviewScreen> {
                             'لا يمكنك مشاهدة لوحة الإحصاءات حاليًا. يتطلب ذلك منح صلاحية "لوحة الإحصاءات" من الادارة.',
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              color: scheme.onSurface.withOpacity(.85),
+                              color: scheme.onSurface.withValues(alpha: .85),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -1346,7 +1346,7 @@ class _StatCard extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Container(
                 decoration: BoxDecoration(
-                  color: kPrimaryColor.withOpacity(.10),
+                  color: kPrimaryColor.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 padding: const EdgeInsets.all(10),
@@ -1359,7 +1359,7 @@ class _StatCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.85),
+                color: scheme.onSurface.withValues(alpha: .85),
                 fontSize: 14.5,
                 fontWeight: FontWeight.w800,
               ),
@@ -1400,7 +1400,7 @@ class _DateChip extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(14),
           ),
           padding: const EdgeInsets.all(8),

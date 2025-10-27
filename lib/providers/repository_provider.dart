@@ -3,13 +3,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-import '../models/item_type.dart';
-import '../models/item.dart';
-import '../services/repository_service.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/services/repository_service.dart';
 
 /* ربط مباشر مع الـ DB + Sync */
-import '../services/db_service.dart';
-import '../services/sync_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/sync_service.dart';
 
 /// ‎ChangeNotifier‎ يغلِّف منطق المستودع ويُحدِّث الشارات (badges)
 /// في الواجهة الرئيسيّة فور تغيُّر حالة المخزون أو التنبيهات.

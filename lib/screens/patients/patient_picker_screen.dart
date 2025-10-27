@@ -3,9 +3,9 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/formatters.dart';
-import '../../models/patient.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/core/formatters.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class PatientPickerScreen extends StatefulWidget {
   const PatientPickerScreen({super.key});
@@ -324,7 +324,7 @@ class _PatientPickerScreenState extends State<PatientPickerScreen> {
                                                   '${repsList.length} زيارات'),
                                               backgroundColor: scheme
                                                   .primaryContainer
-                                                  .withOpacity(.35),
+                                                  .withValues(alpha: .35),
                                             )
                                           : null,
                                       onTap: () => _onTileTap(rep),

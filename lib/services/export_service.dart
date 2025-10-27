@@ -2,10 +2,10 @@
 import 'package:excel/excel.dart';
 import 'dart:typed_data';
 
-import '../models/patient.dart';
-import '../models/consumption.dart';
-import '../models/return_entry.dart';
-import '../models/doctor.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 
 class ExportService {
   // تصدير المرضى مع إضافة بيانات الطبيب وبيانات البرج الطبي (Tower Share)

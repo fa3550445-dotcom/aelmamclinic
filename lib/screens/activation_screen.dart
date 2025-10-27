@@ -14,10 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../providers/activation_provider.dart';
+import 'package:aelmamclinic/providers/activation_provider.dart';
 import 'statistics/statistics_overview_screen.dart';
 
 class ActivationScreen extends StatefulWidget {
@@ -107,7 +107,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
   }
 
   Future<void> _shareCode() async {
-    await Share.share('السيريال الخاص بي: $serialCode');
+    await SharePlus.instance.share(text: 'السيريال الخاص بي: $serialCode');
   }
 
   Future<void> _refreshSerialCode() async {
@@ -280,7 +280,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                         Text(
                           'السيريال الخاص بك',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.85),
+                            color: scheme.onSurface.withValues(alpha: .85),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -403,7 +403,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
               if (_isLoading)
                 Positioned.fill(
                   child: Container(
-                    color: scheme.scrim.withOpacity(.06),
+                    color: scheme.scrim.withValues(alpha: .06),
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),

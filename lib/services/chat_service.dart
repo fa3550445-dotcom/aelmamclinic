@@ -22,8 +22,8 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/constants.dart';
-import '../models/chat_models.dart'
+import 'package:aelmamclinic/core/constants.dart';
+import 'package:aelmamclinic/models/chat_models.dart'
     show
     ChatAttachment,
     ChatConversation,
@@ -32,9 +32,9 @@ import '../models/chat_models.dart'
     ChatMessageKindX,
     ChatMessageStatus,
     ConversationListItem;
-import '../models/chat_reaction.dart';
-import '../utils/device_id.dart';
-import '../utils/local_seq.dart';
+import 'package:aelmamclinic/models/chat_reaction.dart';
+import 'package:aelmamclinic/utils/device_id.dart';
+import 'package:aelmamclinic/utils/local_seq.dart';
 
 class ChatService {
   ChatService._();

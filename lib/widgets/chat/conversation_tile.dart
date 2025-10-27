@@ -27,11 +27,11 @@
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:flutter/material.dart';
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../models/chat_models.dart';
-import '../../utils/time.dart' as tutils;
-import '../../utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/utils/time.dart' as tutils;
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
 
 class ConversationTile extends StatelessWidget {
   final ChatConversation conversation;
@@ -163,7 +163,7 @@ class ConversationTile extends StatelessWidget {
                     Text(
                       timeText,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.55),
+                        color: scheme.onSurface.withValues(alpha: .55),
                         fontWeight: FontWeight.w700,
                         fontSize: 11.5,
                       ),
@@ -173,7 +173,7 @@ class ConversationTile extends StatelessWidget {
                       Icon(
                         Icons.notifications_off_rounded,
                         size: 14,
-                        color: scheme.onSurface.withOpacity(.45),
+                        color: scheme.onSurface.withValues(alpha: .45),
                         semanticLabel: 'مكتومة',
                       ),
                     ],
@@ -218,7 +218,7 @@ class ConversationTile extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 22,
-          backgroundColor: kPrimaryColor.withOpacity(.08),
+          backgroundColor: kPrimaryColor.withValues(alpha: .08),
           child: Icon(icon, color: kPrimaryColor),
         ),
         if (isOnline == true && !isGroup && !isAnnouncement)
@@ -321,7 +321,7 @@ class _SubtitleText extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
-        color: isTyping ? kPrimaryColor : scheme.onSurface.withOpacity(.75),
+        color: isTyping ? kPrimaryColor : scheme.onSurface.withValues(alpha: .75),
         fontWeight: bold ? FontWeight.w800 : FontWeight.w700,
       ),
     );
@@ -338,14 +338,14 @@ class _ClinicChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: kPrimaryColor.withOpacity(.08),
+        color: kPrimaryColor.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: scheme.outlineVariant),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: scheme.onSurface.withOpacity(.85),
+          color: scheme.onSurface.withValues(alpha: .85),
           fontWeight: FontWeight.w800,
           fontSize: 11.5,
         ),
@@ -372,7 +372,7 @@ class _UnreadBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.08),
+            color: Colors.black.withValues(alpha: .08),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

@@ -2,14 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/consumption.dart';
-import '../../services/db_service.dart';
-import '../../services/logging_service.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 import 'list_consumption_screen.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class NewConsumptionScreen extends StatefulWidget {
   const NewConsumptionScreen({super.key});
@@ -203,7 +203,7 @@ class _NewConsumptionScreenState extends State<NewConsumptionScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.1),
+                        color: kPrimaryColor.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
@@ -272,7 +272,7 @@ class _NewConsumptionScreenState extends State<NewConsumptionScreen> {
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(dateStr,
                         style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.7),
+                            color: scheme.onSurface.withValues(alpha: .7),
                             fontWeight: FontWeight.w700)),
                   ),
                   trailing: const Icon(Icons.edit_calendar_rounded),
@@ -308,7 +308,7 @@ class _NewConsumptionScreenState extends State<NewConsumptionScreen> {
                       ? Text(
                           'اضغط للاختيار',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.55),
+                            color: scheme.onSurface.withValues(alpha: .55),
                             fontWeight: FontWeight.w600,
                           ),
                         )
@@ -317,7 +317,7 @@ class _NewConsumptionScreenState extends State<NewConsumptionScreen> {
                           child: Text(
                             _selectedConsumptionType!,
                             style: TextStyle(
-                              color: scheme.onSurface.withOpacity(.8),
+                              color: scheme.onSurface.withValues(alpha: .8),
                               fontWeight: FontWeight.w800,
                             ),
                           ),

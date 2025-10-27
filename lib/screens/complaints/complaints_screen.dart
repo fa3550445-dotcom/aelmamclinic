@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class ComplaintsScreen extends StatefulWidget {
   const ComplaintsScreen({super.key});
@@ -163,9 +163,9 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(.12),
+        color: color.withValues(alpha: .12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(.35)),
+        border: Border.all(color: color.withValues(alpha: .35)),
       ),
       child: Text(
         label,
@@ -217,7 +217,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.1),
+                        color: kPrimaryColor.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),

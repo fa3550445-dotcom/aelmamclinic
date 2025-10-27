@@ -20,9 +20,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../models/chat_models.dart';
-import '../../utils/text_direction.dart' as bidi;
-import '../../utils/time.dart' as time;
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/utils/time.dart' as time;
 
 const List<String> _kCommonReactions = <String>['👍', '❤️', '😂', '😮', '😢', '👎'];
 

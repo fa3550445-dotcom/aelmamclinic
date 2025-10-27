@@ -9,21 +9,21 @@ import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
-import '../../core/validators.dart';
-import '../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/core/validators.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../models/attachment.dart';
-import '../../models/consumption.dart';
-import '../../models/item.dart';
-import '../../models/doctor.dart';
-import '../../models/patient.dart';
-import '../../models/patient_service.dart';
-import '../../services/db_service.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/repository_provider.dart';
+import 'package:aelmamclinic/models/attachment.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 import 'list_patients_screen.dart';
 
 class EditPatientScreen extends StatefulWidget {
@@ -401,7 +401,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     final label = '${u['typeName']} > ${u['itemName']} × ${u['quantity']}${isNew ? ' (جديد)' : ''}';
     final deleted = _deletedUsageIds.contains(u['consId']);
     final bg = isNew
-        ? kPrimaryColor.withOpacity(0.10)
+        ? kPrimaryColor.withValues(alpha: 0.10)
         : deleted
         ? Colors.red.shade100
         : null;
@@ -1067,7 +1067,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: kPrimaryColor.withOpacity(.10),
+                            color: kPrimaryColor.withValues(alpha: .10),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           padding: const EdgeInsets.all(8),
@@ -1209,7 +1209,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              color: kPrimaryColor.withOpacity(.10),
+                              color: kPrimaryColor.withValues(alpha: .10),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             padding: const EdgeInsets.all(8),
@@ -1243,7 +1243,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                             children: _selectedServices
                                 .map((ps) => Chip(
                               backgroundColor:
-                              kPrimaryColor.withOpacity(.12),
+                              kPrimaryColor.withValues(alpha: .12),
                               label: Text(
                                   '${ps.serviceName} • ${ps.serviceCost.toStringAsFixed(2)}'),
                               onDeleted: () {
@@ -1326,7 +1326,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                                 final bg = isDeleted
                                     ? Colors.red.shade100
                                     : isNew
-                                    ? kPrimaryColor.withOpacity(.14)
+                                    ? kPrimaryColor.withValues(alpha: .14)
                                     : null;
                                 return FilterChip(
                                   backgroundColor: bg,
@@ -1454,7 +1454,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: sel ? kPrimaryColor.withOpacity(.12) : Colors.white,
+              color: sel ? kPrimaryColor.withValues(alpha: .12) : Colors.white,
               borderRadius: BorderRadius.circular(25),
               border: Border.all(
                 color: sel ? kPrimaryColor : Colors.grey.shade400,

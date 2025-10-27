@@ -13,13 +13,13 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 /*── نمط TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../models/patient.dart';
-import '../../models/patient_service.dart';
-import '../../models/attachment.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/models/attachment.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class ViewPatientScreen extends StatefulWidget {
   final Patient patient;
@@ -658,7 +658,7 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
                                     .map(
                                       (s) => Chip(
                                     backgroundColor:
-                                    kPrimaryColor.withOpacity(.10),
+                                    kPrimaryColor.withValues(alpha: .10),
                                     label: Text(
                                         '${s.serviceName} • ${s.serviceCost.toStringAsFixed(2)}'),
                                   ),
@@ -760,10 +760,10 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 8),
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: kPrimaryColor.withOpacity(.25)),
+                                    color: kPrimaryColor.withValues(alpha: .25)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -890,7 +890,7 @@ class _InfoTile extends StatelessWidget {
       minLeadingWidth: 0,
       leading: Container(
         decoration: BoxDecoration(
-          color: kPrimaryColor.withOpacity(.10),
+          color: kPrimaryColor.withValues(alpha: .10),
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.all(8),
@@ -899,7 +899,7 @@ class _InfoTile extends StatelessWidget {
       title: Text(
         label,
         style: TextStyle(
-          color: scheme.onSurface.withOpacity(.85),
+          color: scheme.onSurface.withValues(alpha: .85),
           fontWeight: FontWeight.w800,
         ),
       ),

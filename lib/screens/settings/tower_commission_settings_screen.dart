@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 class TowerCommissionSettingsScreen extends StatefulWidget {
   const TowerCommissionSettingsScreen({super.key});
@@ -217,7 +217,7 @@ class _TowerCommissionSettingsScreenState
               if (_busy)
                 Positioned.fill(
                   child: Container(
-                    color: scheme.scrim.withOpacity(.08),
+                    color: scheme.scrim.withValues(alpha: .08),
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),
@@ -279,7 +279,7 @@ class _FieldWithSuffix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface.withOpacity(.65);
+    final onSurface = Theme.of(context).colorScheme.onSurface.withValues(alpha: .65);
     return NeuField(
       controller: controller,
       labelText: label,

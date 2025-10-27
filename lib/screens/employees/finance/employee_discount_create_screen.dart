@@ -3,12 +3,12 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 
 class EmployeeDiscountCreateScreen extends StatefulWidget {
   final int empId;
@@ -333,7 +333,7 @@ class _EmployeeDiscountCreateScreenState
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.10),
+                                  color: kPrimaryColor.withValues(alpha: .10),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 padding: const EdgeInsets.all(14),
@@ -365,7 +365,7 @@ class _EmployeeDiscountCreateScreenState
                                               : 'طبيب (ID: $_doctorId)')
                                           : 'غير طبيب',
                                       style: TextStyle(
-                                        color: cs.onSurface.withOpacity(.7),
+                                        color: cs.onSurface.withValues(alpha: .7),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -411,7 +411,7 @@ class _EmployeeDiscountCreateScreenState
                             contentPadding: EdgeInsets.zero,
                             leading: Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -425,7 +425,7 @@ class _EmployeeDiscountCreateScreenState
                             subtitle: Text(
                               _formatDateTime(),
                               style: TextStyle(
-                                color: cs.onSurface.withOpacity(.7),
+                                color: cs.onSurface.withValues(alpha: .7),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -469,7 +469,7 @@ class _EmployeeDiscountCreateScreenState
                             contentPadding: EdgeInsets.zero,
                             leading: Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -524,14 +524,14 @@ class _EmployeeDiscountCreateScreenState
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: scheme.outline.withOpacity(.25)),
+        border: Border.all(color: scheme.outline.withValues(alpha: .25)),
       ),
       child: Row(
         children: [
           Text(
             '$label: ',
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.7),
+              color: scheme.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),

@@ -23,8 +23,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../models/chat_models.dart';
-import '../../utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
 
 class ReplyPreview extends StatelessWidget {
   const ReplyPreview({
@@ -92,7 +92,7 @@ class ReplyPreview extends StatelessWidget {
 
     // ألوان خفيفة متوافقة مع الثيم
     final cs = Theme.of(context).colorScheme;
-    final surface = cs.surfaceVariant.withOpacity(0.45);
+    final surface = cs.surfaceVariant.withValues(alpha: 0.45);
     final borderColor = cs.outlineVariant;
     final barColor = cs.primary;
 
@@ -132,7 +132,7 @@ class ReplyPreview extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textDirection: snippetDir,
                 style: TextStyle(
-                  color: cs.onSurfaceVariant.withOpacity(0.95),
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.95),
                   fontSize: compact ? 12.0 : 13.0,
                   fontWeight: FontWeight.w700,
                   height: 1.25,
@@ -263,7 +263,7 @@ class _Thumb extends StatelessWidget {
           child = Icon(
             Icons.image_outlined,
             size: size * .55,
-            color: cs.onSurfaceVariant.withOpacity(0.8),
+            color: cs.onSurfaceVariant.withValues(alpha: 0.8),
           );
         } else {
           child = ClipRRect(
@@ -276,7 +276,7 @@ class _Thumb extends StatelessWidget {
               errorBuilder: (_, __, ___) => Icon(
                 Icons.broken_image_outlined,
                 size: size * .55,
-                color: cs.onSurfaceVariant.withOpacity(0.8),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.8),
               ),
               loadingBuilder: (_, child, progress) {
                 if (progress == null) return child;
@@ -288,7 +288,7 @@ class _Thumb extends StatelessWidget {
                   child: Icon(
                     Icons.image_rounded,
                     size: size * .55,
-                    color: cs.onSurfaceVariant.withOpacity(.6),
+                    color: cs.onSurfaceVariant.withValues(alpha: .6),
                   ),
                 );
               },
@@ -301,7 +301,7 @@ class _Thumb extends StatelessWidget {
         child = Icon(
           Icons.attach_file_rounded,
           size: size * .55,
-          color: cs.onSurfaceVariant.withOpacity(0.85),
+          color: cs.onSurfaceVariant.withValues(alpha: 0.85),
         );
         break;
 
@@ -309,7 +309,7 @@ class _Thumb extends StatelessWidget {
         child = Icon(
           Icons.text_snippet_rounded,
           size: size * .55,
-          color: cs.onSurfaceVariant.withOpacity(0.8),
+          color: cs.onSurfaceVariant.withValues(alpha: 0.8),
         );
         break;
     }
@@ -322,7 +322,7 @@ class _Thumb extends StatelessWidget {
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.55),
+          color: cs.outlineVariant.withValues(alpha: 0.55),
         ),
       ),
       child: child,

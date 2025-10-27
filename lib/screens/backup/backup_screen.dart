@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-import '../../services/backup_restore_service.dart';
-import '../../models/storage_type.dart';
+import 'package:aelmamclinic/services/backup_restore_service.dart';
+import 'package:aelmamclinic/models/storage_type.dart';
 
 // تصميم TBIAN
 import 'package:aelmamclinic/core/theme.dart';
@@ -117,7 +117,7 @@ class BackupScreen extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.1),
+                color: kPrimaryColor.withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -142,7 +142,7 @@ class BackupScreen extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.65),
+                color: scheme.onSurface.withValues(alpha: .65),
                 fontSize: 13.2,
                 fontWeight: FontWeight.w600,
               ),

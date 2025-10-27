@@ -1,14 +1,14 @@
 // lib/screens/admin/admin_dashboard_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../services/auth_supabase_service.dart';
-import '../../models/clinic.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
+import 'package:aelmamclinic/models/clinic.dart';
 
 /*──────── شاشات للتنقّل ────────*/
-import '../statistics/statistics_overview_screen.dart';
-import '../auth/login_screen.dart';
-import '../chat/chat_admin_inbox_screen.dart'; // ⬅️ شاشة دردشة السوبر أدمن
+import 'package:aelmamclinic/screens/statistics/statistics_overview_screen.dart';
+import 'package:aelmamclinic/screens/auth/login_screen.dart';
+import 'package:aelmamclinic/screens/chat/chat_admin_inbox_screen.dart'; // ⬅️ شاشة دردشة السوبر أدمن
 
 /// شاشة لوحة التحكّم للمشرف العام (super-admin) بتصميم TBIAN.
 /// - تعتمد على Theme.of(context).colorScheme و kPrimaryColor.
@@ -335,7 +335,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 child: TabBar(
                   controller: _tabController,
                   labelColor: scheme.onSurface,
-                  unselectedLabelColor: scheme.onSurface.withOpacity(.6),
+                  unselectedLabelColor: scheme.onSurface.withValues(alpha: .6),
                   indicatorColor: kPrimaryColor,
                   indicatorWeight: 3,
                   tabs: const [
@@ -459,12 +459,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   borderRadius: BorderRadius.circular(kRadius),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white.withOpacity(.9),
+                      color: Colors.white.withValues(alpha: .9),
                       offset: const Offset(-6, -6),
                       blurRadius: 12,
                     ),
                     BoxShadow(
-                      color: const Color(0xFFCFD8DC).withOpacity(.6),
+                      color: const Color(0xFFCFD8DC).withValues(alpha: .6),
                       offset: const Offset(6, 6),
                       blurRadius: 14,
                     ),
@@ -557,7 +557,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               child: ListTile(
                 leading: Container(
                   decoration: BoxDecoration(
-                    color: kPrimaryColor.withOpacity(.1),
+                    color: kPrimaryColor.withValues(alpha: .1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(8),
@@ -578,7 +578,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 subtitle: Text(
                   'مجمّدة: ${clinic.isFrozen ? "نعم" : "لا"} | الإنشاء: ${clinic.createdAt.toLocal()}',
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.7),
+                    color: scheme.onSurface.withValues(alpha: .7),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

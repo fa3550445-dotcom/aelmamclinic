@@ -4,7 +4,7 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/appointment_provider.dart';
+import 'package:aelmamclinic/providers/appointment_provider.dart';
 
 // شاشات الأطباء
 import 'new_doctor_screen.dart';
@@ -12,11 +12,11 @@ import 'list_doctors_screen.dart';
 import 'doctors_patients_screen.dart';
 
 // Placeholders المتبقي
-import '../../services/doctors_services_home_screen.dart';
+import 'package:aelmamclinic/services/doctors_services_home_screen.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class DoctorsHomeScreen extends StatefulWidget {
   const DoctorsHomeScreen({super.key});
@@ -190,7 +190,7 @@ class _HomeCard extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.1),
+                color: kPrimaryColor.withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -215,7 +215,7 @@ class _HomeCard extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.65),
+                color: scheme.onSurface.withValues(alpha: .65),
                 fontSize: 13.2,
                 fontWeight: FontWeight.w600,
               ),

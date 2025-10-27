@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
 
 /// مفاتيح الميزات كما تُخزّن في account_feature_permissions.allowed_features
 class FeatureKeys {
@@ -300,9 +300,9 @@ class _FeatureLoadingPlaceholder extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: scheme.surfaceVariant.withOpacity(0.35),
+        color: scheme.surfaceVariant.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scheme.outline.withOpacity(0.4)),
+        border: Border.all(color: scheme.outline.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

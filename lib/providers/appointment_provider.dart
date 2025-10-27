@@ -1,7 +1,7 @@
 // lib/providers/appointment_provider.dart
 import 'package:flutter/material.dart';
-import '../models/appointment.dart';
-import '../services/db_service.dart';
+import 'package:aelmamclinic/models/appointment.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class AppointmentProvider with ChangeNotifier {
   bool _hasTodayAppointments = false;

@@ -2,11 +2,11 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 
 class EmployeeSalaryDetailScreen extends StatefulWidget {
   final int empId;
@@ -249,7 +249,7 @@ class _EmployeeSalaryDetailScreenState
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               padding: const EdgeInsets.all(14),
@@ -275,7 +275,7 @@ class _EmployeeSalaryDetailScreenState
                                   Text(
                                     subTitle,
                                     style: TextStyle(
-                                      color: cs.onSurface.withOpacity(.7),
+                                      color: cs.onSurface.withValues(alpha: .7),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -408,7 +408,7 @@ class _StatPill extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(.25),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: .25),
         ),
       ),
       child: Row(
@@ -416,7 +416,7 @@ class _StatPill extends StatelessWidget {
           Text(
             '$label: ',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -451,7 +451,7 @@ class _InfoRow extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -460,7 +460,7 @@ class _InfoRow extends StatelessWidget {
         title: Text(
           label,
           style: TextStyle(
-            color: scheme.onSurface.withOpacity(.75),
+            color: scheme.onSurface.withValues(alpha: .75),
             fontWeight: FontWeight.w700,
           ),
         ),

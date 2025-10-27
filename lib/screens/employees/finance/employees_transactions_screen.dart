@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /*── TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /*── خدمات ─*/
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class EmployeesTransactionsScreen extends StatefulWidget {
   const EmployeesTransactionsScreen({super.key});
@@ -312,7 +312,7 @@ class _EmployeesTransactionsScreenState
           Text(
             label,
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.85),
+              color: scheme.onSurface.withValues(alpha: .85),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -356,7 +356,7 @@ class _EmployeesTransactionsScreenState
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: kPrimaryColor.withOpacity(.10),
+                      color: kPrimaryColor.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(8),
@@ -399,7 +399,7 @@ class _EmployeesTransactionsScreenState
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: scheme.outlineVariant.withOpacity(.6)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .6)),
       ),
       child: Text(
         text,
@@ -421,7 +421,7 @@ class _EmployeesTransactionsScreenState
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -433,7 +433,7 @@ class _EmployeesTransactionsScreenState
           'الموظف: $name\n'
           'التاريخ: ${dt != null ? _dateTimeFmt.format(dt) : '—'}\n'
           'المتبقي: ${_moneyFmt.format(leftover)}',
-          style: TextStyle(color: scheme.onSurface.withOpacity(.8)),
+          style: TextStyle(color: scheme.onSurface.withValues(alpha: .8)),
         ),
       ),
     );
@@ -452,7 +452,7 @@ class _EmployeesTransactionsScreenState
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -464,7 +464,7 @@ class _EmployeesTransactionsScreenState
           'الموظف: $name\n'
           'التاريخ: ${dt != null ? _dateTimeFmt.format(dt) : '—'}\n'
           'ملاحظات: $notes',
-          style: TextStyle(color: scheme.onSurface.withOpacity(.8)),
+          style: TextStyle(color: scheme.onSurface.withValues(alpha: .8)),
         ),
       ),
     );
@@ -487,7 +487,7 @@ class _EmployeesTransactionsScreenState
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -502,7 +502,7 @@ class _EmployeesTransactionsScreenState
           'النسب: ${_moneyFmt.format(ratioSum)}, '
           'سلف: ${_moneyFmt.format(loans)}, '
           'صافي: ${_moneyFmt.format(netPay)}',
-          style: TextStyle(color: scheme.onSurface.withOpacity(.8)),
+          style: TextStyle(color: scheme.onSurface.withValues(alpha: .8)),
         ),
       ),
     );

@@ -3,16 +3,16 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/prescription.dart';
-import '../../models/prescription_item.dart';
-import '../../models/drug.dart';
-import '../../models/patient.dart';
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
-import '../../services/prescription_pdf_service.dart';
+import 'package:aelmamclinic/models/prescription.dart';
+import 'package:aelmamclinic/models/prescription_item.dart';
+import 'package:aelmamclinic/models/drug.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/prescription_pdf_service.dart';
 
 /* تصميم TBIAN */
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class ViewPrescriptionScreen extends StatefulWidget {
   final int prescriptionId; // رقم الوصفة
@@ -207,7 +207,7 @@ class _ViewPrescriptionScreenState extends State<ViewPrescriptionScreen> {
                     Text(
                       'الأدوية',
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.85),
+                        color: scheme.onSurface.withValues(alpha: .85),
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
@@ -218,7 +218,7 @@ class _ViewPrescriptionScreenState extends State<ViewPrescriptionScreen> {
                           ? Center(
                               child: Text('لا توجد أدوية',
                                   style: TextStyle(
-                                      color: scheme.onSurface.withOpacity(.6))),
+                                      color: scheme.onSurface.withValues(alpha: .6))),
                             )
                           : ListView.separated(
                               itemCount: data.items.length,
@@ -235,7 +235,7 @@ class _ViewPrescriptionScreenState extends State<ViewPrescriptionScreen> {
                                       Container(
                                         decoration: BoxDecoration(
                                           color:
-                                              scheme.primary.withOpacity(.10),
+                                              scheme.primary.withValues(alpha: .10),
                                           borderRadius:
                                               BorderRadius.circular(14),
                                         ),
@@ -260,7 +260,7 @@ class _ViewPrescriptionScreenState extends State<ViewPrescriptionScreen> {
                                               'أيام: ${it.days}  •  مرات/يوم: ${it.timesPerDay}',
                                               style: TextStyle(
                                                 color: scheme.onSurface
-                                                    .withOpacity(.7),
+                                                    .withValues(alpha: .7),
                                                 fontSize: 13.5,
                                               ),
                                             ),
@@ -320,7 +320,7 @@ class _InfoRow extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: scheme.primary.withOpacity(.10),
+            color: scheme.primary.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(14),
           ),
           padding: const EdgeInsets.all(10),
@@ -333,7 +333,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(label,
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.85),
+                    color: scheme.onSurface.withValues(alpha: .85),
                     fontWeight: FontWeight.w800,
                   )),
               const SizedBox(height: 2),

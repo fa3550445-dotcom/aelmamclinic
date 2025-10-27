@@ -15,11 +15,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../local/chat_local_store.dart';
-import '../models/chat_models.dart' as CM;
-import '../services/chat_service.dart';
-import '../services/chat_realtime_notifier.dart';
-import '../services/attachment_cache.dart';
+import 'package:aelmamclinic/local/chat_local_store.dart';
+import 'package:aelmamclinic/models/chat_models.dart' as CM;
+import 'package:aelmamclinic/services/chat_service.dart';
+import 'package:aelmamclinic/services/chat_realtime_notifier.dart';
+import 'package:aelmamclinic/services/attachment_cache.dart';
 
 class ChatProvider extends ChangeNotifier {
   ChatProvider();

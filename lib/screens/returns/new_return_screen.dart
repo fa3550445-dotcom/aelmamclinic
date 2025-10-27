@@ -2,12 +2,12 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
-import '../../models/return_entry.dart';
-import '../../models/patient.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'list_returns_screen.dart';
 
 class NewReturnScreen extends StatefulWidget {
@@ -455,7 +455,7 @@ class _PatientSearchSheetState extends State<_PatientSearchSheet> {
                                         horizontal: 6),
                                     leading: Container(
                                       decoration: BoxDecoration(
-                                        color: kPrimaryColor.withOpacity(.10),
+                                        color: kPrimaryColor.withValues(alpha: .10),
                                         borderRadius: BorderRadius.circular(14),
                                       ),
                                       padding: const EdgeInsets.all(8),
@@ -475,7 +475,7 @@ class _PatientSearchSheetState extends State<_PatientSearchSheet> {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: scheme.onSurface
-                                              .withOpacity(.75)),
+                                              .withValues(alpha: .75)),
                                     ),
                                     trailing:
                                         const Icon(Icons.chevron_left_rounded),

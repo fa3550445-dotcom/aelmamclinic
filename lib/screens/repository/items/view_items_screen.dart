@@ -3,10 +3,10 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../models/item.dart';
-import '../../../models/item_type.dart';
-import '../../../providers/repository_provider.dart';
-import '../../../services/repository_service.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
+import 'package:aelmamclinic/services/repository_service.dart';
 
 /*──────── لوحة ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);
@@ -153,7 +153,7 @@ class _ViewItemsScreenState extends State<ViewItemsScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(
-                            color: lightAccentColor.withOpacity(.25)),
+                            color: lightAccentColor.withValues(alpha: .25)),
                       ),
                       child: _TypeSectionTBIAN(type: type, items: list),
                     );
@@ -404,11 +404,11 @@ class _ItemTileTBIAN extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color:
-                  (critical ? Colors.red : lightAccentColor).withOpacity(.25),
+                  (critical ? Colors.red : lightAccentColor).withValues(alpha: .25),
             ),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(.04),
+                  color: Colors.black.withValues(alpha: .04),
                   blurRadius: 8,
                   offset: const Offset(0, 4)),
             ],
@@ -420,7 +420,7 @@ class _ItemTileTBIAN extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: lightAccentColor.withOpacity(.18),
+                color: lightAccentColor.withValues(alpha: .18),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -528,10 +528,10 @@ class _SummaryStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(.06),
+              color: Colors.black.withValues(alpha: .06),
               blurRadius: 12,
               offset: const Offset(0, 6))
         ],
@@ -580,9 +580,9 @@ class _StatChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: c.withOpacity(.08),
+          color: c.withValues(alpha: .08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: c.withOpacity(.25)),
+          border: Border.all(color: c.withValues(alpha: .25)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -689,7 +689,7 @@ class _FiltersBar extends StatelessWidget {
               label: const Text('المنتهية فقط'),
               selected: showOutOfStockOnly,
               onSelected: onToggleOutOfStock,
-              selectedColor: Colors.red.withOpacity(.12),
+              selectedColor: Colors.red.withValues(alpha: .12),
               checkmarkColor: Colors.red,
             ),
           ],
@@ -731,7 +731,7 @@ class _DropdownPill<T> extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: DropdownButton<T>(
@@ -760,9 +760,9 @@ class _Pill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(.16),
+        color: color.withValues(alpha: .16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(.35)),
+        border: Border.all(color: color.withValues(alpha: .35)),
       ),
       child: Text(text,
           style: TextStyle(color: accentColor, fontWeight: FontWeight.w800)),
@@ -782,7 +782,7 @@ class _EmptyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: lightAccentColor.withOpacity(.35)),
+        border: Border.all(color: lightAccentColor.withValues(alpha: .35)),
       ),
       child: Text(message, style: const TextStyle(fontWeight: FontWeight.w700)),
     );

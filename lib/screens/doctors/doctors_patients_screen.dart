@@ -1,13 +1,13 @@
 // lib/screens/doctors/doctors_patients_screen.dart
 
 import 'package:flutter/material.dart';
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'patients_by_doctor_screen.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class DoctorsPatientsScreen extends StatefulWidget {
   const DoctorsPatientsScreen({super.key});
@@ -105,7 +105,7 @@ class _DoctorsPatientsScreenState extends State<DoctorsPatientsScreen> {
                           child: Text(
                             'لا توجد نتائج',
                             style: TextStyle(
-                              color: scheme.onSurface.withOpacity(.7),
+                              color: scheme.onSurface.withValues(alpha: .7),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -126,7 +126,7 @@ class _DoctorsPatientsScreenState extends State<DoctorsPatientsScreen> {
                                 // أيقونة/صورة يسار
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: kPrimaryColor.withOpacity(.08),
+                                    color: kPrimaryColor.withValues(alpha: .08),
                                     borderRadius: BorderRadius.circular(14),
                                   ),
                                   padding: const EdgeInsets.all(10),
@@ -160,7 +160,7 @@ class _DoctorsPatientsScreenState extends State<DoctorsPatientsScreen> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color:
-                                              scheme.onSurface.withOpacity(.65),
+                                              scheme.onSurface.withValues(alpha: .65),
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13.2,
                                         ),

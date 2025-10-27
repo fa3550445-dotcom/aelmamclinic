@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../../providers/repository_provider.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 
 class RepositoryMenuScreen extends StatelessWidget {
   const RepositoryMenuScreen({super.key});
@@ -144,7 +144,7 @@ class _MenuTile extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Container(
                 decoration: BoxDecoration(
-                  color: kPrimaryColor.withOpacity(.10),
+                  color: kPrimaryColor.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 padding: const EdgeInsets.all(10),

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../providers/theme_provider.dart';
+import 'package:aelmamclinic/providers/theme_provider.dart';
 
 class ThemeSettingsScreen extends StatelessWidget {
   const ThemeSettingsScreen({super.key});
@@ -56,7 +56,7 @@ class ThemeSettingsScreen extends StatelessWidget {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 6),
                   leading: Container(
                     decoration: BoxDecoration(
-                      color: kPrimaryColor.withOpacity(.10),
+                      color: kPrimaryColor.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     padding: const EdgeInsets.all(8),
@@ -74,7 +74,7 @@ class ThemeSettingsScreen extends StatelessWidget {
                   ),
                   subtitle: Text(
                     'فعِّل لاستخدام الثيم الداكن • التعـديـل فـوري',
-                    style: TextStyle(color: scheme.onSurface.withOpacity(.75)),
+                    style: TextStyle(color: scheme.onSurface.withValues(alpha: .75)),
                   ),
                   trailing: Switch.adaptive(
                     value: isDarkMode,
@@ -153,7 +153,7 @@ class _ColorBadge extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(10),
@@ -168,7 +168,7 @@ class _ColorBadge extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.85),
+                        color: scheme.onSurface.withValues(alpha: .85),
                         fontWeight: FontWeight.w800,
                         fontSize: 14.5,
                       )),

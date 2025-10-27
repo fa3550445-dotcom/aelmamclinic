@@ -5,13 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../services/db_service.dart';
-import '../../services/prescription_pdf_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/prescription_pdf_service.dart';
 import 'new_prescription_screen.dart';
 import 'view_prescription_screen.dart';
 
 /* تصميم TBIAN */
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 /// معلومات مختصرة عن الوصفة تُستخدم فى القائمة
 class _PrescriptionInfo {
@@ -181,7 +181,7 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
     final dir = await getTemporaryDirectory();
     final file = await PrescriptionPdfService.saveTempFile(bytes, dir);
 
-    await Share.shareXFiles([XFile(file.path)], text: 'قائمة الوصفات');
+    await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'قائمة الوصفات');
   }
 
   /*──────────────── الواجهة ────────────────*/
@@ -362,7 +362,7 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
                                       leading: Container(
                                         decoration: BoxDecoration(
                                           color:
-                                              scheme.primary.withOpacity(.10),
+                                              scheme.primary.withValues(alpha: .10),
                                           borderRadius:
                                               BorderRadius.circular(14),
                                         ),
@@ -383,7 +383,7 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface
-                                                .withOpacity(.7)),
+                                                .withValues(alpha: .7)),
                                       ),
                                       trailing: const Icon(
                                           Icons.chevron_left_rounded),

@@ -2,7 +2,7 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -267,12 +267,12 @@ class _MetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: scheme.outlineVariant.withOpacity(.3)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .3)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -280,7 +280,7 @@ class _MetricCard extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: color.withOpacity(.12),
+              color: color.withValues(alpha: .12),
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(10),
@@ -292,7 +292,7 @@ class _MetricCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.85),
+              color: scheme.onSurface.withValues(alpha: .85),
               fontWeight: FontWeight.w800,
               fontSize: 14.5,
             ),
@@ -304,7 +304,7 @@ class _MetricCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.6),
+                color: scheme.onSurface.withValues(alpha: .6),
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -350,13 +350,13 @@ class _DateChipButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: scheme.primary.withOpacity(.25)),
+          border: Border.all(color: scheme.primary.withValues(alpha: .25)),
         ),
         child: Row(
           children: [
             Container(
               decoration: BoxDecoration(
-                color: scheme.primary.withOpacity(.12),
+                color: scheme.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(8),
