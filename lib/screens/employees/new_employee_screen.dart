@@ -12,6 +12,7 @@ import '../../models/account_user_summary.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/db_service.dart';
 import '../../services/auth_supabase_service.dart';
+import '../../widgets/user_account_picker_dialog.dart';
 
 class NewEmployeeScreen extends StatefulWidget {
   const NewEmployeeScreen({super.key});
@@ -38,6 +39,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   final AuthSupabaseService _authService = AuthSupabaseService();
   List<AccountUserSummary> _availableAccounts = const [];
   AccountUserSummary? _selectedAccount;
+  String? _selectedUserUid;
+  String? _selectedUserEmail;
+  bool _selectedAccountDisabled = false;
 
   @override
   void dispose() {
@@ -91,6 +95,11 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
       _selectedUserUid = selection.uid;
       _selectedUserEmail = selection.email.isEmpty ? selection.uid : selection.email;
       _selectedAccountDisabled = selection.disabled;
+      _selectedAccount = AccountUserSummary(
+        userUid: selection.uid,
+        email: selection.email,
+        disabled: selection.disabled,
+      );
     });
   }
 
@@ -235,7 +244,13 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
     );
 
     if (chosen != null && mounted) {
-      setState(() => _selectedAccount = chosen);
+      setState(() {
+        _selectedAccount = chosen;
+        _selectedUserUid = chosen.userUid;
+        _selectedUserEmail =
+            chosen.email.isEmpty ? chosen.userUid : chosen.email;
+        _selectedAccountDisabled = chosen.disabled;
+      });
     }
   }
 

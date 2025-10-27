@@ -893,6 +893,25 @@ class DBService {
     await _ensureUuidMappingTable(db);
   }
 
+  Future<void> _ensureRemoteIdMap(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS remote_id_map (
+        table_name TEXT NOT NULL,
+        remote_uuid TEXT NOT NULL,
+        account_id TEXT,
+        device_id TEXT,
+        local_id INTEGER,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, remote_uuid)
+      );
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_remote_id_map_table_local
+      ON remote_id_map(table_name, local_id)
+    ''');
+  }
+
   /*────────────────── الترقيات ──────────────────*/
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 6) {
@@ -2058,20 +2077,6 @@ class DBService {
         whereArgs: [employeeId],
         limit: 1);
     return res.isEmpty ? null : res.first;
-  }
-
-  Future<Employee?> getEmployeeByUserUid(String userUid) async {
-    final uid = userUid.trim();
-    if (uid.isEmpty) return null;
-    final db = await database;
-    final rows = await db.query(
-      'employees',
-      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
-      whereArgs: [uid],
-      limit: 1,
-    );
-    if (rows.isEmpty) return null;
-    return Employee.fromMap(rows.first);
   }
 
   Future<Set<String>> getLinkedUserUids() async {

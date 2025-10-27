@@ -24,7 +24,6 @@ import '../../models/patient_service.dart';
 import '../../services/db_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/repository_provider.dart';
-import '../../providers/auth_provider.dart';
 import 'list_patients_screen.dart';
 
 class EditPatientScreen extends StatefulWidget {
@@ -78,7 +77,6 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dtOnly = DateFormat('yyyy-MM-dd');
   bool _doctorRestricted = false;
-  Doctor? _linkedDoctor;
 
   // ── Helpers العامة ──
   double _parseDouble(String s) {
@@ -218,6 +216,36 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
         _doctorRestricted = true;
       });
     }
+  }
+
+  Future<List<Doctor>> _getDoctorsForCurrentUser({bool forceSelection = false}) async {
+    if (_cachedDoctors != null) return _cachedDoctors!;
+
+    final doctors = await DBService.instance.getAllDoctors();
+    final auth = context.read<AuthProvider>();
+    final uid = auth.uid;
+    Doctor? linked;
+    if (uid != null && uid.isNotEmpty) {
+      linked = await DBService.instance.getDoctorByUserUid(uid);
+    }
+
+    final result = (linked != null && linked.id != null)
+        ? doctors.where((d) => d.id == linked!.id).toList()
+        : doctors;
+
+    _cachedDoctors = result;
+    _linkedDoctor = linked;
+
+    if (forceSelection && linked != null && linked.id != null && mounted) {
+      final selectedName = 'د/${linked.name}';
+      setState(() {
+        _selectedDoctorId = linked!.id;
+        _selectedDoctorName = selectedName;
+        _doctorCtrl.text = selectedName;
+      });
+    }
+
+    return result;
   }
 
   Future<void> _loadExistingConsumptions() async {

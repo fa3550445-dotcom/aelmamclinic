@@ -32,6 +32,105 @@ class _RowIdentity {
   });
 }
 
+class _LocalSyncTriple {
+  final String accountId;
+  final String deviceId;
+  final int localId;
+
+  const _LocalSyncTriple({
+    required this.accountId,
+    required this.deviceId,
+    required this.localId,
+  });
+}
+
+class RemoteIdMapper {
+  RemoteIdMapper(this._db);
+
+  final Database _db;
+
+  static const String _tableName = 'sync_uuid_mapping';
+
+  String _normalizeDeviceId(String? value) {
+    final normalized = (value ?? '').trim();
+    if (normalized.isEmpty || normalized.toLowerCase() == 'app-unknown') {
+      return 'app-unknown';
+    }
+    return normalized;
+  }
+
+  Future<String?> remoteUuidForLocal({
+    required String tableName,
+    required String accountId,
+    required String deviceId,
+    required int localId,
+  }) async {
+    if (localId <= 0 || accountId.trim().isEmpty) return null;
+    final rows = await _db.query(
+      _tableName,
+      columns: const ['uuid'],
+      where: 'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
+      whereArgs: [tableName, accountId.trim(), _normalizeDeviceId(deviceId), localId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.first['uuid'];
+    final uuid = raw?.toString().trim() ?? '';
+    return uuid.isEmpty ? null : uuid;
+  }
+
+  Future<_LocalSyncTriple?> tripleForRemoteUuid({
+    required String tableName,
+    required String remoteUuid,
+  }) async {
+    final normalized = remoteUuid.trim();
+    if (normalized.isEmpty) return null;
+    final rows = await _db.query(
+      _tableName,
+      columns: const ['account_id', 'device_id', 'local_sync_id'],
+      where: 'table_name = ? AND uuid = ?',
+      whereArgs: [tableName, normalized],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    final account = (row['account_id'] ?? '').toString().trim();
+    final device = _normalizeDeviceId(row['device_id']?.toString());
+    final rawLocal = row['local_sync_id'];
+    final localId = rawLocal is num
+        ? rawLocal.toInt()
+        : int.tryParse('${rawLocal ?? ''}') ?? 0;
+    if (localId <= 0) return null;
+    return _LocalSyncTriple(accountId: account, deviceId: device, localId: localId);
+  }
+}
+
+class MissingRemoteMappingException implements Exception {
+  final String remoteTable;
+  final String parentTable;
+  final String childColumn;
+  final int parentLocalId;
+  final String reason;
+
+  const MissingRemoteMappingException({
+    required this.remoteTable,
+    required this.parentTable,
+    required this.childColumn,
+    required this.parentLocalId,
+    required this.reason,
+  });
+
+  @override
+  String toString() {
+    return 'MissingRemoteMappingException('
+        'remoteTable: $remoteTable, '
+        'parentTable: $parentTable, '
+        'childColumn: $childColumn, '
+        'parentLocalId: $parentLocalId, '
+        'reason: $reason)';
+  }
+}
+
 /// خدمة للمزامنة بين SQLite المحلي و Supabase.
 ///
 /// المتطلبات السحابية:
@@ -448,14 +547,6 @@ class SyncService {
       return _safeDeviceId;
     }
     return normalized;
-  }
-
-  bool _looksLikeUuid(String? value) {
-    if (value == null) return false;
-    final s = value.trim();
-    if (s.length != 36) return false;
-    final re = RegExp(r'^[0-9a-fA-F-]{36}$');
-    return re.hasMatch(s);
   }
 
   String _uuidKey(String table, String device, int local) {
@@ -981,7 +1072,7 @@ class SyncService {
             .select('id')
             .eq('account_id', accountId)
             .eq('device_id', deviceId)
-            .eq('local_id', rawLocal)
+            .eq('local_id', rawLocal!)
             .maybeSingle();
       });
       final remoteId = (remote?['id'] ?? '').toString();
@@ -1112,8 +1203,9 @@ class SyncService {
 
   Future<void> _remapOutgoingForeignKeys(
     String remoteTable,
-    List<Map<String, dynamic>> rows,
-  ) async {
+    List<Map<String, dynamic>> rows, {
+    List<String>? errors,
+  }) async {
     final fkParentTables = _fkMap[remoteTable];
     if (fkParentTables == null || fkParentTables.isEmpty) return;
 
@@ -1121,10 +1213,16 @@ class SyncService {
       for (final entry in fkParentTables.entries) {
         final fkSnake = entry.key;
         if (!row.containsKey(fkSnake)) continue;
+        final originalValue = row[fkSnake];
         final remoteId = await _mapLocalFkToRemote(
           parentLocalTable: entry.value,
-          rawValue: row[fkSnake],
+          rawValue: originalValue,
         );
+        if (remoteId == null && originalValue != null) {
+          errors?.add(
+            'FK $remoteTable.${entry.key} -> ${entry.value} (value=$originalValue)',
+          );
+        }
         row[fkSnake] = remoteId;
       }
     }
@@ -1651,8 +1749,9 @@ class SyncService {
       // تجهيز ودفع
       final prepared = <Map<String, dynamic>>[];
       final outgoingMeta = <Map<String, dynamic>>[];
+      final fkErrors = <String>[];
       for (final row in localRows) {
-        final remoteMap = _toRemoteRow(
+        final remoteMap = await _toRemoteRow(
           localTable: localTable,
           remoteTable: remoteTable,
           localRow: row,
@@ -1679,7 +1778,7 @@ class SyncService {
         final metaChunk = outgoingMeta.sublist(offset, end);
         offset = end;
 
-        await _remapOutgoingForeignKeys(remoteTable, chunk);
+        await _remapOutgoingForeignKeys(remoteTable, chunk, errors: fkErrors);
 
         try {
           _log('PUSH $remoteTable: ${chunk.length} rows (acc=$accountId, dev=$_safeDeviceId)');
@@ -2176,68 +2275,65 @@ class SyncService {
   }) async {
     if (currentValue == null) return null;
 
-    final colType =
+    final columnType =
         (await _getLocalColumnType(childLocalTable, childLocalColumnName)) ?? '';
-    final isText = colType.contains('TEXT');
+    final isTextColumn = columnType.contains('TEXT');
 
-    if (currentValue is String) {
-      final trimmed = currentValue.trim();
-      if (_looksLikeUuid(trimmed)) {
-        final int? localPk =
-            await _resolveLocalPkForRemoteId(parentLocalTable, trimmed);
-        if (localPk == null) return null;
-        final dynamic uuidVal = isText ? localPk.toString() : localPk;
-        return _toLocalValue(childLocalTable, childLocalColumnName, uuidVal);
+    dynamic toLocal(dynamic value) =>
+        _toLocalValue(childLocalTable, childLocalColumnName, value);
+
+    final stringValue = currentValue.toString().trim();
+    if (stringValue.isEmpty) return null;
+
+    if (_looksLikeUuid(stringValue)) {
+      final localPk =
+          await _resolveLocalPkForRemoteId(parentLocalTable, stringValue);
+      if (localPk != null) {
+        return toLocal(isTextColumn ? localPk.toString() : localPk);
       }
+      return isTextColumn ? stringValue : null;
     }
 
-    final int rawFk = (currentValue is num)
+    final int? remoteLocalId = currentValue is num
         ? currentValue.toInt()
-        : int.tryParse(currentValue.toString()) ?? 0;
-    if (rawFk == 0) return null;
-
-    final String strValue = currentValue.toString().trim();
-    if (_looksLikeUuid(strValue)) {
-      final int? mapped = await _getRecordIdForUuid(parentLocalTable, strValue);
-      if (mapped != null) {
-        final dynamic val = isText ? strValue : mapped;
-        return _toLocalValue(childLocalTable, childLocalColumnName, val);
-      }
-      return isText ? strValue : null;
+        : int.tryParse(stringValue);
+    if (remoteLocalId == null || remoteLocalId <= 0) {
+      return null;
     }
 
-    final int rawFk =
-        (currentValue is num) ? currentValue.toInt() : int.tryParse(strValue) ?? 0;
+    int? resolvedLocal =
+        await _findLocalIdByRawFk(parentLocalTable, remoteLocalId);
 
-    final mapping = await _remoteIds.tripleForRemoteUuid(
-      tableName: parentLocalTable,
-      remoteUuid: remoteUuid,
+    resolvedLocal ??= await _findLocalRowIdByTriple(
+      table: parentLocalTable,
+      accountIdForRow: accountId,
+      deviceIdForRow: remoteDeviceIdOfRow,
+      remoteLocalId: remoteLocalId,
     );
 
-    int? resolved;
-    if (mapping != null) {
-      final acc = mapping.accountId.isNotEmpty ? mapping.accountId : accountId;
-      final dev = mapping.deviceId.isNotEmpty ? mapping.deviceId : remoteDeviceIdOfRow;
-      resolved = await _findLocalRowIdByTriple(
-        table: parentLocalTable,
-        accountIdForRow: acc,
-        deviceIdForRow: dev,
-        remoteLocalId: mapping.localId,
-      );
-      resolved ??= await _findLocalIdByRawFk(parentLocalTable, mapping.localId);
+    if (resolvedLocal == null &&
+        remoteDeviceIdOfRow.isNotEmpty &&
+        myDeviceId.isNotEmpty &&
+        remoteDeviceIdOfRow != myDeviceId) {
+      resolvedLocal = _composeCrossDeviceId(remoteDeviceIdOfRow, remoteLocalId);
     }
 
-    final int fallbackVal = resolved ?? candidate;
-    final dynamic val = isText ? fallbackVal.toString() : fallbackVal;
+    if (resolvedLocal == null) {
+      return null;
+    }
 
-    return _toLocalValue(childLocalTable, childLocalColumnName, val);
+    return toLocal(
+      isTextColumn ? resolvedLocal.toString() : resolvedLocal,
+    );
   }
 
   Future<void> _pullTableRemapFKs(
       String localTable,
       String remoteTable, {
-        required Map<String, String> fkParentTables, // fkSnake -> parentLocalTable
-      }) async {
+        required Map<String, String> fkParentTables,
+      }
+
+) async {
     if (!_hasAccount) {
       _log('PULL $remoteTable skipped (no accountId)');
       return;
