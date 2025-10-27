@@ -17,7 +17,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 import 'package:path/path.dart' as p;
 import 'package:meta/meta.dart';
-import 'package:meta/meta.dart';
 
 /*─────────────────── موديلات ───────────────────*/
 import '../models/patient_service.dart';
@@ -201,7 +200,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 28, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية + remote_id_map
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -414,6 +413,22 @@ class DBService {
     }
   }
 
+  Future<void> _ensureRemoteIdMap(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS remote_id_map (
+        table_name TEXT NOT NULL,
+        account_id TEXT NOT NULL,
+        device_id TEXT NOT NULL,
+        local_id INTEGER NOT NULL,
+        remote_uuid TEXT NOT NULL,
+        PRIMARY KEY (table_name, account_id, device_id, local_id)
+      );
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_remote_id_map_uuid ON remote_id_map(remote_uuid)',
+    );
+  }
+
   /// فهارس مشتركة للأداء (JOIN/WHERE شائعة)
   Future<void> _ensureCommonIndexes(Database db) async {
     await _createIndexIfMissing(db, 'idx_patients_doctorId', 'patients', ['doctorId']);
@@ -472,6 +487,7 @@ class DBService {
     await _ensureAlertSettingsColumns(db);
     await _ensureSoftDeleteColumns(db);
     await _ensureSyncMetaColumns(db);     // ← snake_case (متوافق مع parity v3)
+    await _ensureRemoteIdMap(db);
     await _ensureCommonIndexes(db);
   }
 
@@ -708,6 +724,7 @@ class DBService {
 
     // أعمدة الحذف المنطقي + الفهارس بعد الإنشاء
     await _ensureSoftDeleteColumns(db);
+    await _ensureRemoteIdMap(db);
 
     // تأكيد alert_settings بعد الإنشاء (للتوافق + notifyTime)
     await _ensureAlertSettingsColumns(db);
@@ -951,6 +968,10 @@ class DBService {
       // ← أعمدة المزامنة المحلية (snake_case) + الفهرس المركّب
       await _ensureSyncMetaColumns(db);
       await _ensureCommonIndexes(db);
+    }
+
+    if (oldVersion < 29) {
+      await _ensureRemoteIdMap(db);
     }
   }
 
@@ -2019,6 +2040,7 @@ class DBService {
     for (final t in tables) {
       batch.delete(t);
     }
+    batch.delete('remote_id_map');
     await batch.commit(noResult: true);
 
     // 🧽 إعادة ضبط عدّادات AUTOINCREMENT (إن وُجدت)

@@ -25,6 +25,7 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:postgrest/postgrest.dart';
 
 import '../models/clinic.dart';
 
@@ -150,6 +151,25 @@ class AuditLogEntry {
   );
 }
 
+class AccountPolicyException implements Exception {
+  final String message;
+  const AccountPolicyException(this.message);
+  @override
+  String toString() => message;
+}
+
+class AccountFrozenException extends AccountPolicyException {
+  final String accountId;
+  AccountFrozenException(this.accountId)
+      : super('Account $accountId is frozen');
+}
+
+class AccountUserDisabledException extends AccountPolicyException {
+  final String accountId;
+  AccountUserDisabledException(this.accountId)
+      : super('User is disabled for account $accountId');
+}
+
 // ───────────────────── الخدمة الرئيسية ─────────────────────
 
 class AuthSupabaseService {
@@ -163,7 +183,6 @@ class AuthSupabaseService {
   // مرجع SyncService + تجميعة دفع مؤجلة لكل جدول
   SyncService? _sync;
   String? _boundAccountId; // آخر حساب تم ربط المزامنة عليه
-  final Map<String, Timer> _pushTimers = {};
   Duration _debounce = const Duration(seconds: 1);
 
   // 🔒 قنوات Realtime للحراسة (تجميد الحساب/تعطيل الموظف)
@@ -177,24 +196,14 @@ class AuthSupabaseService {
   // ───── ربط دفع المزامنة عند تغيّر DB المحلي ─────
 
   void _bindDbPush(SyncService sync) {
-    DBService.instance.onLocalChange = (String table) async {
-      _pushTimers.remove(table)?.cancel();
-      _pushTimers[table] = Timer(_debounce, () {
-        if (_sync == sync) {
-          dev.log('Sync push (debounced) → $table');
-          sync.pushFor(table);
-        }
-        _pushTimers.remove(table);
-      });
-      return;
-    };
+    DBService.instance.bindSyncPush((String table) async {
+      if (_sync != sync) return;
+      dev.log('Sync push (bound) → $table');
+      await sync.pushFor(table);
+    });
   }
 
   void _clearPushBinds() {
-    for (final t in _pushTimers.values) {
-      t.cancel();
-    }
-    _pushTimers.clear();
     DBService.instance.onLocalChange = null;
   }
 
@@ -387,6 +396,40 @@ class AuthSupabaseService {
       dev.log('_readLastSyncedAccountId failed: $e');
     }
     return null;
+  }
+
+  Future<void> _assertAccountPolicies({
+    required String accountId,
+    required String userUid,
+  }) async {
+    try {
+      final account = await _client
+          .from('accounts')
+          .select('id,frozen')
+          .eq('id', accountId)
+          .maybeSingle();
+      if (account != null && account['frozen'] == true) {
+        throw AccountFrozenException(accountId);
+      }
+    } on PostgrestException {
+      rethrow;
+    }
+
+    try {
+      final row = await _client
+          .from('account_users')
+          .select('disabled')
+          .eq('account_id', accountId)
+          .eq('user_uid', userUid)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      if (row != null && row['disabled'] == true) {
+        throw AccountUserDisabledException(accountId);
+      }
+    } on PostgrestException {
+      rethrow;
+    }
   }
 
   // ─────────────────── Helpers: Functions/RPC ───────────────────
@@ -601,6 +644,7 @@ class AuthSupabaseService {
       final pAcc = (prof?['account_id'] as String?)?.trim();
       if (pAcc != null && pAcc.isNotEmpty) {
         final role = (prof?['role'] as String?) ?? 'employee';
+        await _assertAccountPolicies(accountId: pAcc, userUid: user.id);
         return ActiveAccount(id: pAcc, role: role, canWrite: true);
       }
     } catch (e) {
@@ -622,6 +666,7 @@ class AuthSupabaseService {
               .maybeSingle();
           role = (au?['role'] as String?) ?? role;
         } catch (_) {}
+        await _assertAccountPolicies(accountId: '$acc', userUid: user.id);
         return ActiveAccount(id: '$acc', role: role, canWrite: true);
       }
     } catch (e) {
@@ -630,6 +675,7 @@ class AuthSupabaseService {
 
     final fb = await _resolveAccountIdForUid(user.id);
     if (fb != null && fb.isNotEmpty) {
+      await _assertAccountPolicies(accountId: fb, userUid: user.id);
       return ActiveAccount(id: fb, role: 'employee', canWrite: true);
     }
 
@@ -717,6 +763,7 @@ class AuthSupabaseService {
 
     _bindDbPush(_sync!);
 
+    await _sync!.pushAll();
     await _sync!.bootstrap(pull: pull, realtime: realtime);
 
     try {
