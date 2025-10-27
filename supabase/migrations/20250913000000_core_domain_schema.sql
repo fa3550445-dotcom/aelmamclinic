@@ -387,20 +387,39 @@ CREATE TABLE IF NOT EXISTS public.patient_services (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
--- صلاحيات الميزات ------------------------------------------------------------
+-- صلاحيات الميزات لكل موظف ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
   user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  allowed_features text[],
-  can_create boolean NOT NULL DEFAULT false,
-  can_update boolean NOT NULL DEFAULT false,
-  can_delete boolean NOT NULL DEFAULT false,
+  allowed_features text[] NOT NULL DEFAULT ARRAY[]::text[],
+  can_create boolean NOT NULL DEFAULT true,
+  can_update boolean NOT NULL DEFAULT true,
+  can_delete boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, user_uid)
 );
 CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
   ON public.account_feature_permissions(account_id);
+
+-- جدول سجلات التدقيق ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  account_id uuid REFERENCES public.accounts(id) ON DELETE CASCADE,
+  actor_uid uuid,
+  actor_email text,
+  table_name text NOT NULL,
+  op text NOT NULL,
+  row_pk text,
+  before_row jsonb,
+  after_row jsonb,
+  diff jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS audit_logs_account_created_idx
+  ON public.audit_logs(account_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS audit_logs_table_idx
+  ON public.audit_logs(table_name);
 
 -- الفهارس العامة على triplet --------------------------------------------------
 DO $$
@@ -460,11 +479,11 @@ BEGIN
   END LOOP;
 END $$;
 
-DROP TRIGGER IF EXISTS audit_logs_set_created_at ON public.audit_logs;
-CREATE TRIGGER audit_logs_set_created_at
-  BEFORE INSERT ON public.audit_logs
-  FOR EACH ROW
-  EXECUTE FUNCTION public.tg_audit_logs_set_created_at();
+DROP TRIGGER IF EXISTS account_feature_permissions_set_updated_at
+  ON public.account_feature_permissions;
+CREATE TRIGGER account_feature_permissions_set_updated_at
+BEFORE UPDATE ON public.account_feature_permissions
+FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
 
 -- تمكين الصلاحيات و RLS ------------------------------------------------------
 DO $$
@@ -512,103 +531,9 @@ GRANT SELECT ON public.accounts TO authenticated;
 GRANT SELECT ON public.account_users TO authenticated;
 
 ALTER TABLE public.account_feature_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.account_feature_permissions TO authenticated;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_select_admin'
-  ) THEN
-    CREATE POLICY account_feature_permissions_select_admin ON public.account_feature_permissions
-    FOR SELECT TO authenticated
-    USING (
-      fn_is_super_admin() = true OR EXISTS (
-        SELECT 1 FROM public.account_users au
-        WHERE au.account_id = account_feature_permissions.account_id
-          AND au.user_uid::text = auth.uid()::text
-          AND au.disabled IS NOT TRUE
-          AND lower(au.role) IN ('owner','manager')
-      )
-    );
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_select_self'
-  ) THEN
-    CREATE POLICY account_feature_permissions_select_self ON public.account_feature_permissions
-    FOR SELECT TO authenticated
-    USING (account_feature_permissions.user_uid::text = auth.uid()::text);
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_insert_manage'
-  ) THEN
-    CREATE POLICY account_feature_permissions_insert_manage ON public.account_feature_permissions
-    FOR INSERT TO authenticated
-    WITH CHECK (
-      fn_is_super_admin() = true OR EXISTS (
-        SELECT 1 FROM public.account_users au
-        WHERE au.account_id = account_feature_permissions.account_id
-          AND au.user_uid::text = auth.uid()::text
-          AND au.disabled IS NOT TRUE
-          AND lower(au.role) IN ('owner','manager')
-      )
-    );
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_update_manage'
-  ) THEN
-    CREATE POLICY account_feature_permissions_update_manage ON public.account_feature_permissions
-    FOR UPDATE TO authenticated
-    USING (
-      fn_is_super_admin() = true OR EXISTS (
-        SELECT 1 FROM public.account_users au
-        WHERE au.account_id = account_feature_permissions.account_id
-          AND au.user_uid::text = auth.uid()::text
-          AND au.disabled IS NOT TRUE
-          AND lower(au.role) IN ('owner','manager')
-      )
-    )
-    WITH CHECK (
-      fn_is_super_admin() = true OR EXISTS (
-        SELECT 1 FROM public.account_users au
-        WHERE au.account_id = account_feature_permissions.account_id
-          AND au.user_uid::text = auth.uid()::text
-          AND au.disabled IS NOT TRUE
-          AND lower(au.role) IN ('owner','manager')
-      )
-    );
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_delete_manage'
-  ) THEN
-    CREATE POLICY account_feature_permissions_delete_manage ON public.account_feature_permissions
-    FOR DELETE TO authenticated
-    USING (
-      fn_is_super_admin() = true OR EXISTS (
-        SELECT 1 FROM public.account_users au
-        WHERE au.account_id = account_feature_permissions.account_id
-          AND au.user_uid::text = auth.uid()::text
-          AND au.disabled IS NOT TRUE
-          AND lower(au.role) IN ('owner','manager')
-      )
-    );
-  END IF;
-END $$;
+GRANT SELECT ON public.audit_logs TO authenticated;
 
 DO $$
 DECLARE
@@ -690,6 +615,113 @@ BEGIN
           AND au.disabled IS NOT TRUE
       )
     );
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_select'
+  ) THEN
+    CREATE POLICY account_feature_permissions_select ON public.account_feature_permissions
+      FOR SELECT TO authenticated
+      USING (
+        fn_is_super_admin() = true
+        OR user_uid::text = auth.uid()::text
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = account_feature_permissions.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_insert'
+  ) THEN
+    CREATE POLICY account_feature_permissions_insert ON public.account_feature_permissions
+      FOR INSERT TO authenticated
+      WITH CHECK (
+        fn_is_super_admin() = true
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = account_feature_permissions.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_update'
+  ) THEN
+    CREATE POLICY account_feature_permissions_update ON public.account_feature_permissions
+      FOR UPDATE TO authenticated
+      USING (
+        fn_is_super_admin() = true
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = account_feature_permissions.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      )
+      WITH CHECK (
+        fn_is_super_admin() = true
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = account_feature_permissions.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='account_feature_permissions' AND policyname='account_feature_permissions_delete'
+  ) THEN
+    CREATE POLICY account_feature_permissions_delete ON public.account_feature_permissions
+      FOR DELETE TO authenticated
+      USING (
+        fn_is_super_admin() = true
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = account_feature_permissions.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      );
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='audit_logs' AND policyname='audit_logs_select_admins'
+  ) THEN
+    CREATE POLICY audit_logs_select_admins ON public.audit_logs
+      FOR SELECT TO authenticated
+      USING (
+        fn_is_super_admin() = true
+        OR EXISTS (
+          SELECT 1 FROM public.account_users au
+          WHERE au.account_id = audit_logs.account_id
+            AND au.user_uid::text = auth.uid()::text
+            AND coalesce(au.disabled, false) = false
+            AND lower(coalesce(au.role,'')) IN ('owner','admin','superadmin')
+        )
+      );
   END IF;
 END $$;
 
@@ -797,5 +829,320 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO authenticated;
+
+-- RPC مساعدة لإدارة الهوية والحسابات -----------------------------------------
+CREATE OR REPLACE FUNCTION public.my_profile()
+RETURNS TABLE (
+  account_id uuid,
+  role text,
+  email text,
+  is_super_admin boolean
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_email text;
+  v_account uuid;
+  v_role text;
+BEGIN
+  IF v_uid IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT u.email INTO v_email
+  FROM auth.users u
+  WHERE u.id = v_uid;
+
+  SELECT p.account_id, p.role
+    INTO v_account, v_role
+  FROM public.profiles p
+  WHERE p.id = v_uid
+  LIMIT 1;
+
+  IF v_account IS NULL OR v_role IS NULL THEN
+    SELECT au.account_id, au.role
+      INTO v_account, v_role
+    FROM public.account_users au
+    WHERE au.user_uid = v_uid
+      AND coalesce(au.disabled, false) = false
+    ORDER BY au.created_at DESC NULLS LAST
+    LIMIT 1;
+  END IF;
+
+  IF v_role IS NULL AND fn_is_super_admin() THEN
+    v_role := 'superadmin';
+  END IF;
+
+  RETURN QUERY
+  SELECT v_account,
+         v_role,
+         v_email,
+         fn_is_super_admin();
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.my_profile() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.my_profile() TO service_role;
+
+CREATE OR REPLACE FUNCTION public.my_feature_permissions(p_account uuid)
+RETURNS TABLE (
+  account_id uuid,
+  user_uid uuid,
+  allowed_features text[],
+  can_create boolean,
+  can_update boolean,
+  can_delete boolean
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_account uuid := p_account;
+  v_allowed text[];
+  v_can_create boolean := true;
+  v_can_update boolean := true;
+  v_can_delete boolean := true;
+BEGIN
+  IF v_uid IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF v_account IS NULL THEN
+    SELECT au.account_id
+      INTO v_account
+    FROM public.account_users au
+    WHERE au.user_uid = v_uid
+      AND coalesce(au.disabled, false) = false
+    ORDER BY au.created_at DESC NULLS LAST
+    LIMIT 1;
+  END IF;
+
+  IF v_account IS NULL THEN
+    RETURN QUERY SELECT NULL::uuid, v_uid, ARRAY[]::text[], true, true, true;
+    RETURN;
+  END IF;
+
+  IF fn_is_super_admin() = false THEN
+    PERFORM 1
+    FROM public.account_users au
+    WHERE au.account_id = v_account
+      AND au.user_uid = v_uid
+      AND coalesce(au.disabled, false) = false;
+
+    IF NOT FOUND THEN
+      RETURN QUERY SELECT v_account, v_uid, ARRAY[]::text[], true, true, true;
+      RETURN;
+    END IF;
+  END IF;
+
+  SELECT afp.allowed_features,
+         afp.can_create,
+         afp.can_update,
+         afp.can_delete
+    INTO v_allowed, v_can_create, v_can_update, v_can_delete
+  FROM public.account_feature_permissions afp
+  WHERE afp.account_id = v_account
+    AND afp.user_uid = v_uid
+  LIMIT 1;
+
+  RETURN QUERY SELECT v_account,
+                         v_uid,
+                         coalesce(v_allowed, ARRAY[]::text[]),
+                         coalesce(v_can_create, true),
+                         coalesce(v_can_update, true),
+                         coalesce(v_can_delete, true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.my_feature_permissions(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.my_feature_permissions(uuid) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_create_owner_full(
+  p_clinic_name text,
+  p_owner_email text,
+  p_owner_password text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_clinic text := nullif(trim(p_clinic_name), '');
+  v_email text := nullif(lower(trim(p_owner_email)), '');
+  v_uid uuid;
+  v_account uuid;
+BEGIN
+  IF fn_is_super_admin() = false THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  IF v_clinic IS NULL THEN
+    RAISE EXCEPTION 'clinic_name is required';
+  END IF;
+
+  IF v_email IS NULL THEN
+    RAISE EXCEPTION 'owner_email is required';
+  END IF;
+
+  SELECT u.id
+    INTO v_uid
+  FROM auth.users u
+  WHERE lower(u.email) = v_email
+  ORDER BY u.created_at DESC
+  LIMIT 1;
+
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'owner email % not found in auth.users', v_email;
+  END IF;
+
+  v_account := public.admin_bootstrap_clinic_for_email(v_clinic, v_email, 'owner');
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'account_id', v_account,
+    'owner_uid', v_uid
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_create_owner_full(text, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_create_owner_full(text, text, text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_create_employee_full(
+  p_account uuid,
+  p_email text,
+  p_password text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_account uuid := p_account;
+  v_email text := nullif(lower(trim(p_email)), '');
+  v_uid uuid;
+BEGIN
+  IF fn_is_super_admin() = false THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  IF v_account IS NULL THEN
+    RAISE EXCEPTION 'account_id is required';
+  END IF;
+
+  IF v_email IS NULL THEN
+    RAISE EXCEPTION 'email is required';
+  END IF;
+
+  SELECT u.id
+    INTO v_uid
+  FROM auth.users u
+  WHERE lower(u.email) = v_email
+  ORDER BY u.created_at DESC
+  LIMIT 1;
+
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'employee email % not found in auth.users', v_email;
+  END IF;
+
+  PERFORM public.admin_attach_employee(v_account, v_uid, 'employee');
+
+  UPDATE public.account_users
+     SET email = v_email
+   WHERE account_id = v_account
+     AND user_uid = v_uid;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'account_id', v_account,
+    'user_uid', v_uid
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_list_clinics()
+RETURNS TABLE (
+  id uuid,
+  name text,
+  frozen boolean,
+  created_at timestamptz
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF fn_is_super_admin() = false THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  RETURN QUERY
+  SELECT a.id, a.name, a.frozen, a.created_at
+  FROM public.accounts a
+  ORDER BY a.created_at DESC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_list_clinics() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_list_clinics() TO service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_set_clinic_frozen(p_account_id uuid, p_frozen boolean)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF fn_is_super_admin() = false THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  IF p_account_id IS NULL THEN
+    RAISE EXCEPTION 'account_id is required';
+  END IF;
+
+  UPDATE public.accounts
+     SET frozen = coalesce(p_frozen, true)
+   WHERE id = p_account_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_delete_clinic(p_account_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF fn_is_super_admin() = false THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  IF p_account_id IS NULL THEN
+    RAISE EXCEPTION 'account_id is required';
+  END IF;
+
+  DELETE FROM public.accounts
+   WHERE id = p_account_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_delete_clinic(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_delete_clinic(uuid) TO service_role;
 
 NOTIFY pgrst, 'reload schema';
