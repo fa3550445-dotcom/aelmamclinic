@@ -152,13 +152,28 @@ class ActivationProvider with ChangeNotifier {
 
     final duration = _expiryDate!.difference(DateTime.now());
     if (duration.isNegative) {
-      deactivate();
+      unawaited(
+        () async {
+          try {
+            await deactivate();
+          } catch (error, stackTrace) {
+            Zone.current.handleUncaughtError(error, stackTrace);
+          }
+        }(),
+      );
       return;
     }
 
     _expiryTimer = Timer(duration, () {
-      deactivate();
-      notifyListeners();
+      unawaited(
+        () async {
+          try {
+            await deactivate();
+          } catch (error, stackTrace) {
+            Zone.current.handleUncaughtError(error, stackTrace);
+          }
+        }(),
+      );
     });
   }
 
