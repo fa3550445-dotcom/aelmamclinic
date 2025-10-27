@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../../models/alert_setting.dart';
-import '../../../models/item.dart';
-import '../../../providers/repository_provider.dart';
-import '../../../services/repository_service.dart';
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/models/alert_setting.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
+import 'package:aelmamclinic/services/repository_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'create_alert_screen.dart';
 
 /// شاشة «استعراض التنبيهات» بنمط TBIAN
@@ -179,7 +179,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(.12),
+        color: color.withValues(alpha: .12),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
             color: critical ? Colors.red.shade200 : Colors.green.shade200),
@@ -288,7 +288,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
                             selected: _showCriticalOnly,
                             onSelected: (v) =>
                                 setState(() => _showCriticalOnly = v),
-                            selectedColor: Colors.red.withOpacity(.12),
+                            selectedColor: Colors.red.withValues(alpha: .12),
                             checkmarkColor: Colors.red,
                           ),
                           FilterChip(
@@ -296,7 +296,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
                             selected: _showEnabledOnly,
                             onSelected: (v) =>
                                 setState(() => _showEnabledOnly = v),
-                            selectedColor: kPrimaryColor.withOpacity(.12),
+                            selectedColor: kPrimaryColor.withValues(alpha: .12),
                             checkmarkColor: kPrimaryColor,
                           ),
                           // زر سريع لإضافة تنبيه جديد
@@ -360,7 +360,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
                                   horizontal: 6, vertical: 4),
                               leading: Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withOpacity(.10),
+                                  color: kPrimaryColor.withValues(alpha: .10),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(10),
@@ -381,7 +381,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(.75),
+                                              .withValues(alpha: .75),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),

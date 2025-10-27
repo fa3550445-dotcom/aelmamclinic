@@ -4,8 +4,8 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 /// القائمة الفرعية للمشتريات والاستهلاكات ببصمة TBIAN/Neumorphism
 class PcMenuScreen extends StatelessWidget {
@@ -48,7 +48,7 @@ class PcMenuScreen extends StatelessWidget {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.10),
+                        color: kPrimaryColor.withValues(alpha: .10),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
@@ -60,7 +60,7 @@ class PcMenuScreen extends StatelessWidget {
                       child: Text(
                         'اختر واحدة من الخيارات لإدارة المشتريات والاستهلاكات.',
                         style: TextStyle(
-                          color: scheme.onSurface.withOpacity(.85),
+                          color: scheme.onSurface.withValues(alpha: .85),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -129,7 +129,7 @@ class _MenuTile extends StatelessWidget {
             // أيقونة داخل كبسولة ملوّنة خفيفة
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
               padding: const EdgeInsets.all(12),
@@ -152,7 +152,7 @@ class _MenuTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: scheme.onSurface.withOpacity(.75),
+                      color: scheme.onSurface.withValues(alpha: .75),
                       fontWeight: FontWeight.w600,
                       fontSize: 13.5,
                     ),
@@ -162,7 +162,7 @@ class _MenuTile extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Icon(Icons.chevron_left_rounded,
-                color: scheme.onSurface.withOpacity(.6)),
+                color: scheme.onSurface.withValues(alpha: .6)),
           ],
         ),
       ),

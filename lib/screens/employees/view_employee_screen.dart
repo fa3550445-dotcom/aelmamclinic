@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Clipboard
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'edit_employee_screen.dart';
 
 class ViewEmployeeScreen extends StatefulWidget {
@@ -115,7 +115,7 @@ class _ViewEmployeeScreenState extends State<ViewEmployeeScreen> {
                         child: Text(
                           'لم يتم العثور على الموظف',
                           style: TextStyle(
-                            color: cs.onSurface.withOpacity(.6),
+                            color: cs.onSurface.withValues(alpha: .6),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -129,7 +129,7 @@ class _ViewEmployeeScreenState extends State<ViewEmployeeScreen> {
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: kPrimaryColor.withOpacity(.10),
+                                    color: kPrimaryColor.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   padding: const EdgeInsets.all(14),
@@ -158,7 +158,7 @@ class _ViewEmployeeScreenState extends State<ViewEmployeeScreen> {
                                         _dashIfEmpty(
                                             _asString(_employee!['jobTitle'])),
                                         style: TextStyle(
-                                          color: cs.onSurface.withOpacity(.7),
+                                          color: cs.onSurface.withValues(alpha: .7),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -282,7 +282,7 @@ class _InfoRow extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -291,7 +291,7 @@ class _InfoRow extends StatelessWidget {
         title: Text(
           label,
           style: TextStyle(
-            color: cs.onSurface.withOpacity(.7),
+            color: cs.onSurface.withValues(alpha: .7),
             fontWeight: FontWeight.w700,
           ),
         ),

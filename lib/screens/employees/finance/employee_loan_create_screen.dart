@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 
 class EmployeeLoanCreateScreen extends StatefulWidget {
   final int empId;
@@ -230,7 +230,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(.25),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: .25),
         ),
       ),
       child: Row(
@@ -238,7 +238,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
           Text(
             '$label: ',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -280,7 +280,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.10),
+                                color: kPrimaryColor.withValues(alpha: .10),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               padding: const EdgeInsets.all(14),
@@ -306,7 +306,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
                                   Text(
                                     'الرصيد النظري الحالي: ${_total.toStringAsFixed(2)}',
                                     style: TextStyle(
-                                      color: cs.onSurface.withOpacity(.7),
+                                      color: cs.onSurface.withValues(alpha: .7),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -327,7 +327,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
                           contentPadding: EdgeInsets.zero,
                           leading: Container(
                             decoration: BoxDecoration(
-                              color: kPrimaryColor.withOpacity(.10),
+                              color: kPrimaryColor.withValues(alpha: .10),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.all(10),
@@ -341,7 +341,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
                           subtitle: Text(
                             _formatDateTime(),
                             style: TextStyle(
-                              color: cs.onSurface.withOpacity(.65),
+                              color: cs.onSurface.withValues(alpha: .65),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -448,7 +448,7 @@ class _InfoRow extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -457,7 +457,7 @@ class _InfoRow extends StatelessWidget {
         title: Text(
           label,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
             fontWeight: FontWeight.w700,
           ),
         ),

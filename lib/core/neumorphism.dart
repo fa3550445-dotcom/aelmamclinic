@@ -6,7 +6,7 @@ import 'theme.dart';
 BoxShadow _lightShadow(BuildContext context, double depth) {
   // ظلّ فاتح (أعلى-يسار)
   return BoxShadow(
-    color: Colors.white.withOpacity(.95),
+    color: Colors.white.withValues(alpha: .95),
     offset: Offset(-depth, -depth),
     blurRadius: depth * 2.2,
     spreadRadius: depth * .2,
@@ -16,8 +16,8 @@ BoxShadow _lightShadow(BuildContext context, double depth) {
 BoxShadow _darkShadow(BuildContext context, double depth) {
   // ظلّ داكن (أسفل-يمين)
   final c = Theme.of(context).brightness == Brightness.dark
-      ? Colors.black.withOpacity(.45)
-      : const Color(0xFFCFD8DC).withOpacity(.75);
+      ? Colors.black.withValues(alpha: .45)
+      : const Color(0xFFCFD8DC).withValues(alpha: .75);
   return BoxShadow(
     color: c,
     offset: Offset(depth, depth),
@@ -282,7 +282,7 @@ class _NeuFieldState extends State<NeuField> {
         borderRadius: BorderRadius.circular(widget.radius),
         boxShadow: shadows,
         border: Border.all(
-          color: _focused ? kPrimaryColor.withOpacity(.5) : scheme.outlineVariant,
+          color: _focused ? kPrimaryColor.withValues(alpha: .5) : scheme.outlineVariant,
           width: _focused ? 1.4 : 1.0,
         ),
       ),
@@ -315,10 +315,10 @@ class _NeuFieldState extends State<NeuField> {
                 hintText: widget.hintText,
                 labelText: widget.labelText,
                 labelStyle: TextStyle(
-                  color: scheme.onSurface.withOpacity(.7),
+                  color: scheme.onSurface.withValues(alpha: .7),
                   fontWeight: FontWeight.w600,
                 ),
-                hintStyle: TextStyle(color: scheme.onSurface.withOpacity(.45)),
+                hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: .45)),
                 prefixIcon: widget.prefix,
                 suffixIcon: widget.suffix,
                 contentPadding: EdgeInsets.zero,

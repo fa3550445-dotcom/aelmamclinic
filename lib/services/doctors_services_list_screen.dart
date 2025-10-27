@@ -3,13 +3,13 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /*── البيانات ─*/
 import 'db_service.dart';
-import '../models/doctor.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 
 /*── شاشة التفاصيل ─*/
 import 'doctor_services_detail_screen.dart';
@@ -111,7 +111,7 @@ class _DoctorsServicesListScreenState extends State<DoctorsServicesListScreen> {
         child: Text(
           'الأطباء: ${_filteredDoctors.length}',
           style: TextStyle(
-            color: scheme.onSurface.withOpacity(.6),
+            color: scheme.onSurface.withValues(alpha: .6),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -132,7 +132,7 @@ class _DoctorsServicesListScreenState extends State<DoctorsServicesListScreen> {
                   borderRadius: BorderRadius.circular(999),
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: kPrimaryColor.withOpacity(.12),
+                    backgroundColor: kPrimaryColor.withValues(alpha: .12),
                     child: Padding(
                       padding: const EdgeInsets.all(4),
                       child: Image.asset(
@@ -154,7 +154,7 @@ class _DoctorsServicesListScreenState extends State<DoctorsServicesListScreen> {
                   doctor.specialization,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: scheme.onSurface.withOpacity(.75)),
+                  style: TextStyle(color: scheme.onSurface.withValues(alpha: .75)),
                 ),
                 trailing: const Icon(Icons.chevron_left_rounded),
                 onTap: () {
@@ -221,7 +221,7 @@ class _DoctorsServicesListScreenState extends State<DoctorsServicesListScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),

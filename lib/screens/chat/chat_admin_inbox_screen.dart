@@ -11,12 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../models/chat_models.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/chat_provider.dart';
-import '../../widgets/chat/conversation_tile.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/providers/chat_provider.dart';
+import 'package:aelmamclinic/widgets/chat/conversation_tile.dart';
 import 'chat_room_screen.dart';
 
 class ChatAdminInboxScreen extends StatefulWidget {
@@ -403,7 +403,7 @@ class _ChatAdminInboxScreenState extends State<ChatAdminInboxScreen> {
                             child: Text(
                               'لا توجد محادثات مطابقة.',
                               style: TextStyle(
-                                color: scheme.onSurface.withOpacity(.75),
+                                color: scheme.onSurface.withValues(alpha: .75),
                                 fontWeight: FontWeight.w800,
                               ),
                             ),

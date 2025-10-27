@@ -13,13 +13,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../services/db_service.dart';
-import '../../models/patient.dart';
-import '../../models/consumption.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/consumption.dart';
 
 /// نموذج بيانات بسيط للرسوم
 class _ChartData {
@@ -302,7 +302,7 @@ class _PdfUtils {
         "${dir.path}/${prefix}_${DateTime.now().millisecondsSinceEpoch}.pdf";
     final file = File(path);
     await file.writeAsBytes(await doc.save());
-    await Share.shareXFiles([XFile(path)], text: prefix);
+    await SharePlus.instance.shareXFiles(files: [XFile(path)], text: prefix);
   }
 
   /// تنزيل
@@ -371,7 +371,7 @@ class _FilterAndExportBar extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: kPrimaryColor.withOpacity(.10),
+                    color: kPrimaryColor.withValues(alpha: .10),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   padding: const EdgeInsets.all(10),
@@ -482,7 +482,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             controller: _tabController,
             indicatorColor: scheme.primary,
             labelColor: scheme.onSurface,
-            unselectedLabelColor: scheme.onSurface.withOpacity(.6),
+            unselectedLabelColor: scheme.onSurface.withValues(alpha: .6),
             tabs: const [
               Tab(icon: Icon(Icons.date_range), text: "الدخل بالتاريخ"),
               Tab(icon: Icon(Icons.calendar_today), text: "الاستهلاك بالتاريخ"),

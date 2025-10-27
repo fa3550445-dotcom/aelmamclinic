@@ -3,7 +3,7 @@
 // سجل محادثة متوافق مع جدول Supabase: public.chat_conversations
 // ملاحظة: هذا "سجل" DB. نموذج الواجهة ChatConversation موجود في chat_models.dart.
 
-import '../utils/time.dart' as t;
+import 'package:aelmamclinic/utils/time.dart' as t;
 import 'chat_models.dart' show ChatConversationType;
 
 class ChatConversationRecord {

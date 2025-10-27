@@ -2,12 +2,12 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../../services/db_service.dart';
-import '../../../services/logging_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/logging_service.dart';
 import 'employee_salary_detail_screen.dart';
 import 'non_doctor_salary_detail_screen.dart';
 
@@ -221,7 +221,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
                                       child: Text(
                                         'لا توجد نتائج',
                                         style: TextStyle(
-                                          color: cs.onSurface.withOpacity(.6),
+                                          color: cs.onSurface.withValues(alpha: .6),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -274,7 +274,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(.10),
+              color: kPrimaryColor.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(8),
@@ -304,7 +304,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(.10),
+              color: kPrimaryColor.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(8),
@@ -334,7 +334,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: (isPaid ? Colors.green : Colors.redAccent).withOpacity(.12),
+            color: (isPaid ? Colors.green : Colors.redAccent).withValues(alpha: .12),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -352,7 +352,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
               ? 'تم صرف الراتب لـ ${_fmtYearMonth()}'
               : 'لم يتم صرف الراتب لـ ${_fmtYearMonth()}',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
             fontWeight: FontWeight.w600,
           ),
         ),

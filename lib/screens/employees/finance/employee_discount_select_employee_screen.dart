@@ -2,11 +2,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 import 'employee_discount_create_screen.dart';
 import 'employee_discounts_of_employee_screen.dart';
 
@@ -192,7 +192,7 @@ class _EmployeeDiscountSelectEmployeeScreenState
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(8),
@@ -249,7 +249,7 @@ class _EmployeeDiscountSelectEmployeeScreenState
                             ? 'خطأ في التحميل'
                             : 'النتائج: ${_filteredEmployees.length}'),
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(.65),
+                      color: cs.onSurface.withValues(alpha: .65),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -295,7 +295,7 @@ class _EmployeeDiscountSelectEmployeeScreenState
                                             leading: CircleAvatar(
                                               radius: 22,
                                               backgroundColor: kPrimaryColor
-                                                  .withOpacity(.12),
+                                                  .withValues(alpha: .12),
                                               child: Text(
                                                 _avatarText(name),
                                                 style: const TextStyle(
@@ -327,7 +327,7 @@ class _EmployeeDiscountSelectEmployeeScreenState
                                                         vertical: 4),
                                                     decoration: BoxDecoration(
                                                       color: kPrimaryColor
-                                                          .withOpacity(.10),
+                                                          .withValues(alpha: .10),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               100),
@@ -350,7 +350,7 @@ class _EmployeeDiscountSelectEmployeeScreenState
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: cs.onSurface
-                                                    .withOpacity(.7),
+                                                    .withValues(alpha: .7),
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -395,14 +395,14 @@ class _EmptyView extends StatelessWidget {
         Icon(
           isCreateMode ? Icons.person_search_rounded : Icons.history_rounded,
           size: 48,
-          color: cs.onSurface.withOpacity(.35),
+          color: cs.onSurface.withValues(alpha: .35),
         ),
         const SizedBox(height: 10),
         Center(
           child: Text(
             'لا توجد نتائج',
             style: TextStyle(
-              color: cs.onSurface.withOpacity(.6),
+              color: cs.onSurface.withValues(alpha: .6),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -452,7 +452,7 @@ class _ErrorView extends StatelessWidget {
                 message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: cs.onSurface.withOpacity(.75),
+                  color: cs.onSurface.withValues(alpha: .75),
                   fontWeight: FontWeight.w600,
                 ),
               ),

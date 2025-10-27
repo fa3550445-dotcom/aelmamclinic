@@ -3,9 +3,9 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../models/item.dart';
-import '../../../models/item_type.dart';
-import '../../../providers/repository_provider.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 
 /*──────── ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);
@@ -200,7 +200,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: lightAccentColor.withOpacity(.18),
+                          color: lightAccentColor.withValues(alpha: .18),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -219,7 +219,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
                       const SizedBox(width: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(.12),
+                          color: Colors.green.withValues(alpha: .12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -278,11 +278,11 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
                     return ActionChip(
                       label: Text('+$n'),
                       onPressed: () => _bumpQty(n),
-                      backgroundColor: lightAccentColor.withOpacity(.18),
+                      backgroundColor: lightAccentColor.withValues(alpha: .18),
                       // لتوافقية أعلى مع نسخ Flutter القديمة استخدم shape بدل side
                       shape: StadiumBorder(
                         side: BorderSide(
-                          color: lightAccentColor.withOpacity(.5),
+                          color: lightAccentColor.withValues(alpha: .5),
                         ),
                       ),
                     );
@@ -385,7 +385,7 @@ class _TotalCostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: lightAccentColor.withOpacity(.18),
+        color: lightAccentColor.withValues(alpha: .18),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: lightAccentColor),
       ),

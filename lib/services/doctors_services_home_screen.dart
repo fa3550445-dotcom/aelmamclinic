@@ -4,9 +4,9 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 import 'doctors_services_list_screen.dart';
 import 'doctors_shares_list_screen.dart';
@@ -49,7 +49,7 @@ class DoctorsServicesHomeScreen extends StatelessWidget {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.10),
+                        color: kPrimaryColor.withValues(alpha: .10),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
@@ -143,7 +143,7 @@ class _MenuTile extends StatelessWidget {
             // أيقونة داخل كبسولة ملوّنة خفيفة
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(.10),
+                color: kPrimaryColor.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
               padding: const EdgeInsets.all(12),
@@ -169,7 +169,7 @@ class _MenuTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: scheme.onSurface.withOpacity(.75),
+                      color: scheme.onSurface.withValues(alpha: .75),
                       fontWeight: FontWeight.w600,
                       fontSize: 13.5,
                     ),
@@ -180,7 +180,7 @@ class _MenuTile extends StatelessWidget {
             const SizedBox(width: 10),
 
             Icon(Icons.chevron_left_rounded,
-                color: scheme.onSurface.withOpacity(.6)),
+                color: scheme.onSurface.withValues(alpha: .6)),
           ],
         ),
       ),

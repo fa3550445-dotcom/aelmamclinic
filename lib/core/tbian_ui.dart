@@ -27,7 +27,7 @@ class TSearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon:
-              Icon(Icons.search, color: scheme.onSurface.withOpacity(.7)),
+              Icon(Icons.search, color: scheme.onSurface.withValues(alpha: .7)),
           suffixIcon: controller.text.isEmpty
               ? null
               : IconButton(
@@ -61,7 +61,7 @@ class TDateButton extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(.10),
+              color: kPrimaryColor.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.all(8),
@@ -110,11 +110,11 @@ class TOutlinedButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, color: scheme.onSurface.withOpacity(.85)),
+      icon: Icon(icon, color: scheme.onSurface.withValues(alpha: .85)),
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: scheme.onSurface,
-        side: BorderSide(color: scheme.outlineVariant.withOpacity(.4)),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .4)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
@@ -167,7 +167,7 @@ class TInfoCard extends StatelessWidget {
           value,
           maxLines: maxLines,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: scheme.onSurface.withOpacity(.85)),
+          style: TextStyle(color: scheme.onSurface.withValues(alpha: .85)),
         ),
       ),
     );

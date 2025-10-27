@@ -3,10 +3,10 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/formatters.dart';
-import '../../models/patient.dart';
-import '../../models/prescription.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/core/formatters.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/prescription.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 import 'new_prescription_screen.dart';
 import 'view_prescription_screen.dart';
@@ -243,7 +243,7 @@ class _PatientPrescriptionsScreenState
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .onSurface
-                                                    .withOpacity(.7),
+                                                    .withValues(alpha: .7),
                                               ),
                                             ),
                                             trailing: IconButton(
@@ -367,7 +367,7 @@ class _PatientPrescriptionsScreenState
                                                                     BoxDecoration(
                                                                   color: scheme
                                                                       .primary
-                                                                      .withOpacity(
+                                                                      .withValues(alpha: 
                                                                           .10),
                                                                   borderRadius:
                                                                       BorderRadius

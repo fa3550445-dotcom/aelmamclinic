@@ -3,16 +3,16 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/doctor.dart';
-import '../../models/drug.dart';
-import '../../models/patient.dart';
-import '../../services/db_service.dart';
-import '../patients/patient_picker_screen.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/drug.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/screens/patients/patient_picker_screen.dart';
 
 /* تصميم TBIAN */
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /// عنصر دواء داخل الوصفة
 class _RxItem {
@@ -473,7 +473,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -488,7 +488,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                         ),
                       ),
                       Icon(Icons.chevron_left_rounded,
-                          color: scheme.onSurface.withOpacity(.6)),
+                          color: scheme.onSurface.withValues(alpha: .6)),
                     ],
                   ),
                 ),
@@ -503,7 +503,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -518,7 +518,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                         ),
                       ),
                       Icon(Icons.chevron_left_rounded,
-                          color: scheme.onSurface.withOpacity(.6)),
+                          color: scheme.onSurface.withValues(alpha: .6)),
                     ],
                   ),
                 ),
@@ -549,7 +549,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -564,7 +564,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                         ),
                       ),
                       Icon(Icons.chevron_left_rounded,
-                          color: scheme.onSurface.withOpacity(.6)),
+                          color: scheme.onSurface.withValues(alpha: .6)),
                     ],
                   ),
                 ),
@@ -579,7 +579,7 @@ class _NewPrescriptionScreenState extends State<NewPrescriptionScreen> {
                     children: _items
                         .map(
                           (it) => InputChip(
-                            backgroundColor: kPrimaryColor.withOpacity(.08),
+                            backgroundColor: kPrimaryColor.withValues(alpha: .08),
                             label: Text(
                                 '${it.drugName} • ${it.days} يوم × ${it.timesPerDay}'),
                             onDeleted: () => setState(() => _items.remove(it)),

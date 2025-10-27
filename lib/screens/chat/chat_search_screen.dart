@@ -26,11 +26,11 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../models/chat_models.dart';
-import '../../utils/time.dart' as t;
-import '../../utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/utils/time.dart' as t;
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
 
 class ChatSearchScreen extends StatefulWidget {
   final String conversationId;
@@ -338,7 +338,7 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 leading: CircleAvatar(
                   radius: 20,
-                  backgroundColor: kPrimaryColor.withOpacity(.08),
+                  backgroundColor: kPrimaryColor.withValues(alpha: .08),
                   child: Icon(
                     isImage ? Icons.image_rounded : Icons.text_snippet_rounded,
                     color: kPrimaryColor,
@@ -369,7 +369,7 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
                       Text(
                         time,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .6),
                           fontWeight: FontWeight.w700,
                           fontSize: 11.5,
                         ),
@@ -530,7 +530,7 @@ class _Choice extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: c),
-          color: selected ? kPrimaryColor.withOpacity(.08) : null,
+          color: selected ? kPrimaryColor.withValues(alpha: .08) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -605,7 +605,7 @@ class _Highlighted extends StatelessWidget {
       spans.add(TextSpan(
         text: s.substring(idx, idx + n.length),
         style: base.copyWith(
-          backgroundColor: kPrimaryColor.withOpacity(.25),
+          backgroundColor: kPrimaryColor.withValues(alpha: .25),
           color: base.color,
         ),
       ));
@@ -634,7 +634,7 @@ class _CenterMsg extends StatelessWidget {
             Text(
               text,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
                 fontWeight: FontWeight.w800,
               ),
             ),

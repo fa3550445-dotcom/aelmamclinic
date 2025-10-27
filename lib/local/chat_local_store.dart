@@ -14,7 +14,7 @@ import 'dart:convert';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
-import '../models/chat_models.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
 
 class ChatLocalStore {
   ChatLocalStore._();

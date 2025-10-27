@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../../core/theme.dart';
-import '../../../core/neumorphism.dart';
-import '../../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../../models/item.dart';
-import '../../../models/item_type.dart';
-import '../../../providers/repository_provider.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 
 /// شاشة «إنشاء / تعديل تنبيه قرب النفاد» بنمط TBIAN.
 class CreateAlertScreen extends StatefulWidget {
@@ -120,7 +120,7 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
                     decoration: BoxDecoration(
-                      color: kPrimaryColor.withOpacity(.10),
+                      color: kPrimaryColor.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     padding: const EdgeInsets.all(10),
@@ -131,7 +131,7 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
                       'اضبط تنبيهًا يظهر عند نزول مخزون الصنف إلى حد معيّن'),
                   subtitle: Text(
                     'اختر نوع الصنف ثم الصنف، وحدّد العتبة التي عندها يتم إشعارك.',
-                    style: TextStyle(color: scheme.onSurface.withOpacity(.75)),
+                    style: TextStyle(color: scheme.onSurface.withValues(alpha: .75)),
                   ),
                 ),
               ),

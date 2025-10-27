@@ -7,22 +7,22 @@ import 'package:provider/provider.dart';
 import 'package:mime/mime.dart';
 import 'dart:ui' as ui show TextDirection;
 
-import '../../core/theme.dart';
-import '../../core/validators.dart';
-import '../../core/formatters.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
-import '../../providers/auth_provider.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/validators.dart';
+import 'package:aelmamclinic/core/formatters.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
 
-import '../../models/attachment.dart';
-import '../../models/consumption.dart';
-import '../../models/item.dart';
-import '../../models/patient.dart';
-import '../../models/patient_service.dart';
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/repository_provider.dart';
+import 'package:aelmamclinic/models/attachment.dart';
+import 'package:aelmamclinic/models/consumption.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/models/patient_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/providers/repository_provider.dart';
 import 'list_patients_screen.dart';
 import 'duplicate_patients_screen.dart';
 
@@ -1350,7 +1350,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
               duration: const Duration(milliseconds: 120),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: sel ? kPrimaryColor.withOpacity(.10) : scheme.surface,
+                color: sel ? kPrimaryColor.withValues(alpha: .10) : scheme.surface,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: sel ? kPrimaryColor : scheme.outlineVariant,
@@ -1360,12 +1360,12 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
                     ? [
                   // لمسة نيومورفيزم خفيفة عند الاختيار
                   BoxShadow(
-                    color: Colors.white.withOpacity(.9),
+                    color: Colors.white.withValues(alpha: .9),
                     offset: const Offset(-3, -3),
                     blurRadius: 6,
                   ),
                   BoxShadow(
-                    color: const Color(0xFFCFD8DC).withOpacity(.6),
+                    color: const Color(0xFFCFD8DC).withValues(alpha: .6),
                     offset: const Offset(3, 3),
                     blurRadius: 6,
                   ),
@@ -1401,7 +1401,7 @@ class _DateRow extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.10),
+            color: kPrimaryColor.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(14),
           ),
           padding: const EdgeInsets.all(8),
@@ -1419,7 +1419,7 @@ class _DateRow extends StatelessWidget {
         if (action != null)
           Text(action!,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.6),
+                color: scheme.onSurface.withValues(alpha: .6),
                 fontWeight: FontWeight.w700,
               )),
       ],
@@ -1439,7 +1439,7 @@ class _RemovableChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(text, style: TextStyle(color: scheme.onSurface.withOpacity(.9))),
+          Text(text, style: TextStyle(color: scheme.onSurface.withValues(alpha: .9))),
           const SizedBox(width: 6),
           InkWell(
             onTap: onDelete,

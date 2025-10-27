@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class EditDoctorScreen extends StatefulWidget {
   final Doctor doctor;
@@ -154,7 +154,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.schedule_rounded,
-                        color: kPrimaryColor.withOpacity(.9)),
+                        color: kPrimaryColor.withValues(alpha: .9)),
                     title: const Text(
                       'ساعات المناوبة (من)',
                       style:
@@ -163,7 +163,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                     subtitle: Text(
                       _formatTimeOfDay(_startTime),
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.7),
+                        color: scheme.onSurface.withValues(alpha: .7),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -183,7 +183,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.access_time_filled_rounded,
-                        color: kPrimaryColor.withOpacity(.9)),
+                        color: kPrimaryColor.withValues(alpha: .9)),
                     title: const Text(
                       'ساعات المناوبة (إلى)',
                       style:
@@ -192,7 +192,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                     subtitle: Text(
                       _formatTimeOfDay(_endTime),
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.7),
+                        color: scheme.onSurface.withValues(alpha: .7),
                         fontWeight: FontWeight.w700,
                       ),
                     ),

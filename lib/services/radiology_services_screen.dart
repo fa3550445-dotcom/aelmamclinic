@@ -9,9 +9,9 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /*── البيانات ─*/
 import 'db_service.dart';
@@ -571,7 +571,7 @@ class _RadiologyServicesScreenState extends State<RadiologyServicesScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),

@@ -18,10 +18,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:postgrest/postgrest.dart';
 
-import '../core/features.dart'; // FeatureKeys.chat
-import '../services/auth_supabase_service.dart';
-import '../services/db_service.dart';
-import '../services/device_id_service.dart';
+import 'package:aelmamclinic/core/features.dart'; // FeatureKeys.chat
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/device_id_service.dart';
 
 /// مفاتيح التخزين المحلي
 const _kUid = 'auth.uid';

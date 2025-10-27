@@ -1,11 +1,11 @@
 // lib/screens/drugs/drug_list_screen.dart
 import 'package:flutter/material.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
-import '../../services/db_service.dart';
-import '../../models/drug.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/models/drug.dart';
 import 'new_drug_screen.dart';
 
 class DrugListScreen extends StatefulWidget {
@@ -182,7 +182,7 @@ class _DrugListScreenState extends State<DrugListScreen> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(.75),
+                              .withValues(alpha: .75),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -203,7 +203,7 @@ class _DrugListScreenState extends State<DrugListScreen> {
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withOpacity(.6),
+                            .withValues(alpha: .6),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -228,7 +228,7 @@ class _DrugListScreenState extends State<DrugListScreen> {
                             leading: Container(
                               decoration: BoxDecoration(
                                 color: kPrimaryColor
-                                    .withOpacity(.10),
+                                    .withValues(alpha: .10),
                                 borderRadius:
                                 BorderRadius.circular(12),
                               ),
@@ -251,7 +251,7 @@ class _DrugListScreenState extends State<DrugListScreen> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
-                                    .withOpacity(.75),
+                                    .withValues(alpha: .75),
                                 fontWeight: FontWeight.w600,
                               ),
                             )

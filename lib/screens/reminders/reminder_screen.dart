@@ -6,8 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/return_entry.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});
@@ -245,13 +245,13 @@ class _ReminderScreenState extends State<ReminderScreen> {
                         },
                         label: const Text('غير مُشاهَد'),
                         showCheckmark: false,
-                        selectedColor: scheme.primary.withOpacity(.15),
+                        selectedColor: scheme.primary.withValues(alpha: .15),
                         labelStyle: TextStyle(
                           color:
                               _onlyUnseen ? scheme.primary : scheme.onSurface,
                           fontWeight: FontWeight.w600,
                         ),
-                        side: BorderSide(color: scheme.primary.withOpacity(.4)),
+                        side: BorderSide(color: scheme.primary.withValues(alpha: .4)),
                       ),
                     ),
                   ],
@@ -268,7 +268,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                       const SizedBox(width: 6),
                       Text('تاريخ اليوم: $todayStr',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.7),
+                            color: scheme.onSurface.withValues(alpha: .7),
                             fontWeight: FontWeight.w600,
                           )),
                     ],
@@ -346,7 +346,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(.75),
+                                              .withValues(alpha: .75),
                                         ),
                                       ),
                                       trailing: Wrap(

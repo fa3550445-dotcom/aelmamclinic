@@ -2,13 +2,13 @@
 
 import 'package:sqflite/sqflite.dart';
 
-import '../models/item_type.dart';
-import '../models/item.dart';
-import '../models/purchase.dart';
-import '../models/consumption.dart'; // ← أضفنا هذا السطر
-import '../models/alert_setting.dart';
-import '../services/db_service.dart';
-import '../utils/notifications_helper.dart';
+import 'package:aelmamclinic/models/item_type.dart';
+import 'package:aelmamclinic/models/item.dart';
+import 'package:aelmamclinic/models/purchase.dart';
+import 'package:aelmamclinic/models/consumption.dart'; // ← أضفنا هذا السطر
+import 'package:aelmamclinic/models/alert_setting.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/utils/notifications_helper.dart';
 
 /// طبقة الأعمال للمستودع.
 /// تعتمد على DBService للوصول إلى SQLite، وعلى NotificationsHelper

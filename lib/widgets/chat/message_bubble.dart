@@ -24,14 +24,14 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../models/chat_models.dart';
-import '../../models/chat_reaction.dart';
-import '../../services/chat_service.dart';
-import '../../services/attachment_cache.dart'; // ✅ جديد
-import '../../utils/time.dart' as t;
-import '../../utils/text_direction.dart' as bidi;
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/models/chat_models.dart';
+import 'package:aelmamclinic/models/chat_reaction.dart';
+import 'package:aelmamclinic/services/chat_service.dart';
+import 'package:aelmamclinic/services/attachment_cache.dart'; // ✅ جديد
+import 'package:aelmamclinic/utils/time.dart' as t;
+import 'package:aelmamclinic/utils/text_direction.dart' as bidi;
 
 /// حالة واجهة مبسّطة لعرض أيقونة الحالة
 enum _UiStatus { sending, sent, delivered, read, failed }
@@ -88,7 +88,7 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    final bg = isMine ? kPrimaryColor.withOpacity(.10) : scheme.surfaceContainerHigh;
+    final bg = isMine ? kPrimaryColor.withValues(alpha: .10) : scheme.surfaceContainerHigh;
     final border = Border.all(color: scheme.outlineVariant);
 
     final radius = BorderRadius.only(
@@ -124,7 +124,7 @@ class MessageBubble extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: scheme.onSurface.withOpacity(.65),
+                      color: scheme.onSurface.withValues(alpha: .65),
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),
@@ -175,7 +175,7 @@ class MessageBubble extends StatelessWidget {
                     Text(
                       t.formatMessageTimestamp(message.createdAt),
                       style: TextStyle(
-                        color: scheme.onSurface.withOpacity(.55),
+                        color: scheme.onSurface.withValues(alpha: .55),
                         fontWeight: FontWeight.w700,
                         fontSize: 11.5,
                       ),
@@ -364,7 +364,7 @@ class _TextBody extends StatelessWidget {
               child: Text(
                 '(معدل)',
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(.55),
+                  color: scheme.onSurface.withValues(alpha: .55),
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
                 ),
@@ -532,7 +532,7 @@ class _ImageBody extends StatelessWidget {
                       child: Text(
                         '(معدل)',
                         style: TextStyle(
-                          color: scheme.onSurface.withOpacity(.55),
+                          color: scheme.onSurface.withValues(alpha: .55),
                           fontWeight: FontWeight.w700,
                           fontSize: 11,
                         ),
@@ -573,12 +573,12 @@ class _DeletedBody extends StatelessWidget {
       child: Row(
         mainAxisAlignment: isMine ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
-          Icon(Icons.delete_outline_rounded, color: scheme.onSurface.withOpacity(.55), size: 18),
+          Icon(Icons.delete_outline_rounded, color: scheme.onSurface.withValues(alpha: .55), size: 18),
           const SizedBox(width: 6),
           Text(
             'تم حذف هذه الرسالة',
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.6),
+              color: scheme.onSurface.withValues(alpha: .6),
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w700,
             ),
@@ -638,7 +638,7 @@ class _ReplyPreview extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textDirection: bidi.textDirectionFor(display),
             style: TextStyle(
-              color: scheme.onSurface.withOpacity(.9),
+              color: scheme.onSurface.withValues(alpha: .9),
               fontWeight: FontWeight.w700,
               fontSize: 12.5,
             ),
@@ -649,7 +649,7 @@ class _ReplyPreview extends StatelessWidget {
 
     final box = Container(
       decoration: BoxDecoration(
-        color: kPrimaryColor.withOpacity(.06),
+        color: kPrimaryColor.withValues(alpha: .06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: scheme.outlineVariant),
       ),
@@ -693,20 +693,20 @@ class _StatusIcon extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     IconData icon = Icons.schedule_rounded;
-    Color color = scheme.onSurface.withOpacity(.45);
+    Color color = scheme.onSurface.withValues(alpha: .45);
 
     switch (status) {
       case _UiStatus.sending:
         icon = Icons.schedule_rounded;
-        color = scheme.onSurface.withOpacity(.45);
+        color = scheme.onSurface.withValues(alpha: .45);
         break;
       case _UiStatus.sent:
         icon = Icons.done_rounded; // ✓
-        color = scheme.onSurface.withOpacity(.55);
+        color = scheme.onSurface.withValues(alpha: .55);
         break;
       case _UiStatus.delivered:
         icon = Icons.done_all_rounded; // ✓✓
-        color = scheme.onSurface.withOpacity(.75);
+        color = scheme.onSurface.withValues(alpha: .75);
         break;
       case _UiStatus.read:
         icon = Icons.done_all_rounded; // ✓✓ أزرق
@@ -815,8 +815,8 @@ class _ReactionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bg = selected ? kPrimaryColor.withOpacity(.12) : scheme.surface;
-    final brd = selected ? kPrimaryColor.withOpacity(.6) : scheme.outlineVariant;
+    final bg = selected ? kPrimaryColor.withValues(alpha: .12) : scheme.surface;
+    final brd = selected ? kPrimaryColor.withValues(alpha: .6) : scheme.outlineVariant;
 
     return Material(
       color: Colors.transparent,
@@ -839,7 +839,7 @@ class _ReactionChip extends StatelessWidget {
                 '$count',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: scheme.onSurface.withOpacity(.8),
+                  color: scheme.onSurface.withValues(alpha: .8),
                   fontSize: 12,
                 ),
               ),

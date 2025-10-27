@@ -16,9 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/neumorphism.dart';
-import '../../core/theme.dart';
-import '../../providers/auth_provider.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
 
 class PermissionsScreen extends StatefulWidget {
   const PermissionsScreen({super.key});
@@ -364,7 +364,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     'ملاحظة: لا يوجد سجل مخصص لك، لذلك تُطبَّق الصلاحيات الافتراضية (كل الميزات + كامل CRUD).',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: scheme.onSurface.withOpacity(.7),
+                      color: scheme.onSurface.withValues(alpha: .7),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -596,7 +596,7 @@ class _EmployeeTile extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(.10),
+              color: kPrimaryColor.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.all(10),
@@ -623,7 +623,7 @@ class _EmployeeTile extends StatelessWidget {
                         child: Text(
                           'افتراضي',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(.7),
+                            color: scheme.onSurface.withValues(alpha: .7),
                             fontWeight: FontWeight.w900,
                             fontSize: 11.5,
                           ),
@@ -650,7 +650,7 @@ class _EmployeeTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.7),
+                    color: scheme.onSurface.withValues(alpha: .7),
                     fontWeight: FontWeight.w700,
                     fontSize: 12.5,
                   ),
@@ -662,7 +662,7 @@ class _EmployeeTile extends StatelessWidget {
                   textAlign: TextAlign.right,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: scheme.onSurface.withOpacity(.75),
+                    color: scheme.onSurface.withValues(alpha: .75),
                     fontWeight: FontWeight.w700,
                     fontSize: 12.5,
                   ),
@@ -764,7 +764,7 @@ class _PermissionEditorState extends State<_PermissionEditor> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -861,7 +861,7 @@ class _PermissionEditorState extends State<_PermissionEditor> {
                                   'إذا بقيت القائمة فارغة مع تفعيل CRUD الكامل، فسيتم استخدام الصلاحيات الافتراضية (كل الميزات).',
                                   style: TextStyle(
                                     color:
-                                    scheme.onSurface.withOpacity(.7),
+                                    scheme.onSurface.withValues(alpha: .7),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -933,7 +933,7 @@ class _CrudRow extends StatelessWidget {
             Text(
               t,
               style: TextStyle(
-                color: scheme.onSurface.withOpacity(.9),
+                color: scheme.onSurface.withValues(alpha: .9),
                 fontWeight: FontWeight.w800,
               ),
             ),

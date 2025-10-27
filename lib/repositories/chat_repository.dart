@@ -9,10 +9,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../models/chat_models.dart'
+import 'package:aelmamclinic/models/chat_models.dart'
     show ChatConversation, ChatMessage, ConversationListItem;
-import '../models/chat_reaction.dart'; // نوع التفاعلات
-import '../services/chat_service.dart' as chat_svc;
+import 'package:aelmamclinic/models/chat_reaction.dart'; // نوع التفاعلات
+import 'package:aelmamclinic/services/chat_service.dart' as chat_svc;
 
 class ChatRepository {
   ChatRepository._();

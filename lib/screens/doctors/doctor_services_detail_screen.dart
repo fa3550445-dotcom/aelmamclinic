@@ -2,12 +2,12 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
-import '../../models/doctor.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class DoctorServicesDetailScreen extends StatefulWidget {
   final Doctor doctor;
@@ -183,7 +183,7 @@ class _DoctorServicesDetailScreenState
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: kPrimaryColor.withOpacity(.1),
+                                color: kPrimaryColor.withValues(alpha: .1),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               padding: const EdgeInsets.all(10),
@@ -289,7 +289,7 @@ class _InfoTile extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(.1),
+            color: kPrimaryColor.withValues(alpha: .1),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -302,7 +302,7 @@ class _InfoTile extends StatelessWidget {
             children: [
               Text(label,
                   style: TextStyle(
-                    color: onSurface.withOpacity(.7),
+                    color: onSurface.withValues(alpha: .7),
                     fontWeight: FontWeight.w700,
                     fontSize: 12.8,
                   )),

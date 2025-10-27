@@ -7,12 +7,12 @@ import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 import 'db_service.dart';
-import '../models/doctor.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 
 class DoctorServicesDetailScreen extends StatefulWidget {
   final Doctor doctor;
@@ -385,7 +385,7 @@ class _DoctorServicesDetailScreenState
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: kPrimaryColor.withOpacity(.10),
+                            color: kPrimaryColor.withValues(alpha: .10),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           padding: const EdgeInsets.all(8),
@@ -458,7 +458,7 @@ class _DoctorServicesDetailScreenState
                           decoration: BoxDecoration(
                             color: hidden
                                 ? scheme.errorContainer
-                                : kPrimaryColor.withOpacity(.10),
+                                : kPrimaryColor.withValues(alpha: .10),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -508,7 +508,7 @@ class _DoctorServicesDetailScreenState
                                           fontSize: 16,
                                           color: hidden
                                               ? scheme.onSurface
-                                              .withOpacity(.55)
+                                              .withValues(alpha: .55)
                                               : scheme.onSurface,
                                         ),
                                       ),
@@ -572,7 +572,7 @@ class _DoctorServicesDetailScreenState
               if (_busy)
                 Positioned.fill(
                   child: Container(
-                    color: scheme.scrim.withOpacity(.06),
+                    color: scheme.scrim.withValues(alpha: .06),
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),

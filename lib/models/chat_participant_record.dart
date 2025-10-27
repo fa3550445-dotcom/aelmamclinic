@@ -13,7 +13,7 @@
 
 library chat_participant_model;
 
-import '../utils/time.dart' as t;
+import 'package:aelmamclinic/utils/time.dart' as t;
 
 class ChatParticipantRecord {
   // -------- حقول محفوظة / محتملة في الجدول --------

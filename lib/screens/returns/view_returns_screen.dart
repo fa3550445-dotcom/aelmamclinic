@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /*── تصميم TBIAN ─*/
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../models/return_entry.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
 import 'edit_return_screen.dart';
 
 class ViewReturnScreen extends StatelessWidget {

@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
-import '../services/auth_supabase_service.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
 
 /// نتيجة اختيار حساب مستخدم.
 class UserAccountSelection {

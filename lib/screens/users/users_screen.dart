@@ -3,9 +3,9 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/auth_provider.dart';
-import '../../services/auth_supabase_service.dart';
-import '../../models/account_user_summary.dart';
+import 'package:aelmamclinic/providers/auth_provider.dart';
+import 'package:aelmamclinic/services/auth_supabase_service.dart';
+import 'package:aelmamclinic/models/account_user_summary.dart';
 
 /// شاشة إدارة حسابات الموظفين.
 /// مسار القراءة الموصى به:

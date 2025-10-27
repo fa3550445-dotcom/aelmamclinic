@@ -13,17 +13,17 @@ import 'package:intl/intl.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 
 /*── تصميم TBIAN ─*/
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
-import '../../models/return_entry.dart';
-import '../../services/db_service.dart';
-import '../../services/export_service.dart';
-import '../../services/save_file_service.dart';
-import '../../providers/appointment_provider.dart';
-import '../reminders/reminder_screen.dart';
-import '../../services/notification_service.dart';
+import 'package:aelmamclinic/models/return_entry.dart';
+import 'package:aelmamclinic/services/db_service.dart';
+import 'package:aelmamclinic/services/export_service.dart';
+import 'package:aelmamclinic/services/save_file_service.dart';
+import 'package:aelmamclinic/providers/appointment_provider.dart';
+import 'package:aelmamclinic/screens/reminders/reminder_screen.dart';
+import 'package:aelmamclinic/services/notification_service.dart';
 import 'view_returns_screen.dart';
 
 class ListReturnsScreen extends StatefulWidget {
@@ -194,7 +194,7 @@ class _ListReturnsScreenState extends State<ListReturnsScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-العودات.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles([XFile(file.path)], text: 'كشف العودات المحفوظ');
+      await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'كشف العودات المحفوظ');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
@@ -424,7 +424,7 @@ class _ListReturnsScreenState extends State<ListReturnsScreen> {
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface
-                                                .withOpacity(.75),
+                                                .withValues(alpha: .75),
                                             height: 1.25,
                                           ),
                                         ),

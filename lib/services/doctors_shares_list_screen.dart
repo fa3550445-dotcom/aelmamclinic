@@ -3,12 +3,12 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
 /*── تصميم TBIAN ─*/
-import '../core/theme.dart';
-import '../core/neumorphism.dart';
-import '../core/tbian_ui.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/tbian_ui.dart';
 
 /*── البيانات ─*/
-import '../models/doctor.dart';
+import 'package:aelmamclinic/models/doctor.dart';
 import 'db_service.dart';
 
 class DoctorsSharesListScreen extends StatefulWidget {
@@ -147,7 +147,7 @@ class _DoctorsSharesListScreenState extends State<DoctorsSharesListScreen> {
         child: Text(
           'الأطباء: ${_filteredDoctors.length}',
           style: TextStyle(
-            color: scheme.onSurface.withOpacity(.6),
+            color: scheme.onSurface.withValues(alpha: .6),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -169,7 +169,7 @@ class _DoctorsSharesListScreenState extends State<DoctorsSharesListScreen> {
                     borderRadius: BorderRadius.circular(999),
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundColor: kPrimaryColor.withOpacity(.12),
+                      backgroundColor: kPrimaryColor.withValues(alpha: .12),
                       child: Padding(
                         padding: const EdgeInsets.all(4),
                         child: Image.asset(
@@ -191,7 +191,7 @@ class _DoctorsSharesListScreenState extends State<DoctorsSharesListScreen> {
                     doctor.specialization,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: scheme.onSurface.withOpacity(.75)),
+                    style: TextStyle(color: scheme.onSurface.withValues(alpha: .75)),
                   ),
                   trailing: const Icon(Icons.chevron_left_rounded),
                   onTap: () => _chooseServiceType(doctor),
@@ -250,7 +250,7 @@ class _DoctorsSharesListScreenState extends State<DoctorsSharesListScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.10),
+                          color: kPrimaryColor.withValues(alpha: .10),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -478,7 +478,7 @@ class _DoctorSharesByTypeWidgetState extends State<DoctorSharesByTypeWidget> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(.10),
+                        color: kPrimaryColor.withValues(alpha: .10),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
@@ -494,7 +494,7 @@ class _DoctorSharesByTypeWidgetState extends State<DoctorSharesByTypeWidget> {
                                   const TextStyle(fontWeight: FontWeight.w900)),
                           Text('الخدمات ($_typeLabel)',
                               style: TextStyle(
-                                  color: scheme.onSurface.withOpacity(.75))),
+                                  color: scheme.onSurface.withValues(alpha: .75))),
                         ],
                       ),
                     ),
@@ -526,7 +526,7 @@ class _DoctorSharesByTypeWidgetState extends State<DoctorSharesByTypeWidget> {
                 child: Center(
                   child: Text('لا توجد خدمات ($_typeLabel) بعد',
                       style:
-                          TextStyle(color: scheme.onSurface.withOpacity(.65))),
+                          TextStyle(color: scheme.onSurface.withValues(alpha: .65))),
                 ),
               )
             else

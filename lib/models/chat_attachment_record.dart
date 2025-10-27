@@ -8,7 +8,7 @@
 //  - t.parseDateFlexibleUtc(dynamic)
 //  - t.toIsoUtc(DateTime?)
 
-import '../utils/time.dart' as t;
+import 'package:aelmamclinic/utils/time.dart' as t;
 
 class ChatAttachmentRecord {
   // حقول قاعدة البيانات

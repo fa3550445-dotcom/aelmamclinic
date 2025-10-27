@@ -3,13 +3,13 @@ import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/doctor.dart';
-import '../../models/patient.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/models/doctor.dart';
+import 'package:aelmamclinic/models/patient.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class DoctorImagingLabReportScreen extends StatefulWidget {
   const DoctorImagingLabReportScreen({Key? key}) : super(key: key);
@@ -349,7 +349,7 @@ class _DoctorImagingLabReportScreenState
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withOpacity(.7),
+                                      .withValues(alpha: .7),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -429,7 +429,7 @@ class _DoctorImagingLabReportScreenState
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(.1),
+                          color: kPrimaryColor.withValues(alpha: .1),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.all(10),
@@ -519,7 +519,7 @@ class _DoctorImagingLabReportScreenState
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(.6),
+                              .withValues(alpha: .6),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -572,7 +572,7 @@ class _DoctorImagingLabReportScreenState
                                   contentPadding: EdgeInsets.zero,
                                   leading: Container(
                                     decoration: BoxDecoration(
-                                      color: kPrimaryColor.withOpacity(.1),
+                                      color: kPrimaryColor.withValues(alpha: .1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     padding: const EdgeInsets.all(8),
@@ -594,7 +594,7 @@ class _DoctorImagingLabReportScreenState
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurface
-                                            .withOpacity(.65),
+                                            .withValues(alpha: .65),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -654,7 +654,7 @@ class _DateTile extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(.8),
+                  color: scheme.onSurface.withValues(alpha: .8),
                   fontWeight: FontWeight.w800,
                 ),
               ),

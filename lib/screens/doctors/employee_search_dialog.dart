@@ -1,10 +1,10 @@
 // lib/screens/doctors/employee_search_dialog.dart
 import 'package:flutter/material.dart';
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 // تصميم TBIAN
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
 
 class EmployeeSearchDialog extends StatefulWidget {
   const EmployeeSearchDialog({super.key});
@@ -113,7 +113,7 @@ class _EmployeeSearchDialogState extends State<EmployeeSearchDialog> {
                           child: Text(
                             'لا يوجد بيانات',
                             style: TextStyle(
-                              color: scheme.onSurface.withOpacity(.6),
+                              color: scheme.onSurface.withValues(alpha: .6),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -132,7 +132,7 @@ class _EmployeeSearchDialogState extends State<EmployeeSearchDialog> {
                                     const EdgeInsets.symmetric(horizontal: 6),
                                 leading: Container(
                                   decoration: BoxDecoration(
-                                    color: kPrimaryColor.withOpacity(.10),
+                                    color: kPrimaryColor.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   padding: const EdgeInsets.all(8),
@@ -147,7 +147,7 @@ class _EmployeeSearchDialogState extends State<EmployeeSearchDialog> {
                                 subtitle: Text(
                                   job.isEmpty ? '—' : job,
                                   style: TextStyle(
-                                    color: scheme.onSurface.withOpacity(.65),
+                                    color: scheme.onSurface.withValues(alpha: .65),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

@@ -2,12 +2,12 @@
 import 'dart:ui' as ui show TextDirection;
 import 'package:flutter/material.dart';
 
-import '../../core/theme.dart';
-import '../../core/neumorphism.dart';
-import '../../core/validators.dart';
-import '../../core/formatters.dart';
+import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/core/neumorphism.dart';
+import 'package:aelmamclinic/core/validators.dart';
+import 'package:aelmamclinic/core/formatters.dart';
 
-import '../../services/db_service.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 class EditEmployeeScreen extends StatefulWidget {
   final int empId;
@@ -196,7 +196,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: kPrimaryColor.withOpacity(.10),
+                                      color: kPrimaryColor.withValues(alpha: .10),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     padding: const EdgeInsets.all(14),
@@ -227,7 +227,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                                               ? '—'
                                               : _jobTitleCtrl.text.trim(),
                                           style: TextStyle(
-                                            color: cs.onSurface.withOpacity(.7),
+                                            color: cs.onSurface.withValues(alpha: .7),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
