@@ -9,6 +9,7 @@ import '../../../models/item_type.dart';
 import '../../../models/consumption.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../services/repository_service.dart';
+import '../../../services/db_service.dart';
 
 /*──────── ألوان TBIAN الموحدة ────────*/
 const Color accentColor = Color(0xFF004A61);
@@ -233,6 +234,9 @@ class _ItemConsumptionsPageState extends State<_ItemConsumptionsPage> {
         [diff, widget.item.id],
       );
     });
+
+    await DBService.instance.notifyTableChanged(Consumption.table);
+    await DBService.instance.notifyTableChanged(Item.table);
 
     if (!mounted) return;
     setState(() => _future = _load());

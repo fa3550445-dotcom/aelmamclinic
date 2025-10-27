@@ -12,9 +12,11 @@ import '../../core/validators.dart';
 import '../../core/formatters.dart';
 import '../../core/neumorphism.dart';
 import '../../core/tbian_ui.dart';
+import '../../providers/auth_provider.dart';
 
 import '../../models/attachment.dart';
 import '../../models/consumption.dart';
+import '../../models/item.dart';
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../models/doctor.dart';
@@ -75,12 +77,17 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
 
   final _formKey = GlobalKey<FormState>();
   bool _saving = false;
+  bool _doctorRestricted = false;
+  Doctor? _linkedDoctor;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialName != null) _nameCtrl.text = widget.initialName!;
     if (widget.initialPhone != null) _phoneCtrl.text = widget.initialPhone!;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _resolveDoctorAccount();
+    });
     _loadInvTypes();
     WidgetsBinding.instance.addPostFrameCallback((_) => _prefillDoctorFromAccount());
   }
@@ -123,6 +130,23 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
       orderBy: 'name',
     );
     setState(() => _invItems = rows);
+  }
+
+  Future<void> _resolveDoctorAccount() async {
+    final auth = context.read<AuthProvider>();
+    final uid = auth.uid;
+    if (uid == null || uid.isEmpty) return;
+    final doctor = await DBService.instance.getDoctorByUserUid(uid);
+    if (!mounted) return;
+    if (doctor != null) {
+      setState(() {
+        _linkedDoctor = doctor;
+        _doctorRestricted = true;
+        _selectedDoctorId = doctor.id;
+        _selectedDoctorName = 'د/${doctor.name}';
+        _doctorCtrl.text = _selectedDoctorName ?? '';
+      });
+    }
   }
 
   Future<void> _selectInventoryUsage() async {
@@ -408,15 +432,17 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
   }
 
   Future<void> _selectDoctorForRadLab() async {
-    final doctors = await _getDoctorsForCurrentUser();
-    if (doctors.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد أطباء متاحون لهذا الحساب.')),
-      );
+    if (_doctorRestricted && _linkedDoctor != null) {
+      setState(() {
+        _selectedDoctorId = _linkedDoctor!.id;
+        _selectedDoctorName = 'د/${_linkedDoctor!.name}';
+        _doctorCtrl.text = _selectedDoctorName ?? '';
+      });
       return;
     }
-    List<Doctor> filtered = List.from(doctors);
+    final doctors = await DBService.instance.getAllDoctors();
+    final source = List<Doctor>.from(doctors);
+    List<Doctor> filtered = List.from(source);
     final chosen = await showDialog<Doctor>(
       context: context,
       builder: (ctx) => Directionality(
@@ -435,7 +461,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
                   hintText: 'بحث عن الطبيب…',
                   prefix: const Icon(Icons.search),
                   onChanged: (v) {
-                    filtered = doctors
+                    filtered = source
                         .where((d) => d.name
                         .toLowerCase()
                         .contains(v.toLowerCase()))
@@ -817,6 +843,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
       await batch.commit(noResult: true);
 
       // 3) Inventory usages
+      var touchedItems = false;
       for (final u in _invUsages) {
         final itemId = u['itemId'] as int;
         final qty = u['quantity'] as int;
@@ -833,6 +860,11 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
           'UPDATE items SET stock = stock - ? WHERE id = ? AND stock >= ?',
           [qty, itemId, qty],
         );
+        touchedItems = true;
+      }
+
+      if (touchedItems) {
+        await DBService.instance.notifyTableChanged(Item.table);
       }
 
       // 4) Attachments

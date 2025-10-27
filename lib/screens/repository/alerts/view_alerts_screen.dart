@@ -12,6 +12,7 @@ import '../../../models/alert_setting.dart';
 import '../../../models/item.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../services/repository_service.dart';
+import '../../../services/db_service.dart';
 import 'create_alert_screen.dart';
 
 /// شاشة «استعراض التنبيهات» بنمط TBIAN
@@ -62,10 +63,10 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
   Future<List<_AlertInfo>> _load() async {
     final db = await RepositoryService.instance.database;
     final rows = await db.rawQuery('''
-      SELECT a.id, a.itemId, a.threshold, a.is_enabled,
+      SELECT a.id, a.item_id, a.threshold, a.is_enabled,
              i.name AS item_name, i.stock AS current_stock
       FROM ${AlertSetting.table} AS a
-      JOIN ${Item.table} AS i ON i.id = a.itemId
+      JOIN ${Item.table} AS i ON i.id = a.item_id
       ORDER BY i.name
     ''');
 
@@ -94,6 +95,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
       where: 'id = ?',
       whereArgs: [a.id],
     );
+    await DBService.instance.notifyTableChanged(AlertSetting.table);
     await _refresh();
   }
 
@@ -129,6 +131,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
         where: 'id = ?',
         whereArgs: [a.id],
       );
+      await DBService.instance.notifyTableChanged(AlertSetting.table);
       await _refresh();
     }
   }
@@ -154,6 +157,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
     if (ok == true) {
       final db = await RepositoryService.instance.database;
       await db.delete(AlertSetting.table, where: 'id = ?', whereArgs: [a.id]);
+      await DBService.instance.notifyTableChanged(AlertSetting.table);
       await _refresh();
     }
   }

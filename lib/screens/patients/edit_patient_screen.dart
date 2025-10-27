@@ -17,12 +17,14 @@ import '../../core/formatters.dart';
 
 import '../../models/attachment.dart';
 import '../../models/consumption.dart';
+import '../../models/item.dart';
 import '../../models/doctor.dart';
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../services/db_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/repository_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'list_patients_screen.dart';
 
 class EditPatientScreen extends StatefulWidget {
@@ -75,6 +77,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _dtOnly = DateFormat('yyyy-MM-dd');
+  bool _doctorRestricted = false;
+  Doctor? _linkedDoctor;
 
   // ── Helpers العامة ──
   double _parseDouble(String s) {
@@ -128,9 +132,15 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     _registerDate = p.registerDate;
     _registerTime = TimeOfDay.fromDateTime(p.registerDate);
 
-    _selectedDoctorId = p.doctorId;
-    _selectedDoctorName = p.doctorName;
-    _doctorCtrl.text = p.doctorName ?? '';
+    await _resolveDoctorAccount();
+    if (_doctorRestricted && _linkedDoctor != null) {
+      _selectedDoctorId = _linkedDoctor!.id;
+      _selectedDoctorName = 'د/${_linkedDoctor!.name}';
+    } else {
+      _selectedDoctorId = p.doctorId;
+      _selectedDoctorName = p.doctorName;
+    }
+    _doctorCtrl.text = _selectedDoctorName ?? '';
 
     await _getDoctorsForCurrentUser(forceSelection: true);
 
@@ -195,33 +205,18 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     setState(() => _invItems = rows);
   }
 
-  Future<List<Doctor>> _getDoctorsForCurrentUser({bool forceSelection = false}) async {
-    if (_cachedDoctors != null) return _cachedDoctors!;
-
-    final docs = await DBService.instance.getAllDoctors();
+  Future<void> _resolveDoctorAccount() async {
     final auth = context.read<AuthProvider>();
     final uid = auth.uid;
-    Doctor? linked;
-    if (uid != null && uid.isNotEmpty) {
-      linked = await DBService.instance.getDoctorByUserUid(uid);
-    }
-
-    final result = (linked != null && linked.id != null)
-        ? docs.where((d) => d.id == linked!.id).toList()
-        : docs;
-
-    _cachedDoctors = result;
-    _linkedDoctor = linked;
-
-    if (forceSelection && linked != null && linked.id != null && mounted) {
+    if (uid == null || uid.isEmpty) return;
+    final doctor = await DBService.instance.getDoctorByUserUid(uid);
+    if (!mounted) return;
+    if (doctor != null) {
       setState(() {
-        _selectedDoctorId = linked!.id;
-        _selectedDoctorName = 'د/${linked.name}';
-        _doctorCtrl.text = _selectedDoctorName!;
+        _linkedDoctor = doctor;
+        _doctorRestricted = true;
       });
     }
-
-    return result;
   }
 
   Future<void> _loadExistingConsumptions() async {
@@ -519,15 +514,17 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   }
 
   Future<void> _selectDoctorForRadLab() async {
-    final doctors = await _getDoctorsForCurrentUser();
-    if (doctors.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد أطباء متاحون لهذا الحساب.')),
-      );
+    if (_doctorRestricted && _linkedDoctor != null) {
+      setState(() {
+        _selectedDoctorId = _linkedDoctor!.id;
+        _selectedDoctorName = 'د/${_linkedDoctor!.name}';
+        _doctorCtrl.text = _selectedDoctorName ?? '';
+      });
       return;
     }
-    List<Doctor> filtered = List.from(doctors);
+    final doctors = await DBService.instance.getAllDoctors();
+    final source = List<Doctor>.from(doctors);
+    List<Doctor> filtered = List.from(source);
     final chosen = await showDialog<Doctor>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -543,7 +540,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
                     hintText: 'بحث عن الطبيب…',
                     prefixIcon: Icon(Icons.search),
                   ),
-                  onChanged: (v) => setDlg(() => filtered = doctors
+                  onChanged: (v) => setDlg(() => filtered = source
                       .where(
                           (d) => d.name.toLowerCase().contains(v.toLowerCase()))
                       .toList()),
@@ -921,6 +918,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       await DBService.instance.updatePatient(updated, _selectedServices);
 
       // Inventory: حذف/إضافة + تعديل الرصيد
+      var touchedConsumptions = false;
+      var touchedItems = false;
       for (final id in _deletedUsageIds) {
         final u = _existingUsages.firstWhere((e) => e['consId'] == id);
         await db.delete('consumptions', where: 'id = ?', whereArgs: [id]);
@@ -928,6 +927,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
           'UPDATE items SET stock = stock + ? WHERE id = ?',
           [u['quantity'], u['itemId']],
         );
+        touchedConsumptions = true;
+        touchedItems = true;
       }
       for (final u in _newUsages) {
         await DBService.instance.insertConsumption(Consumption(
@@ -941,6 +942,15 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
           'UPDATE items SET stock = stock - ? WHERE id = ?',
           [u['quantity'], u['itemId']],
         );
+        touchedItems = true;
+        touchedConsumptions = true;
+      }
+
+      if (touchedConsumptions) {
+        await DBService.instance.notifyTableChanged(Consumption.table);
+      }
+      if (touchedItems) {
+        await DBService.instance.notifyTableChanged(Item.table);
       }
 
       // Attachments

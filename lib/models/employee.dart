@@ -44,7 +44,7 @@ class Employee {
   final double basicSalary;
   final double finalSalary;
   final bool isDoctor;
-  final String? userUid; // حساب Supabase المرتبط (اختياري)
+  final String? userUid;
 
   /*────────────────────────── حقول مزامنة اختيارية (سحابة) ─────────────────────────*/
   /// معرّف الحساب (Supabase → accounts.id)
@@ -192,6 +192,7 @@ class Employee {
       deviceId: deviceId,
       localId: localId,
       updatedAt: updatedAt,
+      userUid: (userUid == null || userUid.isEmpty) ? null : userUid,
     );
   }
 

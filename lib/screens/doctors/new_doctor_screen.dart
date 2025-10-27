@@ -2,12 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
+import 'package:provider/provider.dart';
 import '../../core/theme.dart';
 import '../../core/neumorphism.dart';
 
 import '../../models/doctor.dart';
+import '../../models/account_user_summary.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/db_service.dart';
-import '../../widgets/user_account_picker_dialog.dart';
+import '../../services/auth_supabase_service.dart';
+import 'employee_search_dialog.dart';
 
 class NewDoctorScreen extends StatefulWidget {
   const NewDoctorScreen({super.key});
@@ -24,9 +28,10 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
   final _phoneCtrl = TextEditingController();
 
   int? _selectedEmployeeId;
-  String? _selectedUserUid;
-  String? _selectedUserEmail;
-  bool _selectedAccountDisabled = false;
+  AccountUserSummary? _selectedAccount;
+  List<AccountUserSummary> _availableAccounts = const [];
+  bool _loadingAccounts = false;
+  final AuthSupabaseService _authService = AuthSupabaseService();
 
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -37,6 +42,14 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
     _specializationCtrl.dispose();
     _phoneCtrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAvailableAccounts();
+    });
   }
 
   String _formatTimeOfDay(TimeOfDay? time) {
@@ -67,33 +80,126 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
       ),
     );
 
-    if (selection == null) return;
+    if (selectedEmployee != null) {
+      setState(() {
+        _selectedEmployeeId = selectedEmployee['id'] as int?;
+        _doctorNameCtrl.text = selectedEmployee['name'] ?? '';
+        _specializationCtrl.text = selectedEmployee['jobTitle'] ?? '';
+        _phoneCtrl.text = selectedEmployee['phoneNumber'] ?? '';
+      });
 
-    final employee = await DBService.instance.getEmployeeByUserUid(selection.uid);
-    if (!mounted) return;
-
-    setState(() {
-      _selectedUserUid = selection.uid;
-      _selectedUserEmail = selection.email.isEmpty ? selection.uid : selection.email;
-      _selectedAccountDisabled = selection.disabled;
-      _selectedEmployeeId = employee?.id;
-
-      if (employee != null) {
-        if (employee.name.trim().isNotEmpty) {
-          _doctorNameCtrl.text = employee.name.trim();
-        }
-        if (employee.jobTitle.trim().isNotEmpty) {
-          _specializationCtrl.text = employee.jobTitle.trim();
-        }
-        if (employee.phoneNumber.trim().isNotEmpty) {
-          _phoneCtrl.text = employee.phoneNumber.trim();
-        }
+      final linkedUid = (selectedEmployee['userUid'] ?? selectedEmployee['user_uid'])?.toString();
+      if (linkedUid != null && linkedUid.trim().isNotEmpty) {
+        final match = _availableAccounts.firstWhere(
+          (a) => a.userUid == linkedUid,
+          orElse: () => AccountUserSummary(userUid: linkedUid, email: selectedEmployee['email']?.toString() ?? '—', disabled: false),
+        );
+        setState(() {
+          if (_availableAccounts.any((a) => a.userUid == linkedUid)) {
+            _selectedAccount = match;
+          }
+        });
       }
-    });
+    }
+  }
+
+  Future<void> _loadAvailableAccounts() async {
+    final accountId = context.read<AuthProvider>().accountId;
+    if (accountId == null || accountId.isEmpty) {
+      return;
+    }
+    setState(() => _loadingAccounts = true);
+    try {
+      final accounts = await _authService.listAccountUsersWithEmail(
+        accountId: accountId,
+        includeDisabled: false,
+      );
+      final linked = await DBService.instance.getDoctorUserUids();
+      final filtered = accounts.where((a) => !linked.contains(a.userUid)).toList();
+      if (!mounted) return;
+      setState(() {
+        _availableAccounts = filtered;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذّر تحميل حسابات الموظفين: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingAccounts = false);
+    }
+  }
+
+  Future<void> _pickAccount() async {
+    if (_loadingAccounts) return;
+    if (_availableAccounts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('لا يوجد حسابات متاحة غير مرتبطة بأطباء.')),
+      );
+      return;
+    }
+
+    final chosen = await showModalBottomSheet<AccountUserSummary>(
+      context: context,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        return Directionality(
+          textDirection: ui.TextDirection.rtl,
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: const Text('اختر حساب الموظف', style: TextStyle(fontWeight: FontWeight.w800)),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.refresh_rounded),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _loadAvailableAccounts();
+                    },
+                  ),
+                ),
+                const Divider(height: 1),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _availableAccounts.length,
+                    itemBuilder: (context, index) {
+                      final acc = _availableAccounts[index];
+                      return ListTile(
+                        title: Text(acc.email.isEmpty ? acc.userUid : acc.email,
+                            style: const TextStyle(fontWeight: FontWeight.w700)),
+                        subtitle: acc.email.isEmpty
+                            ? Text(acc.userUid, style: TextStyle(color: scheme.onSurfaceVariant))
+                            : Text(acc.userUid, style: TextStyle(color: scheme.onSurfaceVariant)),
+                        trailing: const Icon(Icons.chevron_left_rounded),
+                        onTap: () => Navigator.pop(ctx, acc),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (chosen != null && mounted) {
+      setState(() {
+        _selectedAccount = chosen;
+      });
+    }
   }
 
   Future<void> _saveDoctor() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedAccount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى ربط الطبيب بحساب موظف قبل الحفظ.')),
+      );
+      return;
+    }
 
     if (_selectedUserUid == null || _selectedUserUid!.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +210,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
 
     final newDoctor = Doctor(
       employeeId: _selectedEmployeeId,
-      userUid: _selectedUserUid,
+      userUid: _selectedAccount!.userUid,
       name: _doctorNameCtrl.text.trim(),
       specialization: _specializationCtrl.text.trim(),
       phoneNumber: _phoneCtrl.text.trim(),
@@ -188,6 +294,49 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                         ),
                       ),
                       trailing: const Icon(Icons.search_rounded),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  NeuCard(
+                    onTap: _pickAccount,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor.withOpacity(.10),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: const Icon(Icons.account_circle_rounded, color: kPrimaryColor),
+                      ),
+                      title: Text(
+                        _selectedAccount == null
+                            ? 'ربطه بحساب'
+                            : (_selectedAccount!.email.isNotEmpty
+                                ? _selectedAccount!.email
+                                : _selectedAccount!.userUid),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      subtitle: Text(
+                        _loadingAccounts
+                            ? 'جارٍ تحميل الحسابات…'
+                            : _availableAccounts.isEmpty
+                                ? 'لا توجد حسابات موظفين متاحة للربط'
+                                : 'اضغط لاختيار حساب الموظف المرتبط بهذا الطبيب',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      trailing: _loadingAccounts
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.chevron_left_rounded),
                     ),
                   ),
                   const SizedBox(height: 12),
