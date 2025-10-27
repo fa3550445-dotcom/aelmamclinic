@@ -742,72 +742,78 @@ CREATE OR REPLACE VIEW public.clinics AS
 SELECT id, name, frozen, created_at
 FROM public.accounts;
 
-REVOKE ALL ON TABLE public.clinics FROM PUBLIC;
-GRANT SELECT ON TABLE public.clinics TO authenticated;
-GRANT SELECT ON TABLE public.clinics TO service_role;
-
--- إجراءات خدمية --------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.admin_attach_employee(p_account uuid, p_user_uid uuid, p_role text DEFAULT 'employee')
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  exists_row boolean;
-  caller_can_manage boolean;
+DO $do$
 BEGIN
-  IF p_account IS NULL OR p_user_uid IS NULL THEN
-    RAISE EXCEPTION 'account_id and user_uid are required';
-  END IF;
+  EXECUTE $$
+    CREATE OR REPLACE FUNCTION public.admin_attach_employee(p_account uuid, p_user_uid uuid, p_role text DEFAULT 'employee')
+    RETURNS void
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path = public
+    AS $func$
+    DECLARE
+      exists_row boolean;
+      caller_can_manage boolean;
+    BEGIN
+      IF p_account IS NULL OR p_user_uid IS NULL THEN
+        RAISE EXCEPTION 'account_id and user_uid are required';
+      END IF;
 
-  IF fn_is_super_admin() = false THEN
-    SELECT EXISTS (
-             SELECT 1
-               FROM public.account_users au
-              WHERE au.account_id = p_account
-                AND au.user_uid::text = auth.uid()::text
-                AND COALESCE(au.disabled, false) = false
-                AND lower(COALESCE(au.role, '')) = 'owner'
-           )
-      INTO caller_can_manage;
+      IF fn_is_super_admin() = false THEN
+        SELECT EXISTS (
+                 SELECT 1
+                   FROM public.account_users au
+                  WHERE au.account_id = p_account
+                    AND au.user_uid::text = auth.uid()::text
+                    AND COALESCE(au.disabled, false) = false
+                    AND lower(COALESCE(au.role, '')) = 'owner'
+               )
+          INTO caller_can_manage;
 
-    IF NOT COALESCE(caller_can_manage, false) THEN
-      RAISE EXCEPTION 'insufficient privileges to manage employees for this account'
-        USING ERRCODE = '42501';
-    END IF;
-  END IF;
+        IF NOT COALESCE(caller_can_manage, false) THEN
+          RAISE EXCEPTION 'insufficient privileges to manage employees for this account'
+            USING ERRCODE = '42501';
+        END IF;
+      END IF;
 
-  SELECT true INTO exists_row
-  FROM public.account_users
-  WHERE account_id = p_account
-    AND user_uid = p_user_uid
-  LIMIT 1;
+      SELECT true INTO exists_row
+      FROM public.account_users
+      WHERE account_id = p_account
+        AND user_uid = p_user_uid
+      LIMIT 1;
 
-  IF NOT COALESCE(exists_row, false) THEN
-    INSERT INTO public.account_users(account_id, user_uid, role, disabled)
-    VALUES (p_account, p_user_uid, COALESCE(p_role, 'employee'), false);
-  ELSE
-    UPDATE public.account_users
-       SET disabled = false,
-           role = COALESCE(p_role, role),
-           updated_at = now()
-     WHERE account_id = p_account
-       AND user_uid = p_user_uid;
-  END IF;
+      IF NOT COALESCE(exists_row, false) THEN
+        INSERT INTO public.account_users(account_id, user_uid, role, disabled)
+        VALUES (p_account, p_user_uid, COALESCE(p_role, 'employee'), false);
+      ELSE
+        UPDATE public.account_users
+           SET disabled = false,
+               role = COALESCE(p_role, role),
+               updated_at = now()
+         WHERE account_id = p_account
+           AND user_uid = p_user_uid;
+      END IF;
 
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'profiles'
-  ) THEN
-    INSERT INTO public.profiles(id, account_id, role, created_at)
-    VALUES (p_user_uid, p_account, COALESCE(p_role, 'employee'), now())
-    ON CONFLICT (id) DO UPDATE
-        SET account_id = EXCLUDED.account_id,
-            role = EXCLUDED.role;
-  END IF;
+      IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'profiles'
+      ) THEN
+        INSERT INTO public.profiles(id, account_id, role, created_at)
+        VALUES (p_user_uid, p_account, COALESCE(p_role, 'employee'), now())
+        ON CONFLICT (id) DO UPDATE
+            SET account_id = EXCLUDED.account_id,
+                role = EXCLUDED.role;
+      END IF;
+    END;
+    $func$;
+  $$;
+
+  EXECUTE 'REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM PUBLIC';
+  EXECUTE 'REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM anon';
+  EXECUTE 'GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated';
+  EXECUTE 'GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role';
 END;
-$$;
+$do$;
 
 CREATE OR REPLACE FUNCTION public.admin_bootstrap_clinic_for_email(clinic_name text, owner_email text, owner_role text DEFAULT 'owner')
 RETURNS uuid
@@ -850,10 +856,6 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM anon;
-GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO authenticated;
