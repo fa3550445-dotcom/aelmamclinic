@@ -540,20 +540,22 @@ class DBService {
     }
   }
 
-  Future<void> _ensureRemoteIdMap(Database db) async {
+  Future<void> _ensureSyncFkMappingTable(Database db) async {
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS remote_id_map (
+      CREATE TABLE IF NOT EXISTS sync_fk_mapping (
         table_name TEXT NOT NULL,
-        account_id TEXT NOT NULL,
-        device_id TEXT NOT NULL,
         local_id INTEGER NOT NULL,
-        remote_uuid TEXT NOT NULL,
-        PRIMARY KEY (table_name, account_id, device_id, local_id)
+        remote_id TEXT NOT NULL,
+        remote_device_id TEXT,
+        remote_local_id INTEGER,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (table_name, local_id)
       );
     ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_remote_id_map_uuid ON remote_id_map(remote_uuid)',
-    );
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_fk_mapping_table_remote
+      ON sync_fk_mapping(table_name, remote_id)
+    ''');
   }
 
   /// فهارس مشتركة للأداء (JOIN/WHERE شائعة)
@@ -616,12 +618,13 @@ class DBService {
     await _ensureAlertSettingsColumns(db);
     await _ensureSoftDeleteColumns(db);
     await _ensureSyncMetaColumns(db);     // ← snake_case (متوافق مع parity v3)
-    await _ensureUuidMappingTable(db);
+    await _ensureSyncFkMappingTable(db);
     await _ensureCommonIndexes(db);
   }
 
   /*──────────────── إنشاء الجداول ───────────────*/
   Future<void> _onCreate(Database db, int version) async {
+    await _ensureSyncFkMappingTable(db);
     await db.execute('''
   CREATE TABLE patients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2228,6 +2231,7 @@ class DBService {
       Prescription.table,
       PrescriptionItem.table,
       'complaints',
+      'sync_fk_mapping',
     ];
     for (final t in tables) {
       batch.delete(t);
