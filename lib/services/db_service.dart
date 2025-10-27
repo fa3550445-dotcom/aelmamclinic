@@ -28,6 +28,7 @@ import '../models/return_entry.dart';
 import '../models/consumption.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
+import '../models/employee.dart';
 import '../models/item_type.dart';
 import '../models/item.dart';
 import '../models/purchase.dart';
@@ -200,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 29, // ↑ رفع النسخة لتطبيق userUid للأطباء/الموظفين
+      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة المحلية + userUid للموظفين/الأطباء
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -444,6 +445,7 @@ class DBService {
 
     await _createIndexIfMissing(db, 'idx_service_doctor_share_serviceId', 'service_doctor_share', ['serviceId']);
     await _createIndexIfMissing(db, 'idx_service_doctor_share_doctorId', 'service_doctor_share', ['doctorId']);
+    await _createIndexIfMissing(db, 'idx_doctors_userUid', 'doctors', ['userUid']);
 
     await _createIndexIfMissing(db, 'idx_consumptions_patientId', 'consumptions', ['patientId']);
     await _createIndexIfMissing(db, 'idx_consumptions_itemId', 'consumptions', ['itemId']);
@@ -455,6 +457,7 @@ class DBService {
     await _createIndexIfMissing(db, 'idx_employees_loans_employeeId', 'employees_loans', ['employeeId']);
     await _createIndexIfMissing(db, 'idx_employees_salaries_employeeId', 'employees_salaries', ['employeeId']);
     await _createIndexIfMissing(db, 'idx_employees_discounts_employeeId', 'employees_discounts', ['employeeId']);
+    await _createIndexIfMissing(db, 'idx_employees_userUid', 'employees', ['userUid']);
 
     // 🧪 فهرس فريد يمنع تكرار أسماء الأدوية باختلاف حالة الأحرف
     try {
@@ -606,6 +609,7 @@ class DBService {
   CREATE TABLE doctors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     employeeId INTEGER,
+    userUid TEXT,
     name TEXT,
     specialization TEXT,
     phoneNumber TEXT,
@@ -976,6 +980,8 @@ class DBService {
     if (oldVersion < 29) {
       await _addColumnIfMissing(db, 'doctors', 'userUid', 'TEXT');
       await _addColumnIfMissing(db, 'employees', 'userUid', 'TEXT');
+      await _createIndexIfMissing(db, 'idx_doctors_userUid', 'doctors', ['userUid']);
+      await _createIndexIfMissing(db, 'idx_employees_userUid', 'employees', ['userUid']);
     }
   }
 
@@ -1472,6 +1478,20 @@ class DBService {
     return res.map((row) => Doctor.fromMap(row)).toList();
   }
 
+  Future<Doctor?> getDoctorByUserUid(String userUid) async {
+    final uid = userUid.trim();
+    if (uid.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'doctors',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [uid],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Doctor.fromMap(rows.first);
+  }
+
   Future<int> updateDoctor(Doctor doctor) async {
     final db = await database;
     final rows = await db.update('doctors', doctor.toMap(),
@@ -1843,6 +1863,49 @@ class DBService {
         whereArgs: [employeeId],
         limit: 1);
     return res.isEmpty ? null : res.first;
+  }
+
+  Future<Employee?> getEmployeeByUserUid(String userUid) async {
+    final uid = userUid.trim();
+    if (uid.isEmpty) return null;
+    final db = await database;
+    final rows = await db.query(
+      'employees',
+      where: 'userUid = ? AND ifnull(isDeleted,0)=0',
+      whereArgs: [uid],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Employee.fromMap(rows.first);
+  }
+
+  Future<Set<String>> getLinkedUserUids() async {
+    final db = await database;
+    final linked = <String>{};
+
+    final doctors = await db.query(
+      'doctors',
+      columns: const ['userUid'],
+      where: 'ifnull(isDeleted,0)=0',
+    );
+    for (final row in doctors) {
+      final raw = row['userUid'] ?? row['user_uid'];
+      final uid = (raw ?? '').toString().trim();
+      if (uid.isNotEmpty) linked.add(uid);
+    }
+
+    final employees = await db.query(
+      'employees',
+      columns: const ['userUid'],
+      where: 'ifnull(isDeleted,0)=0',
+    );
+    for (final row in employees) {
+      final raw = row['userUid'] ?? row['user_uid'];
+      final uid = (raw ?? '').toString().trim();
+      if (uid.isNotEmpty) linked.add(uid);
+    }
+
+    return linked;
   }
 
   //=============================== سلف الموظفين ===============================

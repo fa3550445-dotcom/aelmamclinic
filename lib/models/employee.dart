@@ -44,7 +44,7 @@ class Employee {
   final double basicSalary;
   final double finalSalary;
   final bool isDoctor;
-  final String? userUid;
+  final String? userUid; // حساب Supabase المرتبط (اختياري)
 
   /*────────────────────────── حقول مزامنة اختيارية (سحابة) ─────────────────────────*/
   /// معرّف الحساب (Supabase → accounts.id)
@@ -174,6 +174,7 @@ class Employee {
         ? m['localId'] as int
         : (m['local_id'] is int ? m['local_id'] as int : m['id'] as int?);
     final updatedAt = _toDateN(m['updatedAt'] ?? m['updated_at']);
+    final userUid = _toStrN(m['userUid'] ?? m['user_uid']);
 
     return Employee(
       id: id,
@@ -233,7 +234,7 @@ class Employee {
 
   @override
   String toString() =>
-      'Employee(id:$id, name:$name, phone:$phoneNumber, job:$jobTitle, isDoctor:$isDoctor, user:$userUid)';
+      'Employee(id:$id, name:$name, phone:$phoneNumber, job:$jobTitle, isDoctor:$isDoctor, userUid:$userUid)';
 
   @override
   bool operator ==(Object other) =>

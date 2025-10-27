@@ -21,6 +21,7 @@ import '../../models/doctor.dart';
 import '../../models/patient.dart';
 import '../../models/patient_service.dart';
 import '../../services/db_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/repository_provider.dart';
 import 'list_patients_screen.dart';
 
@@ -57,6 +58,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   // Doctor selection
   int? _selectedDoctorId;
   String? _selectedDoctorName;
+  List<Doctor>? _cachedDoctors;
+  Doctor? _linkedDoctor;
 
   // Inventory usages
   List<Map<String, dynamic>> _invTypes = [];
@@ -129,6 +132,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     _selectedDoctorName = p.doctorName;
     _doctorCtrl.text = p.doctorName ?? '';
 
+    await _getDoctorsForCurrentUser(forceSelection: true);
+
     _selectedServiceTypeAr = _codeToLabel(p.serviceType);
 
     // تحميل المرفقات فورًا
@@ -188,6 +193,35 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       orderBy: 'name',
     );
     setState(() => _invItems = rows);
+  }
+
+  Future<List<Doctor>> _getDoctorsForCurrentUser({bool forceSelection = false}) async {
+    if (_cachedDoctors != null) return _cachedDoctors!;
+
+    final docs = await DBService.instance.getAllDoctors();
+    final auth = context.read<AuthProvider>();
+    final uid = auth.uid;
+    Doctor? linked;
+    if (uid != null && uid.isNotEmpty) {
+      linked = await DBService.instance.getDoctorByUserUid(uid);
+    }
+
+    final result = (linked != null && linked.id != null)
+        ? docs.where((d) => d.id == linked!.id).toList()
+        : docs;
+
+    _cachedDoctors = result;
+    _linkedDoctor = linked;
+
+    if (forceSelection && linked != null && linked.id != null && mounted) {
+      setState(() {
+        _selectedDoctorId = linked!.id;
+        _selectedDoctorName = 'د/${linked.name}';
+        _doctorCtrl.text = _selectedDoctorName!;
+      });
+    }
+
+    return result;
   }
 
   Future<void> _loadExistingConsumptions() async {
@@ -485,7 +519,14 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   }
 
   Future<void> _selectDoctorForRadLab() async {
-    final doctors = await DBService.instance.getAllDoctors();
+    final doctors = await _getDoctorsForCurrentUser();
+    if (doctors.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('لا يوجد أطباء متاحون لهذا الحساب.')),
+      );
+      return;
+    }
     List<Doctor> filtered = List.from(doctors);
     final chosen = await showDialog<Doctor>(
       context: context,

@@ -8,6 +8,7 @@ import '../../core/validators.dart';
 import '../../core/formatters.dart';
 
 import '../../services/db_service.dart';
+import '../../widgets/user_account_picker_dialog.dart';
 
 class NewEmployeeScreen extends StatefulWidget {
   const NewEmployeeScreen({super.key});
@@ -30,6 +31,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
 
   bool _isDoctor = false;
   bool _saving = false;
+  String? _selectedUserUid;
+  String? _selectedUserEmail;
+  bool _selectedAccountDisabled = false;
 
   @override
   void dispose() {
@@ -52,6 +56,30 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
 
     _basicSalaryCtrl.text = cleanNum(_basicSalaryCtrl.text);
     _finalSalaryCtrl.text = cleanNum(_finalSalaryCtrl.text);
+  }
+
+  Future<void> _openAccountPicker() async {
+    final exclude = await DBService.instance.getLinkedUserUids();
+    if (_selectedUserUid != null && _selectedUserUid!.isNotEmpty) {
+      exclude.remove(_selectedUserUid);
+    }
+
+    final selection = await showDialog<UserAccountSelection>(
+      context: context,
+      builder: (_) => UserAccountPickerDialog(
+        excludeUserUids: exclude,
+        initialUserUid: _selectedUserUid,
+      ),
+    );
+
+    if (selection == null) return;
+
+    if (!mounted) return;
+    setState(() {
+      _selectedUserUid = selection.uid;
+      _selectedUserEmail = selection.email.isEmpty ? selection.uid : selection.email;
+      _selectedAccountDisabled = selection.disabled;
+    });
   }
 
   Future<void> _saveEmployee() async {
@@ -80,6 +108,20 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
       'finalSalary': fin,
       'isDoctor': _isDoctor ? 1 : 0, // ✅ متوافقة مع SQLite (0/1)
     };
+
+    if (_isDoctor) {
+      data['userUid'] = null;
+    } else {
+      final uid = _selectedUserUid?.trim() ?? '';
+      if (uid.isEmpty) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('الرجاء اختيار حساب Supabase للموظف.')),
+        );
+        return;
+      }
+      data['userUid'] = uid;
+    }
 
     try {
       await DBService.instance.insertEmployee(data);
@@ -209,6 +251,44 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
 
                       const SizedBox(height: 12),
 
+                      if (!_isDoctor) ...[
+                        NeuCard(
+                          onTap: _openAccountPicker,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          child: ListTile(
+                            leading: Container(
+                              decoration: BoxDecoration(
+                                color: kPrimaryColor.withOpacity(.10),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.all(10),
+                              child: const Icon(
+                                Icons.alternate_email_rounded,
+                                color: kPrimaryColor,
+                              ),
+                            ),
+                            title: Text(
+                              _selectedUserEmail ?? 'اختيار حساب Supabase',
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                            subtitle: Text(
+                              _selectedUserEmail == null
+                                  ? 'اضغط لاختيار حساب لربطه بالموظف'
+                                  : _selectedAccountDisabled
+                                      ? '⚠️ الحساب المحدد معطّل'
+                                      : 'سيُربط بالمعرّف ${_selectedUserUid ?? ''}',
+                              style: TextStyle(
+                                color: scheme.onSurface.withOpacity(.65),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            trailing: const Icon(Icons.search_rounded),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
                       // بطاقة: الرواتب
                       NeuCard(
                         padding: const EdgeInsets.all(12),
@@ -255,7 +335,21 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                           title: const Text('هل الموظف طبيب؟',
                               style: TextStyle(fontWeight: FontWeight.w700)),
                           value: _isDoctor,
-                          onChanged: (v) => setState(() => _isDoctor = v),
+                          onChanged: (v) {
+                            setState(() {
+                              _isDoctor = v;
+                              if (v) {
+                                _selectedUserUid = null;
+                                _selectedUserEmail = null;
+                                _selectedAccountDisabled = false;
+                              }
+                            });
+                            if (!v && _selectedUserUid == null) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) _openAccountPicker();
+                              });
+                            }
+                          },
                         ),
                       ),
 

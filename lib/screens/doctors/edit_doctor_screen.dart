@@ -74,6 +74,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
     final updated = Doctor(
       id: widget.doctor.id,
       employeeId: widget.doctor.employeeId,
+      userUid: widget.doctor.userUid,
       name: widget.doctor.name,
       specialization: widget.doctor.specialization,
       phoneNumber: widget.doctor.phoneNumber,
