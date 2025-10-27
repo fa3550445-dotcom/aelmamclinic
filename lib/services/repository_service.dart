@@ -255,6 +255,7 @@ class RepositoryService {
       JOIN ${AlertSetting.table} AS a ON a.item_id = i.id
       WHERE a.is_enabled = 1
         AND i.stock     <= a.threshold
+        AND ifnull(i.isDeleted, 0) = 0
       ORDER BY i.stock ASC
     ''');
     return rows.map(Item.fromMap).toList();
@@ -269,6 +270,7 @@ class RepositoryService {
       JOIN ${Item.table}         AS i ON i.id = a.item_id
       WHERE a.is_enabled = 1
         AND i.stock     <= a.threshold
+        AND ifnull(i.isDeleted, 0) = 0
       LIMIT 1
     ''');
     return result.isNotEmpty;
