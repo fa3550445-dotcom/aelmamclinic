@@ -163,7 +163,7 @@ class RepositoryService {
   /*────────── تنبيه انخفاض المخزون ──────────*/
   Future<void> setAlert({
     required int itemId,
-    required int threshold,
+    required double threshold,
   }) async {
     final db = await _db.database;
 

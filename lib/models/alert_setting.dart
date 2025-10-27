@@ -12,7 +12,7 @@ class AlertSetting {
 
   final int? id;
   final int itemId;
-  final int threshold;
+  final double threshold;
   final bool isEnabled;
   final DateTime? lastTriggered;
   final DateTime? notifyTime;
@@ -38,6 +38,14 @@ class AlertSetting {
   }
 
   static int _toInt0(dynamic v) => _toIntN(v) ?? 0;
+
+  static double? _toDoubleN(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
+
+  static double _toDouble0(dynamic v) => _toDoubleN(v) ?? 0.0;
 
   static bool _toBool(dynamic v) {
     if (v is bool) return v;
@@ -66,7 +74,7 @@ class AlertSetting {
   CREATE TABLE IF NOT EXISTS $table (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     item_id         INTEGER NOT NULL UNIQUE,
-    threshold       INTEGER NOT NULL,
+    threshold       REAL    NOT NULL,
     is_enabled      INTEGER NOT NULL DEFAULT 1,
     last_triggered  TEXT,
     notify_time     TEXT,
@@ -97,7 +105,7 @@ class AlertSetting {
   factory AlertSetting.fromMap(Map<String, dynamic> map) => AlertSetting(
     id: _toIntN(map['id']),
     itemId: _toInt0(map['item_id'] ?? map['itemId']),
-    threshold: _toInt0(map['threshold']),
+    threshold: _toDouble0(map['threshold']),
     isEnabled: _toBool(map['is_enabled'] ?? map['isEnabled'] ?? 1),
     lastTriggered:
     _toDateN(map['last_triggered'] ?? map['lastTriggered']),
@@ -110,7 +118,7 @@ class AlertSetting {
   AlertSetting copyWith({
     int? id,
     int? itemId,
-    int? threshold,
+    double? threshold,
     bool? isEnabled,
     DateTime? lastTriggered,
     DateTime? notifyTime,

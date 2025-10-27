@@ -31,6 +31,22 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
   bool _showCriticalOnly = false; // المتجاوزة للحد فقط
   bool _showEnabledOnly = false; // المفعّلة فقط
 
+  String _formatNumber(double value) {
+    if ((value - value.roundToDouble()).abs() < 1e-9) {
+      return value.round().toString();
+    }
+    var str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      while (str.endsWith('0')) {
+        str = str.substring(0, str.length - 1);
+      }
+      if (str.endsWith('.')) {
+        str = str.substring(0, str.length - 1);
+      }
+    }
+    return str;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +73,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
         .map((m) => _AlertInfo(
               id: m['id'] as int,
               itemName: m['item_name'] as String,
-              threshold: (m['threshold'] as num).toInt(),
+              threshold: (m['threshold'] as num).toDouble(),
               currentStock: (m['current_stock'] as num).toInt(),
               isEnabled: (m['is_enabled'] as int) == 1,
             ))
@@ -82,7 +98,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
   }
 
   Future<void> _editThreshold(_AlertInfo a) async {
-    final ctrl = TextEditingController(text: a.threshold.toString());
+    final ctrl = TextEditingController(text: _formatNumber(a.threshold));
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -90,7 +106,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
         content: TextField(
           controller: ctrl,
           decoration: const InputDecoration(labelText: 'العدد الجديد'),
-          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
         ),
         actions: [
           TextButton(
@@ -104,7 +120,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
     );
 
     if (ok == true) {
-      final v = int.tryParse(ctrl.text);
+      final v = double.tryParse(ctrl.text.trim());
       if (v == null || v <= 0) return;
       final db = await RepositoryService.instance.database;
       await db.update(
@@ -356,7 +372,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        'الحد: ${a.threshold}  •  المتبقي: ${a.currentStock}',
+                                        'الحد: ${_formatNumber(a.threshold)}  •  المتبقي: ${a.currentStock}',
                                         style: TextStyle(
                                           color: Theme.of(context)
                                               .colorScheme
@@ -459,7 +475,7 @@ class _ViewAlertsScreenState extends State<ViewAlertsScreen> {
 class _AlertInfo {
   final int id;
   final String itemName;
-  final int threshold;
+  final double threshold;
   final int currentStock;
   final bool isEnabled;
 
