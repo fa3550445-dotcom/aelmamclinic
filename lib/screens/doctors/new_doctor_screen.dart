@@ -32,6 +32,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
   List<AccountUserSummary> _availableAccounts = const [];
   bool _loadingAccounts = false;
   final AuthSupabaseService _authService = AuthSupabaseService();
+  Map<String, dynamic>? _selectedEmployee;
 
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -66,41 +67,43 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
     );
   }
 
-  Future<void> _openAccountPicker() async {
-    final exclude = await DBService.instance.getLinkedUserUids();
-    if (_selectedUserUid != null && _selectedUserUid!.isNotEmpty) {
-      exclude.remove(_selectedUserUid);
+  Future<void> _openEmployeePicker() async {
+    final selectedEmployee = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (_) => const EmployeeSearchDialog(),
+    );
+
+    if (selectedEmployee == null) return;
+
+    setState(() {
+      _selectedEmployee = Map<String, dynamic>.from(selectedEmployee);
+      _selectedEmployeeId = selectedEmployee['id'] as int?;
+      _doctorNameCtrl.text = (selectedEmployee['name'] ?? '').toString();
+      _specializationCtrl.text = (selectedEmployee['jobTitle'] ?? '').toString();
+      _phoneCtrl.text = (selectedEmployee['phoneNumber'] ?? '').toString();
+    });
+
+    final linkedUid = (selectedEmployee['userUid'] ??
+            selectedEmployee['user_uid'])
+        ?.toString()
+        .trim();
+    if (linkedUid == null || linkedUid.isEmpty) {
+      setState(() => _selectedAccount = null);
+      return;
     }
 
-    final selection = await showDialog<UserAccountSelection>(
-      context: context,
-      builder: (_) => UserAccountPickerDialog(
-        excludeUserUids: exclude,
-        initialUserUid: _selectedUserUid,
+    final existing = _availableAccounts.firstWhere(
+      (a) => a.userUid == linkedUid,
+      orElse: () => AccountUserSummary(
+        userUid: linkedUid,
+        email: (selectedEmployee['email'] ?? '').toString(),
+        disabled: selectedEmployee['disabled'] == true,
       ),
     );
 
-    if (selectedEmployee != null) {
-      setState(() {
-        _selectedEmployeeId = selectedEmployee['id'] as int?;
-        _doctorNameCtrl.text = selectedEmployee['name'] ?? '';
-        _specializationCtrl.text = selectedEmployee['jobTitle'] ?? '';
-        _phoneCtrl.text = selectedEmployee['phoneNumber'] ?? '';
-      });
-
-      final linkedUid = (selectedEmployee['userUid'] ?? selectedEmployee['user_uid'])?.toString();
-      if (linkedUid != null && linkedUid.trim().isNotEmpty) {
-        final match = _availableAccounts.firstWhere(
-          (a) => a.userUid == linkedUid,
-          orElse: () => AccountUserSummary(userUid: linkedUid, email: selectedEmployee['email']?.toString() ?? '—', disabled: false),
-        );
-        setState(() {
-          if (_availableAccounts.any((a) => a.userUid == linkedUid)) {
-            _selectedAccount = match;
-          }
-        });
-      }
-    }
+    setState(() {
+      _selectedAccount = existing;
+    });
   }
 
   Future<void> _loadAvailableAccounts() async {
@@ -201,13 +204,6 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
       return;
     }
 
-    if (_selectedUserUid == null || _selectedUserUid!.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء اختيار حساب Supabase لربط الطبيب.')),
-      );
-      return;
-    }
-
     final newDoctor = Doctor(
       employeeId: _selectedEmployeeId,
       userUid: _selectedAccount!.userUid,
@@ -257,7 +253,7 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                 children: [
                   // اختيار الحساب المرتبط
                   NeuCard(
-                    onTap: _openAccountPicker,
+                    onTap: _openEmployeePicker,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
                     child: ListTile(
@@ -274,17 +270,21 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
                         ),
                       ),
                       title: Text(
-                        _selectedUserEmail ?? 'اختيار حساب الموظف',
+                        _selectedEmployee == null
+                            ? 'اختيار الموظف'
+                            : (_selectedEmployee!['name']?.toString().isNotEmpty ?? false)
+                                ? _selectedEmployee!['name'].toString()
+                                : 'موظف رقم ${_selectedEmployeeId ?? ''}',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        _selectedUserEmail == null
-                            ? 'اضغط لاختيار حساب Supabase لربط الطبيب'
-                            : _selectedAccountDisabled
-                                ? '⚠️ هذا الحساب معطّل حاليًا'
+                        _selectedEmployee == null
+                            ? 'اضغط لاختيار الموظف لربط بياناته بالطبيب'
+                            : (_selectedEmployee!['jobTitle']?.toString().isNotEmpty ?? false)
+                                ? _selectedEmployee!['jobTitle'].toString()
                                 : (_selectedEmployeeId != null
-                                    ? 'موظف مرتبط ID: $_selectedEmployeeId'
-                                    : 'سيُربط بالحساب المختار'),
+                                    ? 'معرّف الموظف: $_selectedEmployeeId'
+                                    : 'سيُستخدم اسم الموظف الحالي'),
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme

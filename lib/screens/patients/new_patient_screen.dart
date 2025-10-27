@@ -78,8 +78,6 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _saving = false;
   bool _doctorRestricted = false;
-  Doctor? _linkedDoctor;
-
   @override
   void initState() {
     super.initState();
