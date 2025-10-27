@@ -12,6 +12,12 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
+CREATE SCHEMA IF NOT EXISTS "auth";
+
+
+ALTER SCHEMA "auth" OWNER TO "supabase_admin";
+
+
 CREATE SCHEMA IF NOT EXISTS "public";
 
 
@@ -28,6 +34,94 @@ CREATE SCHEMA IF NOT EXISTS "storage";
 ALTER SCHEMA "storage" OWNER TO "supabase_admin";
 
 
+CREATE TYPE "auth"."aal_level" AS ENUM (
+    'aal1',
+    'aal2',
+    'aal3'
+);
+
+
+ALTER TYPE "auth"."aal_level" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."code_challenge_method" AS ENUM (
+    's256',
+    'plain'
+);
+
+
+ALTER TYPE "auth"."code_challenge_method" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."factor_status" AS ENUM (
+    'unverified',
+    'verified'
+);
+
+
+ALTER TYPE "auth"."factor_status" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."factor_type" AS ENUM (
+    'totp',
+    'webauthn',
+    'phone'
+);
+
+
+ALTER TYPE "auth"."factor_type" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."oauth_authorization_status" AS ENUM (
+    'pending',
+    'approved',
+    'denied',
+    'expired'
+);
+
+
+ALTER TYPE "auth"."oauth_authorization_status" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."oauth_client_type" AS ENUM (
+    'public',
+    'confidential'
+);
+
+
+ALTER TYPE "auth"."oauth_client_type" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."oauth_registration_type" AS ENUM (
+    'dynamic',
+    'manual'
+);
+
+
+ALTER TYPE "auth"."oauth_registration_type" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."oauth_response_type" AS ENUM (
+    'code'
+);
+
+
+ALTER TYPE "auth"."oauth_response_type" OWNER TO "supabase_auth_admin";
+
+
+CREATE TYPE "auth"."one_time_token_type" AS ENUM (
+    'confirmation_token',
+    'reauthentication_token',
+    'recovery_token',
+    'email_change_token_new',
+    'email_change_token_current',
+    'phone_change_token'
+);
+
+
+ALTER TYPE "auth"."one_time_token_type" OWNER TO "supabase_auth_admin";
+
+
 CREATE TYPE "storage"."buckettype" AS ENUM (
     'STANDARD',
     'ANALYTICS'
@@ -35,6 +129,74 @@ CREATE TYPE "storage"."buckettype" AS ENUM (
 
 
 ALTER TYPE "storage"."buckettype" OWNER TO "supabase_storage_admin";
+
+
+CREATE OR REPLACE FUNCTION "auth"."email"() RETURNS "text"
+    LANGUAGE "sql" STABLE
+    AS $$
+  select 
+  coalesce(
+    nullif(current_setting('request.jwt.claim.email', true), ''),
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'email')
+  )::text
+$$;
+
+
+ALTER FUNCTION "auth"."email"() OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON FUNCTION "auth"."email"() IS 'Deprecated. Use auth.jwt() -> ''email'' instead.';
+
+
+
+CREATE OR REPLACE FUNCTION "auth"."jwt"() RETURNS "jsonb"
+    LANGUAGE "sql" STABLE
+    AS $$
+  select 
+    coalesce(
+        nullif(current_setting('request.jwt.claim', true), ''),
+        nullif(current_setting('request.jwt.claims', true), '')
+    )::jsonb
+$$;
+
+
+ALTER FUNCTION "auth"."jwt"() OWNER TO "supabase_auth_admin";
+
+
+CREATE OR REPLACE FUNCTION "auth"."role"() RETURNS "text"
+    LANGUAGE "sql" STABLE
+    AS $$
+  select 
+  coalesce(
+    nullif(current_setting('request.jwt.claim.role', true), ''),
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role')
+  )::text
+$$;
+
+
+ALTER FUNCTION "auth"."role"() OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON FUNCTION "auth"."role"() IS 'Deprecated. Use auth.jwt() -> ''role'' instead.';
+
+
+
+CREATE OR REPLACE FUNCTION "auth"."uid"() RETURNS "uuid"
+    LANGUAGE "sql" STABLE
+    AS $$
+  select 
+  coalesce(
+    nullif(current_setting('request.jwt.claim.sub', true), ''),
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
+  )::uuid
+$$;
+
+
+ALTER FUNCTION "auth"."uid"() OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON FUNCTION "auth"."uid"() IS 'Deprecated. Use auth.jwt() -> ''sub'' instead.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text" DEFAULT 'employee'::"text") RETURNS "void"
@@ -45,6 +207,24 @@ DECLARE
 BEGIN
   IF p_account IS NULL OR p_user_uid IS NULL THEN
     RAISE EXCEPTION 'account_id and user_uid are required';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.employees e
+    WHERE e.user_uid = p_user_uid
+      AND e.account_id IS DISTINCT FROM p_account
+  ) THEN
+    RAISE EXCEPTION 'user already linked to another employee record' USING errcode = '23505';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.doctors d
+    WHERE d.user_uid = p_user_uid
+      AND d.account_id IS DISTINCT FROM p_account
+  ) THEN
+    RAISE EXCEPTION 'user already linked to another doctor record' USING errcode = '23505';
   END IF;
 
   SELECT true INTO exists_row
@@ -82,54 +262,293 @@ $$;
 ALTER FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."admin_bootstrap_clinic_for_email"("clinic_name" "text", "owner_email" "text", "owner_role" "text" DEFAULT 'owner'::"text") RETURNS "uuid"
+CREATE OR REPLACE FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text" DEFAULT NULL::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
     AS $$
 DECLARE
-  owner_uid uuid;
-  acc_id uuid;
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_uid uuid := nullif(claims->>'sub', '')::uuid;
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+  can_manage boolean;
+  employee_uid uuid;
 BEGIN
-  IF fn_is_super_admin() = false THEN
-    RAISE EXCEPTION 'not allowed';
+  IF p_account IS NULL OR coalesce(trim(p_email), '') = '' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'account and email are required');
   END IF;
 
-  IF clinic_name IS NULL OR length(trim(clinic_name)) = 0 THEN
-    RAISE EXCEPTION 'clinic_name is required';
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.account_users au
+    WHERE au.account_id = p_account
+      AND au.user_uid = caller_uid
+      AND au.role IN ('owner', 'admin')
+      AND coalesce(au.disabled, false) = false
+  ) INTO can_manage;
+
+  IF NOT (fn_is_super_admin() = true OR can_manage OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
   END IF;
 
-  IF owner_email IS NULL OR length(trim(owner_email)) = 0 THEN
-    RAISE EXCEPTION 'owner_email is required';
-  END IF;
-
-  SELECT id INTO owner_uid
+  SELECT id
+    INTO employee_uid
   FROM auth.users
-  WHERE lower(email) = lower(owner_email)
+  WHERE lower(email) = lower(p_email)
   ORDER BY created_at DESC
   LIMIT 1;
 
-  IF owner_uid IS NULL THEN
-    RAISE EXCEPTION 'owner with email % not found in auth.users', owner_email;
+  IF employee_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'user not found');
   END IF;
 
-  INSERT INTO public.accounts(name, frozen)
-  VALUES (clinic_name, false)
-  RETURNING id INTO acc_id;
+  PERFORM public.admin_attach_employee(p_account, employee_uid, 'employee');
 
-  PERFORM public.admin_attach_employee(acc_id, owner_uid, COALESCE(owner_role, 'owner'));
+  UPDATE public.account_users
+     SET email = coalesce(email, lower(p_email))
+   WHERE account_id = p_account
+     AND user_uid = employee_uid;
 
-  RETURN acc_id;
+  RETURN jsonb_build_object('ok', true, 'account_id', p_account::text, 'user_uid', employee_uid::text);
 END;
 $$;
 
 
-ALTER FUNCTION "public"."admin_bootstrap_clinic_for_email"("clinic_name" "text", "owner_email" "text", "owner_role" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text" DEFAULT NULL::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
+    AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+  owner_uid uuid;
+  account_id uuid;
+BEGIN
+  IF coalesce(trim(p_clinic_name), '') = '' OR coalesce(trim(p_owner_email), '') = '' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'clinic_name and owner_email are required');
+  END IF;
+
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  SELECT id
+    INTO owner_uid
+  FROM auth.users
+  WHERE lower(email) = lower(p_owner_email)
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF owner_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'owner user not found');
+  END IF;
+
+  INSERT INTO public.accounts(name, frozen)
+  VALUES (p_clinic_name, false)
+  RETURNING id INTO account_id;
+
+  PERFORM public.admin_attach_employee(account_id, owner_uid, 'owner');
+
+  UPDATE public.account_users au
+     SET email = lower(p_owner_email)
+   WHERE au.account_id = account_id
+     AND au.user_uid = owner_uid;
+
+  RETURN jsonb_build_object('ok', true, 'account_id', account_id::text, 'owner_uid', owner_uid::text);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
+    AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+  deleted_id uuid;
+BEGIN
+  IF p_account_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'account_id is required');
+  END IF;
+
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  DELETE FROM public.accounts
+   WHERE id = p_account_id
+   RETURNING id INTO deleted_id;
+
+  IF deleted_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'account not found');
+  END IF;
+
+  RETURN jsonb_build_object('ok', true, 'account_id', deleted_id::text);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."admin_list_clinics"() RETURNS TABLE("id" "uuid", "name" "text", "frozen" boolean, "created_at" timestamp with time zone)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
+    AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+BEGIN
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  RETURN QUERY
+  SELECT a.id, a.name, a.frozen, a.created_at
+  FROM public.accounts a
+  ORDER BY a.created_at DESC;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."admin_list_clinics"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
+    AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+  updated_id uuid;
+BEGIN
+  IF p_account_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'account_id is required');
+  END IF;
+
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  UPDATE public.accounts
+     SET frozen = coalesce(p_frozen, false)
+   WHERE id = p_account_id
+   RETURNING id INTO updated_id;
+
+  IF updated_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'account not found');
+  END IF;
+
+  RETURN jsonb_build_object('ok', true, 'account_id', updated_id::text, 'frozen', coalesce(p_frozen, false));
+END;
+$$;
+
+
+ALTER FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."chat_admin_start_dm"("target_email" "text") RETURNS "uuid"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'auth'
+    AS $$
+DECLARE
+  claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
+  caller_uid uuid := nullif(claims->>'sub', '')::uuid;
+  caller_email text := lower(coalesce(claims->>'email', ''));
+  super_admin_email text := 'admin@elmam.com';
+  normalized_email text := lower(coalesce(target_email, ''));
+  target_uid uuid;
+  target_account uuid;
+  existing_conv uuid;
+  conv_id uuid;
+  now_ts timestamptz := now();
+BEGIN
+  IF caller_uid IS NULL THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  IF normalized_email = '' THEN
+    RAISE EXCEPTION 'target_email is required';
+  END IF;
+
+  IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
+
+  SELECT id
+    INTO target_uid
+  FROM auth.users
+  WHERE lower(email) = normalized_email
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF target_uid IS NULL THEN
+    RAISE EXCEPTION 'target user not found' USING errcode = 'P0002';
+  END IF;
+
+  IF target_uid = caller_uid THEN
+    RAISE EXCEPTION 'cannot start conversation with yourself';
+  END IF;
+
+  SELECT au.account_id
+    INTO target_account
+  FROM public.account_users au
+  WHERE au.user_uid = target_uid
+    AND coalesce(au.disabled, false) = false
+  ORDER BY CASE WHEN lower(coalesce(au.role, '')) IN ('owner','admin','superadmin') THEN 0 ELSE 1 END,
+           au.created_at DESC
+  LIMIT 1;
+
+  SELECT p.conversation_id
+    INTO existing_conv
+  FROM public.chat_participants p
+  JOIN public.chat_participants p2
+    ON p.conversation_id = p2.conversation_id
+  JOIN public.chat_conversations c
+    ON c.id = p.conversation_id
+  WHERE p.user_uid = caller_uid
+    AND p2.user_uid = target_uid
+    AND coalesce(c.is_group, false) = false
+  ORDER BY c.created_at DESC
+  LIMIT 1;
+
+  IF existing_conv IS NOT NULL THEN
+    RETURN existing_conv;
+  END IF;
+
+  conv_id := gen_random_uuid();
+
+  INSERT INTO public.chat_conversations(id, account_id, is_group, title, created_by, created_at, updated_at)
+  VALUES (conv_id, target_account, false, NULL, caller_uid, now_ts, now_ts);
+
+  INSERT INTO public.chat_participants(conversation_id, user_uid, role, email, joined_at)
+  VALUES
+    (conv_id, caller_uid, 'superadmin', NULLIF(caller_email, ''), now_ts),
+    (conv_id, target_uid, NULL, normalized_email, now_ts);
+
+  RETURN conv_id;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."chat_admin_start_dm"("target_email" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."chat_conversation_id_from_path"("_name" "text") RETURNS "uuid"
     LANGUAGE "sql" IMMUTABLE
     AS $$
-  -- نلتقط UUID من الجزء بعد attachments/
-  -- مثال: attachments/123e4567-e89b-12d3-a456-426614174000/...
   select case
            when regexp_match(_name,
              '^attachments/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/'
@@ -149,36 +568,47 @@ CREATE OR REPLACE FUNCTION "public"."delete_employee"("p_account" "uuid", "p_use
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'auth'
     AS $$
-declare
+DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
   caller_email text := lower(coalesce(claims->>'email',''));
   super_admin_email text := 'aelmam.app@gmail.com';
   can_manage boolean;
-begin
-  select exists (
-    select 1
-    from public.account_users
-    where account_id = p_account
-      and user_uid = caller_uid
-      and role in ('owner','admin')
-      and coalesce(disabled,false) = false
-  ) into can_manage;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.account_users
+    WHERE account_id = p_account
+      AND user_uid = caller_uid
+      AND role IN ('owner','admin')
+      AND coalesce(disabled,false) = false
+  ) INTO can_manage;
 
-  if not (can_manage or caller_email = lower(super_admin_email)) then
-    raise exception 'forbidden' using errcode = '42501';
-  end if;
+  IF NOT (can_manage OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
 
-  delete from public.account_users
-   where account_id = p_account
-     and user_uid = p_user_uid;
+  DELETE FROM public.account_users
+   WHERE account_id = p_account
+     AND user_uid = p_user_uid;
 
-  -- اختياري: وسم البروفايل كـ "removed" بدلاً من الحذف
-  update public.profiles
-     set role = 'removed'
-   where id = p_user_uid
-     and coalesce(account_id, p_account) = p_account;
-end;
+  UPDATE public.employees
+     SET user_uid = NULL,
+         updated_at = now()
+   WHERE account_id = p_account
+     AND user_uid = p_user_uid;
+
+  UPDATE public.doctors
+     SET user_uid = NULL,
+         updated_at = now()
+   WHERE account_id = p_account
+     AND user_uid = p_user_uid;
+
+  UPDATE public.profiles
+     SET role = 'removed'
+   WHERE id = p_user_uid
+     AND coalesce(account_id, p_account) = p_account;
+END;
 $$;
 
 
@@ -482,43 +912,46 @@ $$;
 ALTER FUNCTION "public"."get_schema_info"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."list_employees_with_email"("p_account" "uuid") RETURNS TABLE("user_uid" "uuid", "email" "text", "role" "text", "disabled" boolean, "created_at" timestamp with time zone)
+CREATE OR REPLACE FUNCTION "public"."list_employees_with_email"("p_account" "uuid") RETURNS TABLE("user_uid" "uuid", "email" "text", "role" "text", "disabled" boolean, "created_at" timestamp with time zone, "employee_id" "uuid", "doctor_id" "uuid")
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'auth'
     AS $$
-declare
+DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
   caller_email text := lower(coalesce(claims->>'email',''));
   super_admin_email text := 'aelmam.app@gmail.com';
   can_manage boolean;
-begin
-  -- تحقق الصلاحيات: (owner/admin) على الحساب أو سوبر أدمن بالبريد
-  select exists (
-    select 1
-    from public.account_users
-    where account_id = p_account
-      and user_uid = caller_uid
-      and role in ('owner','admin')
-      and coalesce(disabled,false) = false
-  ) into can_manage;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.account_users
+    WHERE account_id = p_account
+      AND user_uid = caller_uid
+      AND role IN ('owner','admin')
+      AND coalesce(disabled,false) = false
+  ) INTO can_manage;
 
-  if not (can_manage or caller_email = lower(super_admin_email)) then
-    raise exception 'forbidden' using errcode = '42501';
-  end if;
+  IF NOT (can_manage OR caller_email = lower(super_admin_email)) THEN
+    RAISE EXCEPTION 'forbidden' USING errcode = '42501';
+  END IF;
 
-  return query
-  select
+  RETURN QUERY
+  SELECT
     au.user_uid,
-    u.email,
+    coalesce(u.email, au.email),
     au.role,
-    coalesce(au.disabled,false) as disabled,
-    au.created_at
-  from public.account_users au
-  left join auth.users u on u.id = au.user_uid
-  where au.account_id = p_account
-  order by au.created_at desc;
-end;
+    coalesce(au.disabled,false) AS disabled,
+    au.created_at,
+    e.id AS employee_id,
+    d.id AS doctor_id
+  FROM public.account_users au
+  LEFT JOIN auth.users u ON u.id = au.user_uid
+  LEFT JOIN public.employees e ON e.account_id = au.account_id AND e.user_uid = au.user_uid
+  LEFT JOIN public.doctors d ON d.account_id = au.account_id AND d.user_uid = au.user_uid
+  WHERE au.account_id = p_account
+  ORDER BY au.created_at DESC;
+END;
 $$;
 
 
@@ -556,6 +989,44 @@ $$;
 ALTER FUNCTION "public"."my_accounts"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."my_feature_permissions"() RETURNS TABLE("account_id" "uuid", "allowed_features" "text"[], "can_create" boolean, "can_update" boolean, "can_delete" boolean)
+    LANGUAGE "sql" STABLE
+    AS $$
+  SELECT
+    coalesce(afp.account_id, au.account_id) as account_id,
+    coalesce(afp.allowed_features, '{}')    as allowed_features,
+    coalesce(afp.can_create, true)          as can_create,
+    coalesce(afp.can_update, true)          as can_update,
+    coalesce(afp.can_delete, true)          as can_delete
+  FROM public.account_users au
+  LEFT JOIN public.account_feature_permissions afp
+    ON afp.account_id = au.account_id AND afp.user_uid = au.user_uid
+  WHERE au.user_uid = auth.uid()
+  LIMIT 1;
+$$;
+
+
+ALTER FUNCTION "public"."my_feature_permissions"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."my_profile"() RETURNS TABLE("user_uid" "uuid", "email" "text", "account_id" "uuid", "role" "text", "disabled" boolean)
+    LANGUAGE "sql" STABLE
+    AS $$
+  SELECT u.id,
+         u.email,
+         au.account_id,
+         au.role::text,
+         au.disabled
+  FROM auth.users u
+  JOIN public.account_users au ON au.user_uid = u.id
+  WHERE u.id = auth.uid()
+  LIMIT 1;
+$$;
+
+
+ALTER FUNCTION "public"."my_profile"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'auth'
@@ -563,20 +1034,19 @@ CREATE OR REPLACE FUNCTION "public"."set_employee_disabled"("p_account" "uuid", 
 declare
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
-  caller_email text := lower(coalesce(claims->>'email',''));
-  super_admin_email text := 'aelmam.app@gmail.com';
   can_manage boolean;
+  is_super_admin boolean := public.fn_is_super_admin();
 begin
   select exists (
     select 1
     from public.account_users
     where account_id = p_account
       and user_uid = caller_uid
-      and role in ('owner','admin')
+      and lower(coalesce(role,'')) in ('owner','admin','superadmin')
       and coalesce(disabled,false) = false
   ) into can_manage;
 
-  if not (can_manage or caller_email = lower(super_admin_email)) then
+  if not (can_manage or is_super_admin) then
     raise exception 'forbidden' using errcode = '42501';
   end if;
 
@@ -595,6 +1065,35 @@ $$;
 
 
 ALTER FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."tg_account_feature_permissions_touch"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."tg_account_feature_permissions_touch"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."tg_audit_logs_set_created_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.created_at = COALESCE(NEW.created_at, now());
+  END IF;
+  -- TODO: إرفاق تسجيل العمليات التفصيلي عند تجهيز نظام التدقيق الكامل.
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."tg_audit_logs_set_created_at"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."tg_profiles_set_updated_at"() RETURNS "trigger"
@@ -1550,6 +2049,446 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
+CREATE TABLE IF NOT EXISTS "auth"."audit_log_entries" (
+    "instance_id" "uuid",
+    "id" "uuid" NOT NULL,
+    "payload" json,
+    "created_at" timestamp with time zone,
+    "ip_address" character varying(64) DEFAULT ''::character varying NOT NULL
+);
+
+
+ALTER TABLE "auth"."audit_log_entries" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."audit_log_entries" IS 'Auth: Audit trail for user actions.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."flow_state" (
+    "id" "uuid" NOT NULL,
+    "user_id" "uuid",
+    "auth_code" "text" NOT NULL,
+    "code_challenge_method" "auth"."code_challenge_method" NOT NULL,
+    "code_challenge" "text" NOT NULL,
+    "provider_type" "text" NOT NULL,
+    "provider_access_token" "text",
+    "provider_refresh_token" "text",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "authentication_method" "text" NOT NULL,
+    "auth_code_issued_at" timestamp with time zone
+);
+
+
+ALTER TABLE "auth"."flow_state" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."flow_state" IS 'stores metadata for pkce logins';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."identities" (
+    "provider_id" "text" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "identity_data" "jsonb" NOT NULL,
+    "provider" "text" NOT NULL,
+    "last_sign_in_at" timestamp with time zone,
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "email" "text" GENERATED ALWAYS AS ("lower"(("identity_data" ->> 'email'::"text"))) STORED,
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
+);
+
+
+ALTER TABLE "auth"."identities" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."identities" IS 'Auth: Stores identities associated to a user.';
+
+
+
+COMMENT ON COLUMN "auth"."identities"."email" IS 'Auth: Email is a generated column that references the optional email property in the identity_data';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."instances" (
+    "id" "uuid" NOT NULL,
+    "uuid" "uuid",
+    "raw_base_config" "text",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone
+);
+
+
+ALTER TABLE "auth"."instances" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."instances" IS 'Auth: Manages users across multiple sites.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."mfa_amr_claims" (
+    "session_id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone NOT NULL,
+    "updated_at" timestamp with time zone NOT NULL,
+    "authentication_method" "text" NOT NULL,
+    "id" "uuid" NOT NULL
+);
+
+
+ALTER TABLE "auth"."mfa_amr_claims" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."mfa_amr_claims" IS 'auth: stores authenticator method reference claims for multi factor authentication';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."mfa_challenges" (
+    "id" "uuid" NOT NULL,
+    "factor_id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone NOT NULL,
+    "verified_at" timestamp with time zone,
+    "ip_address" "inet" NOT NULL,
+    "otp_code" "text",
+    "web_authn_session_data" "jsonb"
+);
+
+
+ALTER TABLE "auth"."mfa_challenges" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."mfa_challenges" IS 'auth: stores metadata about challenge requests made';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."mfa_factors" (
+    "id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "friendly_name" "text",
+    "factor_type" "auth"."factor_type" NOT NULL,
+    "status" "auth"."factor_status" NOT NULL,
+    "created_at" timestamp with time zone NOT NULL,
+    "updated_at" timestamp with time zone NOT NULL,
+    "secret" "text",
+    "phone" "text",
+    "last_challenged_at" timestamp with time zone,
+    "web_authn_credential" "jsonb",
+    "web_authn_aaguid" "uuid"
+);
+
+
+ALTER TABLE "auth"."mfa_factors" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."mfa_factors" IS 'auth: stores metadata about factors';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."oauth_authorizations" (
+    "id" "uuid" NOT NULL,
+    "authorization_id" "text" NOT NULL,
+    "client_id" "uuid" NOT NULL,
+    "user_id" "uuid",
+    "redirect_uri" "text" NOT NULL,
+    "scope" "text" NOT NULL,
+    "state" "text",
+    "resource" "text",
+    "code_challenge" "text",
+    "code_challenge_method" "auth"."code_challenge_method",
+    "response_type" "auth"."oauth_response_type" DEFAULT 'code'::"auth"."oauth_response_type" NOT NULL,
+    "status" "auth"."oauth_authorization_status" DEFAULT 'pending'::"auth"."oauth_authorization_status" NOT NULL,
+    "authorization_code" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "expires_at" timestamp with time zone DEFAULT ("now"() + '00:03:00'::interval) NOT NULL,
+    "approved_at" timestamp with time zone,
+    CONSTRAINT "oauth_authorizations_authorization_code_length" CHECK (("char_length"("authorization_code") <= 255)),
+    CONSTRAINT "oauth_authorizations_code_challenge_length" CHECK (("char_length"("code_challenge") <= 128)),
+    CONSTRAINT "oauth_authorizations_expires_at_future" CHECK (("expires_at" > "created_at")),
+    CONSTRAINT "oauth_authorizations_redirect_uri_length" CHECK (("char_length"("redirect_uri") <= 2048)),
+    CONSTRAINT "oauth_authorizations_resource_length" CHECK (("char_length"("resource") <= 2048)),
+    CONSTRAINT "oauth_authorizations_scope_length" CHECK (("char_length"("scope") <= 4096)),
+    CONSTRAINT "oauth_authorizations_state_length" CHECK (("char_length"("state") <= 4096))
+);
+
+
+ALTER TABLE "auth"."oauth_authorizations" OWNER TO "supabase_auth_admin";
+
+
+CREATE TABLE IF NOT EXISTS "auth"."oauth_clients" (
+    "id" "uuid" NOT NULL,
+    "client_secret_hash" "text",
+    "registration_type" "auth"."oauth_registration_type" NOT NULL,
+    "redirect_uris" "text" NOT NULL,
+    "grant_types" "text" NOT NULL,
+    "client_name" "text",
+    "client_uri" "text",
+    "logo_uri" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "client_type" "auth"."oauth_client_type" DEFAULT 'confidential'::"auth"."oauth_client_type" NOT NULL,
+    CONSTRAINT "oauth_clients_client_name_length" CHECK (("char_length"("client_name") <= 1024)),
+    CONSTRAINT "oauth_clients_client_uri_length" CHECK (("char_length"("client_uri") <= 2048)),
+    CONSTRAINT "oauth_clients_logo_uri_length" CHECK (("char_length"("logo_uri") <= 2048))
+);
+
+
+ALTER TABLE "auth"."oauth_clients" OWNER TO "supabase_auth_admin";
+
+
+CREATE TABLE IF NOT EXISTS "auth"."oauth_consents" (
+    "id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "client_id" "uuid" NOT NULL,
+    "scopes" "text" NOT NULL,
+    "granted_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "revoked_at" timestamp with time zone,
+    CONSTRAINT "oauth_consents_revoked_after_granted" CHECK ((("revoked_at" IS NULL) OR ("revoked_at" >= "granted_at"))),
+    CONSTRAINT "oauth_consents_scopes_length" CHECK (("char_length"("scopes") <= 2048)),
+    CONSTRAINT "oauth_consents_scopes_not_empty" CHECK (("char_length"(TRIM(BOTH FROM "scopes")) > 0))
+);
+
+
+ALTER TABLE "auth"."oauth_consents" OWNER TO "supabase_auth_admin";
+
+
+CREATE TABLE IF NOT EXISTS "auth"."one_time_tokens" (
+    "id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "token_type" "auth"."one_time_token_type" NOT NULL,
+    "token_hash" "text" NOT NULL,
+    "relates_to" "text" NOT NULL,
+    "created_at" timestamp without time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp without time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "one_time_tokens_token_hash_check" CHECK (("char_length"("token_hash") > 0))
+);
+
+
+ALTER TABLE "auth"."one_time_tokens" OWNER TO "supabase_auth_admin";
+
+
+CREATE TABLE IF NOT EXISTS "auth"."refresh_tokens" (
+    "instance_id" "uuid",
+    "id" bigint NOT NULL,
+    "token" character varying(255),
+    "user_id" character varying(255),
+    "revoked" boolean,
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "parent" character varying(255),
+    "session_id" "uuid"
+);
+
+
+ALTER TABLE "auth"."refresh_tokens" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."refresh_tokens" IS 'Auth: Store of tokens used to refresh JWT tokens once they expire.';
+
+
+
+CREATE SEQUENCE IF NOT EXISTS "auth"."refresh_tokens_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "auth"."refresh_tokens_id_seq" OWNER TO "supabase_auth_admin";
+
+
+ALTER SEQUENCE "auth"."refresh_tokens_id_seq" OWNED BY "auth"."refresh_tokens"."id";
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."saml_providers" (
+    "id" "uuid" NOT NULL,
+    "sso_provider_id" "uuid" NOT NULL,
+    "entity_id" "text" NOT NULL,
+    "metadata_xml" "text" NOT NULL,
+    "metadata_url" "text",
+    "attribute_mapping" "jsonb",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "name_id_format" "text",
+    CONSTRAINT "entity_id not empty" CHECK (("char_length"("entity_id") > 0)),
+    CONSTRAINT "metadata_url not empty" CHECK ((("metadata_url" = NULL::"text") OR ("char_length"("metadata_url") > 0))),
+    CONSTRAINT "metadata_xml not empty" CHECK (("char_length"("metadata_xml") > 0))
+);
+
+
+ALTER TABLE "auth"."saml_providers" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."saml_providers" IS 'Auth: Manages SAML Identity Provider connections.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."saml_relay_states" (
+    "id" "uuid" NOT NULL,
+    "sso_provider_id" "uuid" NOT NULL,
+    "request_id" "text" NOT NULL,
+    "for_email" "text",
+    "redirect_to" "text",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "flow_state_id" "uuid",
+    CONSTRAINT "request_id not empty" CHECK (("char_length"("request_id") > 0))
+);
+
+
+ALTER TABLE "auth"."saml_relay_states" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."saml_relay_states" IS 'Auth: Contains SAML Relay State information for each Service Provider initiated login.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."schema_migrations" (
+    "version" character varying(255) NOT NULL
+);
+
+
+ALTER TABLE "auth"."schema_migrations" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."schema_migrations" IS 'Auth: Manages updates to the auth system.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."sessions" (
+    "id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "factor_id" "uuid",
+    "aal" "auth"."aal_level",
+    "not_after" timestamp with time zone,
+    "refreshed_at" timestamp without time zone,
+    "user_agent" "text",
+    "ip" "inet",
+    "tag" "text",
+    "oauth_client_id" "uuid"
+);
+
+
+ALTER TABLE "auth"."sessions" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."sessions" IS 'Auth: Stores session data associated to a user.';
+
+
+
+COMMENT ON COLUMN "auth"."sessions"."not_after" IS 'Auth: Not after is a nullable column that contains a timestamp after which the session should be regarded as expired.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."sso_domains" (
+    "id" "uuid" NOT NULL,
+    "sso_provider_id" "uuid" NOT NULL,
+    "domain" "text" NOT NULL,
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    CONSTRAINT "domain not empty" CHECK (("char_length"("domain") > 0))
+);
+
+
+ALTER TABLE "auth"."sso_domains" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."sso_domains" IS 'Auth: Manages SSO email address domain mapping to an SSO Identity Provider.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."sso_providers" (
+    "id" "uuid" NOT NULL,
+    "resource_id" "text",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "disabled" boolean,
+    CONSTRAINT "resource_id not empty" CHECK ((("resource_id" = NULL::"text") OR ("char_length"("resource_id") > 0)))
+);
+
+
+ALTER TABLE "auth"."sso_providers" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."sso_providers" IS 'Auth: Manages SSO identity provider information; see saml_providers for SAML.';
+
+
+
+COMMENT ON COLUMN "auth"."sso_providers"."resource_id" IS 'Auth: Uniquely identifies a SSO provider according to a user-chosen resource ID (case insensitive), useful in infrastructure as code.';
+
+
+
+CREATE TABLE IF NOT EXISTS "auth"."users" (
+    "instance_id" "uuid",
+    "id" "uuid" NOT NULL,
+    "aud" character varying(255),
+    "role" character varying(255),
+    "email" character varying(255),
+    "encrypted_password" character varying(255),
+    "email_confirmed_at" timestamp with time zone,
+    "invited_at" timestamp with time zone,
+    "confirmation_token" character varying(255),
+    "confirmation_sent_at" timestamp with time zone,
+    "recovery_token" character varying(255),
+    "recovery_sent_at" timestamp with time zone,
+    "email_change_token_new" character varying(255),
+    "email_change" character varying(255),
+    "email_change_sent_at" timestamp with time zone,
+    "last_sign_in_at" timestamp with time zone,
+    "raw_app_meta_data" "jsonb",
+    "raw_user_meta_data" "jsonb",
+    "is_super_admin" boolean,
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "phone" "text" DEFAULT NULL::character varying,
+    "phone_confirmed_at" timestamp with time zone,
+    "phone_change" "text" DEFAULT ''::character varying,
+    "phone_change_token" character varying(255) DEFAULT ''::character varying,
+    "phone_change_sent_at" timestamp with time zone,
+    "confirmed_at" timestamp with time zone GENERATED ALWAYS AS (LEAST("email_confirmed_at", "phone_confirmed_at")) STORED,
+    "email_change_token_current" character varying(255) DEFAULT ''::character varying,
+    "email_change_confirm_status" smallint DEFAULT 0,
+    "banned_until" timestamp with time zone,
+    "reauthentication_token" character varying(255) DEFAULT ''::character varying,
+    "reauthentication_sent_at" timestamp with time zone,
+    "is_sso_user" boolean DEFAULT false NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "is_anonymous" boolean DEFAULT false NOT NULL,
+    CONSTRAINT "users_email_change_confirm_status_check" CHECK ((("email_change_confirm_status" >= 0) AND ("email_change_confirm_status" <= 2)))
+);
+
+
+ALTER TABLE "auth"."users" OWNER TO "supabase_auth_admin";
+
+
+COMMENT ON TABLE "auth"."users" IS 'Auth: Stores user login data within a secure schema.';
+
+
+
+COMMENT ON COLUMN "auth"."users"."is_sso_user" IS 'Auth: Set this column to true when the account comes from SSO. These accounts can have duplicate emails.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."account_feature_permissions" (
+    "account_id" "uuid" NOT NULL,
+    "user_uid" "uuid" NOT NULL,
+    "allowed_features" "text"[] DEFAULT ARRAY[]::"text"[] NOT NULL,
+    "can_create" boolean DEFAULT true NOT NULL,
+    "can_update" boolean DEFAULT true NOT NULL,
+    "can_delete" boolean DEFAULT true NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."account_feature_permissions" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."account_users" (
     "account_id" "uuid" NOT NULL,
     "user_uid" "uuid" NOT NULL,
@@ -1616,36 +2555,80 @@ CREATE TABLE IF NOT EXISTS "public"."appointments" (
 ALTER TABLE "public"."appointments" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."audit_logs" (
+    "id" bigint NOT NULL,
+    "account_id" "uuid",
+    "actor_uid" "uuid",
+    "actor_email" "text",
+    "table_name" "text" NOT NULL,
+    "op" "text" NOT NULL,
+    "row_pk" "text",
+    "before_row" "jsonb",
+    "after_row" "jsonb",
+    "diff" "jsonb",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."audit_logs" OWNER TO "postgres";
+
+
+ALTER TABLE "public"."audit_logs" ALTER COLUMN "id" ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME "public"."audit_logs_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."chat_attachments" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "account_id" "uuid",
     "message_id" "uuid" NOT NULL,
     "bucket" "text" DEFAULT 'chat-attachments'::"text" NOT NULL,
     "path" "text" NOT NULL,
     "mime_type" "text",
-    "size_bytes" bigint DEFAULT 0 NOT NULL,
+    "size_bytes" integer,
     "width" integer,
     "height" integer,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "is_deleted" boolean DEFAULT false NOT NULL,
+    "device_id" "text",
+    "local_id" bigint
 );
 
 
 ALTER TABLE "public"."chat_attachments" OWNER TO "postgres";
 
 
+COMMENT ON TABLE "public"."chat_attachments" IS 'البيانات الوصفية لمرفقات الرسائل (المسار داخل Storage، الأبعاد، الحجم...).';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."chat_conversations" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "account_id" "uuid",
-    "is_group" boolean DEFAULT false NOT NULL,
     "title" "text",
+    "is_group" boolean DEFAULT false NOT NULL,
     "created_by" "uuid" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "last_msg_at" timestamp with time zone,
-    "last_msg_snippet" "text"
+    "last_msg_snippet" "text",
+    "deleted_at" timestamp with time zone,
+    "is_deleted" boolean DEFAULT false NOT NULL
 );
 
 
 ALTER TABLE "public"."chat_conversations" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."chat_conversations" IS 'قائمة المحادثات (قناة جماعية أو محادثة مباشرة) ضمن حساب العيادة.';
+
 
 
 COMMENT ON COLUMN "public"."chat_conversations"."account_id" IS 'معرّف الحساب (clinic/account) المرتبطة به المحادثة.';
@@ -1654,28 +2637,35 @@ COMMENT ON COLUMN "public"."chat_conversations"."account_id" IS 'معرّف ال
 
 CREATE TABLE IF NOT EXISTS "public"."chat_messages" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "account_id" "uuid",
     "conversation_id" "uuid" NOT NULL,
     "sender_uid" "uuid" NOT NULL,
     "sender_email" "text",
     "kind" "text" DEFAULT 'text'::"text" NOT NULL,
     "body" "text",
+    "text" "text",
+    "attachments" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "mentions" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "reply_to_message_id" "uuid",
+    "reply_to_id" "text",
+    "reply_to_snippet" "text",
+    "patient_id" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "edited" boolean DEFAULT false NOT NULL,
+    "edited_at" timestamp with time zone,
     "deleted" boolean DEFAULT false NOT NULL,
     "deleted_at" timestamp with time zone,
-    "edited_at" timestamp with time zone,
-    "metadata" "jsonb",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "patient_id" "text",
-    "account_id" "uuid",
+    "is_deleted" boolean DEFAULT false NOT NULL,
     "device_id" "text",
-    "local_id" bigint,
-    "reply_to_message_id" "uuid",
-    "reply_to_snippet" "text",
-    "mentions" "jsonb"
+    "local_id" bigint
 );
 
 
 ALTER TABLE "public"."chat_messages" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."chat_messages" IS 'الرسائل داخل كل محادثة مع دعم الحقول التفاؤلية (triplet) للمزامنة عبر الأجهزة.';
+
 
 
 COMMENT ON COLUMN "public"."chat_messages"."account_id" IS 'حقل اختياري لتجميع الرسائل حسب الحساب (clinic/account). يُستخدم ضمن triplet مع device_id/local_id.';
@@ -1691,21 +2681,34 @@ COMMENT ON COLUMN "public"."chat_messages"."local_id" IS 'مُعرّف محلي 
 
 
 CREATE TABLE IF NOT EXISTS "public"."chat_participants" (
+    "account_id" "uuid",
     "conversation_id" "uuid" NOT NULL,
     "user_uid" "uuid" NOT NULL,
+    "email" "text",
+    "nickname" "text",
     "role" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "joined_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "muted" boolean DEFAULT false NOT NULL
 );
 
 
 ALTER TABLE "public"."chat_participants" OWNER TO "postgres";
 
 
+COMMENT ON TABLE "public"."chat_participants" IS 'ربط المستخدمين بالمحادثات مع بيانات إضافية (الدور، البريد، حالة الكتم).';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."chat_reactions" (
+    "account_id" "uuid",
     "message_id" "uuid" NOT NULL,
     "user_uid" "uuid" NOT NULL,
     "emoji" "text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "is_deleted" boolean DEFAULT false NOT NULL,
+    "device_id" "text",
+    "local_id" bigint,
     CONSTRAINT "chat_reactions_emoji_check" CHECK ((("char_length"("emoji") >= 1) AND ("char_length"("emoji") <= 16)))
 );
 
@@ -1713,18 +2716,27 @@ CREATE TABLE IF NOT EXISTS "public"."chat_reactions" (
 ALTER TABLE "public"."chat_reactions" OWNER TO "postgres";
 
 
+COMMENT ON TABLE "public"."chat_reactions" IS 'تفاعلات المستخدمين على الرسائل (إيموجي) مع تتبع triplet للمزامنة.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."chat_reads" (
+    "account_id" "uuid",
     "conversation_id" "uuid" NOT NULL,
     "user_uid" "uuid" NOT NULL,
     "last_read_message_id" "uuid",
-    "last_read_at" timestamp with time zone DEFAULT '1970-01-01 00:00:00+00'::timestamp with time zone NOT NULL
+    "last_read_at" timestamp with time zone
 );
 
 
 ALTER TABLE "public"."chat_reads" OWNER TO "postgres";
 
 
-CREATE OR REPLACE VIEW "public"."clinics" AS
+COMMENT ON TABLE "public"."chat_reads" IS 'آخر حالة قراءة لكل مشارك داخل المحادثات.';
+
+
+
+CREATE OR REPLACE VIEW "public"."clinics" WITH ("security_invoker"='true') AS
  SELECT "id",
     "name",
     "frozen",
@@ -1769,15 +2781,15 @@ CREATE TABLE IF NOT EXISTS "public"."consumptions" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "account_id" "uuid" NOT NULL,
     "local_id" bigint,
-    "patient_id" "text",
-    "item_id" "text",
     "quantity" integer,
     "date" timestamp with time zone,
     "amount" double precision,
     "note" "text",
     "device_id" "text" DEFAULT ''::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "patient_id" "uuid",
+    "item_id" "uuid"
 );
 
 
@@ -1797,7 +2809,8 @@ CREATE TABLE IF NOT EXISTS "public"."doctors" (
     "print_counter" integer,
     "device_id" "text" DEFAULT ''::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "user_uid" "uuid"
 );
 
 
@@ -1834,7 +2847,8 @@ CREATE TABLE IF NOT EXISTS "public"."employees" (
     "is_doctor" boolean,
     "device_id" "text" DEFAULT ''::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "user_uid" "uuid"
 );
 
 
@@ -2134,7 +3148,7 @@ CREATE TABLE IF NOT EXISTS "public"."super_admins" (
 ALTER TABLE "public"."super_admins" OWNER TO "postgres";
 
 
-CREATE OR REPLACE VIEW "public"."v_chat_last_message" AS
+CREATE OR REPLACE VIEW "public"."v_chat_last_message" WITH ("security_invoker"='true') AS
  SELECT "c"."id" AS "conversation_id",
     "lm"."id" AS "last_message_id",
     "lm"."kind" AS "last_message_kind",
@@ -2158,7 +3172,7 @@ COMMENT ON VIEW "public"."v_chat_last_message" IS 'Latest non-deleted message pe
 
 
 
-CREATE OR REPLACE VIEW "public"."v_chat_reads_for_me" AS
+CREATE OR REPLACE VIEW "public"."v_chat_reads_for_me" WITH ("security_invoker"='true') AS
  SELECT "conversation_id",
     "last_read_message_id",
     "last_read_at"
@@ -2173,7 +3187,7 @@ COMMENT ON VIEW "public"."v_chat_reads_for_me" IS 'Per-conversation last read st
 
 
 
-CREATE OR REPLACE VIEW "public"."v_chat_conversations_for_me" AS
+CREATE OR REPLACE VIEW "public"."v_chat_conversations_for_me" WITH ("security_invoker"='true') AS
  WITH "mine" AS (
          SELECT "p"."conversation_id"
            FROM "public"."chat_participants" "p"
@@ -2221,7 +3235,7 @@ COMMENT ON VIEW "public"."v_chat_conversations_for_me" IS 'Conversations for cur
 
 
 
-CREATE OR REPLACE VIEW "public"."v_chat_messages_with_attachments" AS
+CREATE OR REPLACE VIEW "public"."v_chat_messages_with_attachments" WITH ("security_invoker"='true') AS
  SELECT "m"."id",
     "m"."conversation_id",
     "m"."sender_uid",
@@ -2360,6 +3374,155 @@ CREATE TABLE IF NOT EXISTS "storage"."s3_multipart_uploads_parts" (
 ALTER TABLE "storage"."s3_multipart_uploads_parts" OWNER TO "supabase_storage_admin";
 
 
+ALTER TABLE ONLY "auth"."refresh_tokens" ALTER COLUMN "id" SET DEFAULT "nextval"('"auth"."refresh_tokens_id_seq"'::"regclass");
+
+
+
+ALTER TABLE ONLY "auth"."mfa_amr_claims"
+    ADD CONSTRAINT "amr_id_pk" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."audit_log_entries"
+    ADD CONSTRAINT "audit_log_entries_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."flow_state"
+    ADD CONSTRAINT "flow_state_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."identities"
+    ADD CONSTRAINT "identities_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."identities"
+    ADD CONSTRAINT "identities_provider_id_provider_unique" UNIQUE ("provider_id", "provider");
+
+
+
+ALTER TABLE ONLY "auth"."instances"
+    ADD CONSTRAINT "instances_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."mfa_amr_claims"
+    ADD CONSTRAINT "mfa_amr_claims_session_id_authentication_method_pkey" UNIQUE ("session_id", "authentication_method");
+
+
+
+ALTER TABLE ONLY "auth"."mfa_challenges"
+    ADD CONSTRAINT "mfa_challenges_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."mfa_factors"
+    ADD CONSTRAINT "mfa_factors_last_challenged_at_key" UNIQUE ("last_challenged_at");
+
+
+
+ALTER TABLE ONLY "auth"."mfa_factors"
+    ADD CONSTRAINT "mfa_factors_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_authorizations"
+    ADD CONSTRAINT "oauth_authorizations_authorization_code_key" UNIQUE ("authorization_code");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_authorizations"
+    ADD CONSTRAINT "oauth_authorizations_authorization_id_key" UNIQUE ("authorization_id");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_authorizations"
+    ADD CONSTRAINT "oauth_authorizations_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_clients"
+    ADD CONSTRAINT "oauth_clients_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_consents"
+    ADD CONSTRAINT "oauth_consents_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."oauth_consents"
+    ADD CONSTRAINT "oauth_consents_user_client_unique" UNIQUE ("user_id", "client_id");
+
+
+
+ALTER TABLE ONLY "auth"."one_time_tokens"
+    ADD CONSTRAINT "one_time_tokens_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."refresh_tokens"
+    ADD CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."refresh_tokens"
+    ADD CONSTRAINT "refresh_tokens_token_unique" UNIQUE ("token");
+
+
+
+ALTER TABLE ONLY "auth"."saml_providers"
+    ADD CONSTRAINT "saml_providers_entity_id_key" UNIQUE ("entity_id");
+
+
+
+ALTER TABLE ONLY "auth"."saml_providers"
+    ADD CONSTRAINT "saml_providers_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."saml_relay_states"
+    ADD CONSTRAINT "saml_relay_states_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."schema_migrations"
+    ADD CONSTRAINT "schema_migrations_pkey" PRIMARY KEY ("version");
+
+
+
+ALTER TABLE ONLY "auth"."sessions"
+    ADD CONSTRAINT "sessions_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."sso_domains"
+    ADD CONSTRAINT "sso_domains_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."sso_providers"
+    ADD CONSTRAINT "sso_providers_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "auth"."users"
+    ADD CONSTRAINT "users_phone_key" UNIQUE ("phone");
+
+
+
+ALTER TABLE ONLY "auth"."users"
+    ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."account_feature_permissions"
+    ADD CONSTRAINT "account_feature_permissions_pkey" PRIMARY KEY ("account_id", "user_uid");
+
+
+
 ALTER TABLE ONLY "public"."account_users"
     ADD CONSTRAINT "account_users_pkey" PRIMARY KEY ("account_id", "user_uid");
 
@@ -2377,6 +3540,11 @@ ALTER TABLE ONLY "public"."alert_settings"
 
 ALTER TABLE ONLY "public"."appointments"
     ADD CONSTRAINT "appointments_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."audit_logs"
+    ADD CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id");
 
 
 
@@ -2570,6 +3738,206 @@ ALTER TABLE ONLY "storage"."s3_multipart_uploads"
 
 
 
+CREATE INDEX "audit_logs_instance_id_idx" ON "auth"."audit_log_entries" USING "btree" ("instance_id");
+
+
+
+CREATE UNIQUE INDEX "confirmation_token_idx" ON "auth"."users" USING "btree" ("confirmation_token") WHERE (("confirmation_token")::"text" !~ '^[0-9 ]*$'::"text");
+
+
+
+CREATE UNIQUE INDEX "email_change_token_current_idx" ON "auth"."users" USING "btree" ("email_change_token_current") WHERE (("email_change_token_current")::"text" !~ '^[0-9 ]*$'::"text");
+
+
+
+CREATE UNIQUE INDEX "email_change_token_new_idx" ON "auth"."users" USING "btree" ("email_change_token_new") WHERE (("email_change_token_new")::"text" !~ '^[0-9 ]*$'::"text");
+
+
+
+CREATE INDEX "factor_id_created_at_idx" ON "auth"."mfa_factors" USING "btree" ("user_id", "created_at");
+
+
+
+CREATE INDEX "flow_state_created_at_idx" ON "auth"."flow_state" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "identities_email_idx" ON "auth"."identities" USING "btree" ("email" "text_pattern_ops");
+
+
+
+COMMENT ON INDEX "auth"."identities_email_idx" IS 'Auth: Ensures indexed queries on the email column';
+
+
+
+CREATE INDEX "identities_user_id_idx" ON "auth"."identities" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_auth_code" ON "auth"."flow_state" USING "btree" ("auth_code");
+
+
+
+CREATE INDEX "idx_user_id_auth_method" ON "auth"."flow_state" USING "btree" ("user_id", "authentication_method");
+
+
+
+CREATE INDEX "mfa_challenge_created_at_idx" ON "auth"."mfa_challenges" USING "btree" ("created_at" DESC);
+
+
+
+CREATE UNIQUE INDEX "mfa_factors_user_friendly_name_unique" ON "auth"."mfa_factors" USING "btree" ("friendly_name", "user_id") WHERE (TRIM(BOTH FROM "friendly_name") <> ''::"text");
+
+
+
+CREATE INDEX "mfa_factors_user_id_idx" ON "auth"."mfa_factors" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "oauth_auth_pending_exp_idx" ON "auth"."oauth_authorizations" USING "btree" ("expires_at") WHERE ("status" = 'pending'::"auth"."oauth_authorization_status");
+
+
+
+CREATE INDEX "oauth_clients_deleted_at_idx" ON "auth"."oauth_clients" USING "btree" ("deleted_at");
+
+
+
+CREATE INDEX "oauth_consents_active_client_idx" ON "auth"."oauth_consents" USING "btree" ("client_id") WHERE ("revoked_at" IS NULL);
+
+
+
+CREATE INDEX "oauth_consents_active_user_client_idx" ON "auth"."oauth_consents" USING "btree" ("user_id", "client_id") WHERE ("revoked_at" IS NULL);
+
+
+
+CREATE INDEX "oauth_consents_user_order_idx" ON "auth"."oauth_consents" USING "btree" ("user_id", "granted_at" DESC);
+
+
+
+CREATE INDEX "one_time_tokens_relates_to_hash_idx" ON "auth"."one_time_tokens" USING "hash" ("relates_to");
+
+
+
+CREATE INDEX "one_time_tokens_token_hash_hash_idx" ON "auth"."one_time_tokens" USING "hash" ("token_hash");
+
+
+
+CREATE UNIQUE INDEX "one_time_tokens_user_id_token_type_key" ON "auth"."one_time_tokens" USING "btree" ("user_id", "token_type");
+
+
+
+CREATE UNIQUE INDEX "reauthentication_token_idx" ON "auth"."users" USING "btree" ("reauthentication_token") WHERE (("reauthentication_token")::"text" !~ '^[0-9 ]*$'::"text");
+
+
+
+CREATE UNIQUE INDEX "recovery_token_idx" ON "auth"."users" USING "btree" ("recovery_token") WHERE (("recovery_token")::"text" !~ '^[0-9 ]*$'::"text");
+
+
+
+CREATE INDEX "refresh_tokens_instance_id_idx" ON "auth"."refresh_tokens" USING "btree" ("instance_id");
+
+
+
+CREATE INDEX "refresh_tokens_instance_id_user_id_idx" ON "auth"."refresh_tokens" USING "btree" ("instance_id", "user_id");
+
+
+
+CREATE INDEX "refresh_tokens_parent_idx" ON "auth"."refresh_tokens" USING "btree" ("parent");
+
+
+
+CREATE INDEX "refresh_tokens_session_id_revoked_idx" ON "auth"."refresh_tokens" USING "btree" ("session_id", "revoked");
+
+
+
+CREATE INDEX "refresh_tokens_updated_at_idx" ON "auth"."refresh_tokens" USING "btree" ("updated_at" DESC);
+
+
+
+CREATE INDEX "saml_providers_sso_provider_id_idx" ON "auth"."saml_providers" USING "btree" ("sso_provider_id");
+
+
+
+CREATE INDEX "saml_relay_states_created_at_idx" ON "auth"."saml_relay_states" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "saml_relay_states_for_email_idx" ON "auth"."saml_relay_states" USING "btree" ("for_email");
+
+
+
+CREATE INDEX "saml_relay_states_sso_provider_id_idx" ON "auth"."saml_relay_states" USING "btree" ("sso_provider_id");
+
+
+
+CREATE INDEX "sessions_not_after_idx" ON "auth"."sessions" USING "btree" ("not_after" DESC);
+
+
+
+CREATE INDEX "sessions_oauth_client_id_idx" ON "auth"."sessions" USING "btree" ("oauth_client_id");
+
+
+
+CREATE INDEX "sessions_user_id_idx" ON "auth"."sessions" USING "btree" ("user_id");
+
+
+
+CREATE UNIQUE INDEX "sso_domains_domain_idx" ON "auth"."sso_domains" USING "btree" ("lower"("domain"));
+
+
+
+CREATE INDEX "sso_domains_sso_provider_id_idx" ON "auth"."sso_domains" USING "btree" ("sso_provider_id");
+
+
+
+CREATE UNIQUE INDEX "sso_providers_resource_id_idx" ON "auth"."sso_providers" USING "btree" ("lower"("resource_id"));
+
+
+
+CREATE INDEX "sso_providers_resource_id_pattern_idx" ON "auth"."sso_providers" USING "btree" ("resource_id" "text_pattern_ops");
+
+
+
+CREATE UNIQUE INDEX "unique_phone_factor_per_user" ON "auth"."mfa_factors" USING "btree" ("user_id", "phone");
+
+
+
+CREATE INDEX "user_id_created_at_idx" ON "auth"."sessions" USING "btree" ("user_id", "created_at");
+
+
+
+CREATE UNIQUE INDEX "users_email_partial_key" ON "auth"."users" USING "btree" ("email") WHERE ("is_sso_user" = false);
+
+
+
+COMMENT ON INDEX "auth"."users_email_partial_key" IS 'Auth: A partial unique index that applies only when is_sso_user is false';
+
+
+
+CREATE INDEX "users_instance_id_email_idx" ON "auth"."users" USING "btree" ("instance_id", "lower"(("email")::"text"));
+
+
+
+CREATE INDEX "users_instance_id_idx" ON "auth"."users" USING "btree" ("instance_id");
+
+
+
+CREATE INDEX "users_is_anonymous_idx" ON "auth"."users" USING "btree" ("is_anonymous");
+
+
+
+CREATE INDEX "account_feature_permissions_account_idx" ON "public"."account_feature_permissions" USING "btree" ("account_id");
+
+
+
+CREATE UNIQUE INDEX "account_feature_permissions_uix" ON "public"."account_feature_permissions" USING "btree" ("account_id", "user_uid");
+
+
+
+CREATE INDEX "account_feature_permissions_user_idx" ON "public"."account_feature_permissions" USING "btree" ("user_uid");
+
+
+
 CREATE UNIQUE INDEX "account_users_account_device_local_idx" ON "public"."account_users" USING "btree" ("account_id", "device_id", "local_id");
 
 
@@ -2599,6 +3967,18 @@ CREATE UNIQUE INDEX "appointments_account_device_local_idx" ON "public"."appoint
 
 
 CREATE INDEX "appointments_account_idx" ON "public"."appointments" USING "btree" ("account_id");
+
+
+
+CREATE INDEX "audit_logs_account_created_idx" ON "public"."audit_logs" USING "btree" ("account_id", "created_at" DESC);
+
+
+
+CREATE INDEX "audit_logs_actor_idx" ON "public"."audit_logs" USING "btree" ("actor_uid");
+
+
+
+CREATE INDEX "audit_logs_table_idx" ON "public"."audit_logs" USING "btree" ("table_name");
 
 
 
@@ -2678,6 +4058,14 @@ CREATE INDEX "doctors_account_idx" ON "public"."doctors" USING "btree" ("account
 
 
 
+CREATE UNIQUE INDEX "doctors_user_uid_key" ON "public"."doctors" USING "btree" ("user_uid") WHERE ("user_uid" IS NOT NULL);
+
+
+
+CREATE UNIQUE INDEX "doctors_user_uid_unique" ON "public"."doctors" USING "btree" ("user_uid") WHERE ("user_uid" IS NOT NULL);
+
+
+
 CREATE UNIQUE INDEX "drugs_account_device_local_idx" ON "public"."drugs" USING "btree" ("account_id", "device_id", "local_id");
 
 
@@ -2718,11 +4106,31 @@ CREATE INDEX "employees_salaries_account_idx" ON "public"."employees_salaries" U
 
 
 
+CREATE UNIQUE INDEX "employees_user_uid_key" ON "public"."employees" USING "btree" ("user_uid") WHERE ("user_uid" IS NOT NULL);
+
+
+
+CREATE UNIQUE INDEX "employees_user_uid_unique" ON "public"."employees" USING "btree" ("user_uid") WHERE ("user_uid" IS NOT NULL);
+
+
+
 CREATE UNIQUE INDEX "financial_logs_account_device_local_idx" ON "public"."financial_logs" USING "btree" ("account_id", "device_id", "local_id");
 
 
 
 CREATE INDEX "financial_logs_account_idx" ON "public"."financial_logs" USING "btree" ("account_id");
+
+
+
+CREATE INDEX "idx_audit_logs_acc_created" ON "public"."audit_logs" USING "btree" ("account_id", "created_at" DESC);
+
+
+
+CREATE INDEX "idx_audit_logs_actor" ON "public"."audit_logs" USING "btree" ("actor_uid");
+
+
+
+CREATE INDEX "idx_audit_logs_table" ON "public"."audit_logs" USING "btree" ("table_name");
 
 
 
@@ -2870,6 +4278,18 @@ CREATE UNIQUE INDEX "uix_drugs_account_lower_name" ON "public"."drugs" USING "bt
 
 
 
+CREATE UNIQUE INDEX "uq_chat_attachments_device_local" ON "public"."chat_attachments" USING "btree" ("account_id", "device_id", "local_id") WHERE (("account_id" IS NOT NULL) AND ("device_id" IS NOT NULL) AND ("local_id" IS NOT NULL));
+
+
+
+CREATE UNIQUE INDEX "uq_chat_messages_device_local" ON "public"."chat_messages" USING "btree" ("account_id", "device_id", "local_id") WHERE (("account_id" IS NOT NULL) AND ("device_id" IS NOT NULL) AND ("local_id" IS NOT NULL));
+
+
+
+CREATE UNIQUE INDEX "uq_chat_reactions_device_local" ON "public"."chat_reactions" USING "btree" ("account_id", "device_id", "local_id", "emoji") WHERE (("account_id" IS NOT NULL) AND ("device_id" IS NOT NULL) AND ("local_id" IS NOT NULL));
+
+
+
 CREATE UNIQUE INDEX "bname" ON "storage"."buckets" USING "btree" ("name");
 
 
@@ -2903,6 +4323,14 @@ CREATE INDEX "name_prefix_search" ON "storage"."objects" USING "btree" ("name" "
 
 
 CREATE UNIQUE INDEX "objects_bucket_id_level_idx" ON "storage"."objects" USING "btree" ("bucket_id", "level", "name" COLLATE "C");
+
+
+
+CREATE OR REPLACE TRIGGER "account_feature_permissions_set_updated_at" BEFORE UPDATE ON "public"."account_feature_permissions" FOR EACH ROW EXECUTE FUNCTION "public"."tg_set_updated_at"();
+
+
+
+CREATE OR REPLACE TRIGGER "account_feature_permissions_touch" BEFORE UPDATE ON "public"."account_feature_permissions" FOR EACH ROW EXECUTE FUNCTION "public"."tg_account_feature_permissions_touch"();
 
 
 
@@ -3126,6 +4554,96 @@ CREATE OR REPLACE TRIGGER "update_objects_updated_at" BEFORE UPDATE ON "storage"
 
 
 
+ALTER TABLE ONLY "auth"."identities"
+    ADD CONSTRAINT "identities_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."mfa_amr_claims"
+    ADD CONSTRAINT "mfa_amr_claims_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."mfa_challenges"
+    ADD CONSTRAINT "mfa_challenges_auth_factor_id_fkey" FOREIGN KEY ("factor_id") REFERENCES "auth"."mfa_factors"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."mfa_factors"
+    ADD CONSTRAINT "mfa_factors_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."oauth_authorizations"
+    ADD CONSTRAINT "oauth_authorizations_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "auth"."oauth_clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."oauth_authorizations"
+    ADD CONSTRAINT "oauth_authorizations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."oauth_consents"
+    ADD CONSTRAINT "oauth_consents_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "auth"."oauth_clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."oauth_consents"
+    ADD CONSTRAINT "oauth_consents_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."one_time_tokens"
+    ADD CONSTRAINT "one_time_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."refresh_tokens"
+    ADD CONSTRAINT "refresh_tokens_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."saml_providers"
+    ADD CONSTRAINT "saml_providers_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."saml_relay_states"
+    ADD CONSTRAINT "saml_relay_states_flow_state_id_fkey" FOREIGN KEY ("flow_state_id") REFERENCES "auth"."flow_state"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."saml_relay_states"
+    ADD CONSTRAINT "saml_relay_states_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."sessions"
+    ADD CONSTRAINT "sessions_oauth_client_id_fkey" FOREIGN KEY ("oauth_client_id") REFERENCES "auth"."oauth_clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."sessions"
+    ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "auth"."sso_domains"
+    ADD CONSTRAINT "sso_domains_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."account_feature_permissions"
+    ADD CONSTRAINT "account_feature_permissions_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."account_feature_permissions"
+    ADD CONSTRAINT "account_feature_permissions_user_uid_fkey" FOREIGN KEY ("user_uid") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."account_users"
     ADD CONSTRAINT "account_users_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
 
@@ -3156,13 +4674,63 @@ ALTER TABLE ONLY "public"."appointments"
 
 
 
+ALTER TABLE ONLY "public"."audit_logs"
+    ADD CONSTRAINT "audit_logs_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_attachments"
+    ADD CONSTRAINT "chat_attachments_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."chat_attachments"
     ADD CONSTRAINT "chat_attachments_message_id_fkey" FOREIGN KEY ("message_id") REFERENCES "public"."chat_messages"("id") ON DELETE CASCADE;
 
 
 
+ALTER TABLE ONLY "public"."chat_attachments"
+    ADD CONSTRAINT "chat_attachments_message_id_fkey1" FOREIGN KEY ("message_id") REFERENCES "public"."chat_messages"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_conversations"
+    ADD CONSTRAINT "chat_conversations_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."chat_conversations"
+    ADD CONSTRAINT "chat_conversations_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id");
+
+
+
+ALTER TABLE ONLY "public"."chat_messages"
+    ADD CONSTRAINT "chat_messages_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_messages"
+    ADD CONSTRAINT "chat_messages_account_id_sender_uid_fkey" FOREIGN KEY ("account_id", "sender_uid") REFERENCES "public"."account_users"("account_id", "user_uid");
+
+
+
 ALTER TABLE ONLY "public"."chat_messages"
     ADD CONSTRAINT "chat_messages_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "public"."chat_conversations"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_messages"
+    ADD CONSTRAINT "chat_messages_reply_to_message_id_fkey" FOREIGN KEY ("reply_to_message_id") REFERENCES "public"."chat_messages"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."chat_participants"
+    ADD CONSTRAINT "chat_participants_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_participants"
+    ADD CONSTRAINT "chat_participants_account_id_user_uid_fkey" FOREIGN KEY ("account_id", "user_uid") REFERENCES "public"."account_users"("account_id", "user_uid");
 
 
 
@@ -3172,12 +4740,37 @@ ALTER TABLE ONLY "public"."chat_participants"
 
 
 ALTER TABLE ONLY "public"."chat_reactions"
+    ADD CONSTRAINT "chat_reactions_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_reactions"
+    ADD CONSTRAINT "chat_reactions_account_id_user_uid_fkey" FOREIGN KEY ("account_id", "user_uid") REFERENCES "public"."account_users"("account_id", "user_uid");
+
+
+
+ALTER TABLE ONLY "public"."chat_reactions"
     ADD CONSTRAINT "chat_reactions_message_id_fkey" FOREIGN KEY ("message_id") REFERENCES "public"."chat_messages"("id") ON DELETE CASCADE;
 
 
 
 ALTER TABLE ONLY "public"."chat_reads"
+    ADD CONSTRAINT "chat_reads_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_reads"
+    ADD CONSTRAINT "chat_reads_account_id_user_uid_fkey" FOREIGN KEY ("account_id", "user_uid") REFERENCES "public"."account_users"("account_id", "user_uid");
+
+
+
+ALTER TABLE ONLY "public"."chat_reads"
     ADD CONSTRAINT "chat_reads_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "public"."chat_conversations"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."chat_reads"
+    ADD CONSTRAINT "chat_reads_last_read_message_id_fkey" FOREIGN KEY ("last_read_message_id") REFERENCES "public"."chat_messages"("id") ON DELETE SET NULL;
 
 
 
@@ -3193,6 +4786,16 @@ ALTER TABLE ONLY "public"."consumption_types"
 
 ALTER TABLE ONLY "public"."consumptions"
     ADD CONSTRAINT "consumptions_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."consumptions"
+    ADD CONSTRAINT "consumptions_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."consumptions"
+    ADD CONSTRAINT "consumptions_patient_id_fkey" FOREIGN KEY ("patient_id") REFERENCES "public"."patients"("id") ON DELETE SET NULL;
 
 
 
@@ -3401,6 +5004,109 @@ ALTER TABLE ONLY "storage"."s3_multipart_uploads_parts"
 
 
 
+ALTER TABLE "auth"."audit_log_entries" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."flow_state" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."identities" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."instances" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."mfa_amr_claims" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."mfa_challenges" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."mfa_factors" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."one_time_tokens" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."refresh_tokens" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."saml_providers" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."saml_relay_states" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."schema_migrations" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."sessions" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."sso_domains" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."sso_providers" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "auth"."users" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."account_feature_permissions" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "account_feature_permissions_delete" ON "public"."account_feature_permissions" FOR DELETE TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "account_feature_permissions_delete_own" ON "public"."account_feature_permissions" FOR DELETE USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE))))));
+
+
+
+CREATE POLICY "account_feature_permissions_insert" ON "public"."account_feature_permissions" FOR INSERT TO "authenticated" WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "account_feature_permissions_insert_own" ON "public"."account_feature_permissions" FOR INSERT WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE))))));
+
+
+
+CREATE POLICY "account_feature_permissions_select" ON "public"."account_feature_permissions" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (("user_uid")::"text" = ("auth"."uid"())::"text") OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "account_feature_permissions_select_own" ON "public"."account_feature_permissions" FOR SELECT USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE))))));
+
+
+
+CREATE POLICY "account_feature_permissions_update" ON "public"."account_feature_permissions" FOR UPDATE TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"]))))))) WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "account_feature_permissions_update_own" ON "public"."account_feature_permissions" FOR UPDATE USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE)))))) WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE))))));
+
+
+
 ALTER TABLE "public"."account_users" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3420,6 +5126,38 @@ ALTER TABLE "public"."accounts" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "accounts_select" ON "public"."accounts" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
    FROM "public"."account_users" "au"
   WHERE (("au"."account_id" = "accounts"."id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE))))));
+
+
+
+CREATE POLICY "afp_manage_account_admins_delete" ON "public"."account_feature_permissions" FOR DELETE TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND ("au"."user_uid" = "auth"."uid"()) AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "afp_manage_account_admins_insert" ON "public"."account_feature_permissions" FOR INSERT TO "authenticated" WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND ("au"."user_uid" = "auth"."uid"()) AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "afp_manage_account_admins_update" ON "public"."account_feature_permissions" FOR UPDATE TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND ("au"."user_uid" = "auth"."uid"()) AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"]))))))) WITH CHECK ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND ("au"."user_uid" = "auth"."uid"()) AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "afp_select_members" ON "public"."account_feature_permissions" FOR SELECT TO "authenticated" USING (((EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "account_feature_permissions"."account_id") AND ("au"."user_uid" = "auth"."uid"())))) OR (EXISTS ( SELECT 1
+   FROM "public"."super_admins" "sa"
+  WHERE ("sa"."user_uid" = "auth"."uid"())))));
+
+
+
+CREATE POLICY "afp_write_service" ON "public"."account_feature_permissions" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -3498,6 +5236,37 @@ CREATE POLICY "atts_select_if_participant_or_super" ON "public"."chat_attachment
    FROM ("public"."chat_messages" "m"
      JOIN "public"."chat_participants" "p" ON (("p"."conversation_id" = "m"."conversation_id")))
   WHERE (("m"."id" = "chat_attachments"."message_id") AND (("p"."user_uid")::"text" = ("auth"."uid"())::"text"))))));
+
+
+
+ALTER TABLE "public"."audit_logs" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "audit_logs_select" ON "public"."audit_logs" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (("account_id" IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "audit_logs"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE)))))));
+
+
+
+CREATE POLICY "audit_logs_select_account_members" ON "public"."audit_logs" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "audit_logs"."account_id") AND ("au"."user_uid" = "auth"."uid"()) AND (COALESCE("au"."disabled", false) = false))))));
+
+
+
+CREATE POLICY "audit_logs_select_admins" ON "public"."audit_logs" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "audit_logs"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND (COALESCE("au"."disabled", false) = false) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'superadmin'::"text"])))))));
+
+
+
+CREATE POLICY "audit_logs_select_owner_admin" ON "public"."audit_logs" FOR SELECT TO "authenticated" USING ((("public"."fn_is_super_admin"() = true) OR (EXISTS ( SELECT 1
+   FROM "public"."account_users" "au"
+  WHERE (("au"."account_id" = "audit_logs"."account_id") AND (("au"."user_uid")::"text" = ("auth"."uid"())::"text") AND ("au"."disabled" IS NOT TRUE) AND ("lower"(COALESCE("au"."role", ''::"text")) = ANY (ARRAY['owner'::"text", 'admin'::"text", 'owner_admin'::"text"])))))));
+
+
+
+CREATE POLICY "audit_logs_service_all" ON "public"."audit_logs" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -4227,28 +5996,25 @@ CREATE POLICY "service_doctor_share_update_own" ON "public"."service_doctor_shar
 
 
 
+ALTER TABLE "public"."super_admins" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "super_admins_read_service" ON "public"."super_admins" FOR SELECT TO "service_role" USING (true);
+
+
+
+CREATE POLICY "super_admins_select_self" ON "public"."super_admins" FOR SELECT TO "authenticated" USING (("user_uid" = "auth"."uid"()));
+
+
+
+CREATE POLICY "super_admins_write_service" ON "public"."super_admins" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
 ALTER TABLE "storage"."buckets" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "storage"."buckets_analytics" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "chat-attachments delete for participants" ON "storage"."objects" FOR DELETE TO "authenticated" USING ((("bucket_id" = 'chat-attachments'::"text") AND (EXISTS ( SELECT 1
-   FROM "public"."chat_participants" "p"
-  WHERE (("p"."conversation_id" = "public"."chat_conversation_id_from_path"("objects"."name")) AND ("p"."user_uid" = "auth"."uid"()))))));
-
-
-
-CREATE POLICY "chat-attachments insert for participants" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK ((("bucket_id" = 'chat-attachments'::"text") AND (EXISTS ( SELECT 1
-   FROM "public"."chat_participants" "p"
-  WHERE (("p"."conversation_id" = "public"."chat_conversation_id_from_path"("objects"."name")) AND ("p"."user_uid" = "auth"."uid"()))))));
-
-
-
-CREATE POLICY "chat-attachments read for participants" ON "storage"."objects" FOR SELECT TO "authenticated" USING ((("bucket_id" = 'chat-attachments'::"text") AND (EXISTS ( SELECT 1
-   FROM "public"."chat_participants" "p"
-  WHERE (("p"."conversation_id" = "public"."chat_conversation_id_from_path"("objects"."name")) AND ("p"."user_uid" = "auth"."uid"()))))));
-
 
 
 ALTER TABLE "storage"."migrations" ENABLE ROW LEVEL SECURITY;
@@ -4264,6 +6030,15 @@ ALTER TABLE "storage"."s3_multipart_uploads" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "storage"."s3_multipart_uploads_parts" ENABLE ROW LEVEL SECURITY;
+
+
+GRANT USAGE ON SCHEMA "auth" TO "anon";
+GRANT USAGE ON SCHEMA "auth" TO "authenticated";
+GRANT USAGE ON SCHEMA "auth" TO "service_role";
+GRANT ALL ON SCHEMA "auth" TO "supabase_auth_admin";
+GRANT ALL ON SCHEMA "auth" TO "dashboard_user";
+GRANT USAGE ON SCHEMA "auth" TO "postgres";
+
 
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
@@ -4282,15 +6057,68 @@ GRANT ALL ON SCHEMA "storage" TO "dashboard_user";
 
 
 
-GRANT ALL ON FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text") TO "anon";
+GRANT ALL ON FUNCTION "auth"."email"() TO "dashboard_user";
+
+
+
+GRANT ALL ON FUNCTION "auth"."jwt"() TO "postgres";
+GRANT ALL ON FUNCTION "auth"."jwt"() TO "dashboard_user";
+
+
+
+GRANT ALL ON FUNCTION "auth"."role"() TO "dashboard_user";
+
+
+
+GRANT ALL ON FUNCTION "auth"."uid"() TO "dashboard_user";
+
+
+
+REVOKE ALL ON FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."admin_attach_employee"("p_account" "uuid", "p_user_uid" "uuid", "p_role" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."admin_bootstrap_clinic_for_email"("clinic_name" "text", "owner_email" "text", "owner_role" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."admin_bootstrap_clinic_for_email"("clinic_name" "text", "owner_email" "text", "owner_role" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."admin_bootstrap_clinic_for_email"("clinic_name" "text", "owner_email" "text", "owner_role" "text") TO "service_role";
+REVOKE ALL ON FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_create_employee_full"("p_account" "uuid", "p_email" "text", "p_password" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "text", "p_owner_email" "text", "p_owner_password" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."admin_list_clinics"() FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."admin_list_clinics"() TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_list_clinics"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_list_clinics"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uuid", "p_frozen" boolean) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."chat_admin_start_dm"("target_email" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."chat_admin_start_dm"("target_email" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."chat_admin_start_dm"("target_email" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."chat_admin_start_dm"("target_email" "text") TO "service_role";
 
 
 
@@ -4301,7 +6129,6 @@ GRANT ALL ON FUNCTION "public"."chat_conversation_id_from_path"("_name" "text") 
 
 
 REVOKE ALL ON FUNCTION "public"."delete_employee"("p_account" "uuid", "p_user_uid" "uuid") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."delete_employee"("p_account" "uuid", "p_user_uid" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."delete_employee"("p_account" "uuid", "p_user_uid" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."delete_employee"("p_account" "uuid", "p_user_uid" "uuid") TO "service_role";
 
@@ -4319,7 +6146,7 @@ GRANT ALL ON FUNCTION "public"."fn_chat_refresh_last_msg"("p_conversation_id" "u
 
 
 
-GRANT ALL ON FUNCTION "public"."fn_is_super_admin"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."fn_is_super_admin"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."fn_is_super_admin"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."fn_is_super_admin"() TO "service_role";
 
@@ -4350,7 +6177,6 @@ GRANT ALL ON FUNCTION "public"."get_schema_info"() TO "service_role";
 
 
 
-REVOKE ALL ON FUNCTION "public"."list_employees_with_email"("p_account" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."list_employees_with_email"("p_account" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."list_employees_with_email"("p_account" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."list_employees_with_email"("p_account" "uuid") TO "service_role";
@@ -4371,10 +6197,34 @@ GRANT ALL ON FUNCTION "public"."my_accounts"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."my_feature_permissions"() TO "anon";
+GRANT ALL ON FUNCTION "public"."my_feature_permissions"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."my_feature_permissions"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."my_profile"() TO "anon";
+GRANT ALL ON FUNCTION "public"."my_profile"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."my_profile"() TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) TO "anon";
 GRANT ALL ON FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_employee_disabled"("p_account" "uuid", "p_user_uid" "uuid", "p_disabled" boolean) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."tg_account_feature_permissions_touch"() TO "anon";
+GRANT ALL ON FUNCTION "public"."tg_account_feature_permissions_touch"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."tg_account_feature_permissions_touch"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."tg_audit_logs_set_created_at"() TO "anon";
+GRANT ALL ON FUNCTION "public"."tg_audit_logs_set_created_at"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."tg_audit_logs_set_created_at"() TO "service_role";
 
 
 
@@ -4393,6 +6243,122 @@ GRANT ALL ON FUNCTION "public"."tg_set_updated_at"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."tg_touch_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."tg_touch_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."tg_touch_updated_at"() TO "service_role";
+
+
+
+GRANT ALL ON TABLE "auth"."audit_log_entries" TO "dashboard_user";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."audit_log_entries" TO "postgres";
+GRANT SELECT ON TABLE "auth"."audit_log_entries" TO "postgres" WITH GRANT OPTION;
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."flow_state" TO "postgres";
+GRANT SELECT ON TABLE "auth"."flow_state" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."flow_state" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."identities" TO "postgres";
+GRANT SELECT ON TABLE "auth"."identities" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."identities" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."instances" TO "dashboard_user";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."instances" TO "postgres";
+GRANT SELECT ON TABLE "auth"."instances" TO "postgres" WITH GRANT OPTION;
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."mfa_amr_claims" TO "postgres";
+GRANT SELECT ON TABLE "auth"."mfa_amr_claims" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."mfa_amr_claims" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."mfa_challenges" TO "postgres";
+GRANT SELECT ON TABLE "auth"."mfa_challenges" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."mfa_challenges" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."mfa_factors" TO "postgres";
+GRANT SELECT ON TABLE "auth"."mfa_factors" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."mfa_factors" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."oauth_authorizations" TO "postgres";
+GRANT ALL ON TABLE "auth"."oauth_authorizations" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."oauth_clients" TO "postgres";
+GRANT ALL ON TABLE "auth"."oauth_clients" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."oauth_consents" TO "postgres";
+GRANT ALL ON TABLE "auth"."oauth_consents" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."one_time_tokens" TO "postgres";
+GRANT SELECT ON TABLE "auth"."one_time_tokens" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."one_time_tokens" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."refresh_tokens" TO "dashboard_user";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."refresh_tokens" TO "postgres";
+GRANT SELECT ON TABLE "auth"."refresh_tokens" TO "postgres" WITH GRANT OPTION;
+
+
+
+GRANT ALL ON SEQUENCE "auth"."refresh_tokens_id_seq" TO "dashboard_user";
+GRANT ALL ON SEQUENCE "auth"."refresh_tokens_id_seq" TO "postgres";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."saml_providers" TO "postgres";
+GRANT SELECT ON TABLE "auth"."saml_providers" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."saml_providers" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."saml_relay_states" TO "postgres";
+GRANT SELECT ON TABLE "auth"."saml_relay_states" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."saml_relay_states" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."sessions" TO "postgres";
+GRANT SELECT ON TABLE "auth"."sessions" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."sessions" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."sso_domains" TO "postgres";
+GRANT SELECT ON TABLE "auth"."sso_domains" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."sso_domains" TO "dashboard_user";
+
+
+
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."sso_providers" TO "postgres";
+GRANT SELECT ON TABLE "auth"."sso_providers" TO "postgres" WITH GRANT OPTION;
+GRANT ALL ON TABLE "auth"."sso_providers" TO "dashboard_user";
+
+
+
+GRANT ALL ON TABLE "auth"."users" TO "dashboard_user";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "auth"."users" TO "postgres";
+GRANT SELECT ON TABLE "auth"."users" TO "postgres" WITH GRANT OPTION;
+
+
+
+GRANT ALL ON TABLE "public"."account_feature_permissions" TO "anon";
+GRANT ALL ON TABLE "public"."account_feature_permissions" TO "authenticated";
+GRANT ALL ON TABLE "public"."account_feature_permissions" TO "service_role";
 
 
 
@@ -4417,6 +6383,18 @@ GRANT ALL ON TABLE "public"."alert_settings" TO "service_role";
 GRANT ALL ON TABLE "public"."appointments" TO "anon";
 GRANT ALL ON TABLE "public"."appointments" TO "authenticated";
 GRANT ALL ON TABLE "public"."appointments" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."audit_logs" TO "anon";
+GRANT ALL ON TABLE "public"."audit_logs" TO "authenticated";
+GRANT ALL ON TABLE "public"."audit_logs" TO "service_role";
+
+
+
+GRANT ALL ON SEQUENCE "public"."audit_logs_id_seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."audit_logs_id_seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."audit_logs_id_seq" TO "service_role";
 
 
 
@@ -4653,6 +6631,21 @@ GRANT SELECT ON TABLE "storage"."s3_multipart_uploads" TO "anon";
 GRANT ALL ON TABLE "storage"."s3_multipart_uploads_parts" TO "service_role";
 GRANT SELECT ON TABLE "storage"."s3_multipart_uploads_parts" TO "authenticated";
 GRANT SELECT ON TABLE "storage"."s3_multipart_uploads_parts" TO "anon";
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON SEQUENCES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON SEQUENCES TO "dashboard_user";
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON FUNCTIONS TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON FUNCTIONS TO "dashboard_user";
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON TABLES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_auth_admin" IN SCHEMA "auth" GRANT ALL ON TABLES TO "dashboard_user";
 
 
 
