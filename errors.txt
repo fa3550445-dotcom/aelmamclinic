@@ -1205,10 +1205,6 @@ warning - The left operand can't be null, so the right operand is never executed
           require_trailing_commas
    info - Missing a required trailing comma - lib\screens\prescriptions\view_prescription_screen.dart:344:20 -
           require_trailing_commas
-warning - The left operand can't be null, so the right operand is never executed - lib\screens\reminders\reminder_screen.dart:93:38 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\screens\reminders\reminder_screen.dart:94:41 -
-       dead_null_aware_expression
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:208:15 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:229:59 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:267:58 - require_trailing_commas
@@ -1217,8 +1213,6 @@ warning - The left operand can't be null, so the right operand is never executed
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:315:75 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:324:70 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:341:72 - require_trailing_commas
-warning - The left operand can't be null, so the right operand is never executed - lib\screens\reminders\reminder_screen.dart:344:67
-       - dead_null_aware_expression
    info - Missing a required trailing comma - lib\screens\reminders\reminder_screen.dart:368:67 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\reports\report_screen.dart:133:15 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\repository\alerts\create_alert_screen.dart:104:15 - require_trailing_commas
@@ -1262,21 +1256,21 @@ warning - The value of the local variable 'critical' isn't used - lib\screens\re
    info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:128:41 - require_trailing_commas
    info - Don't use 'BuildContext's across async gaps - lib\screens\repository\items\add_item_screen.dart:134:20 -
           use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\screens\repository\items\add_item_screen.dart:156:20 -
+   info - Don't use 'BuildContext's across async gaps - lib\screens\repository\items\add_item_screen.dart:158:20 -
           use_build_context_synchronously
    info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field.
-          This feature was deprecated after v3.33.0-1.0.pre - lib\screens\repository\items\add_item_screen.dart:321:23 -
+          This feature was deprecated after v3.33.0-1.0.pre - lib\screens\repository\items\add_item_screen.dart:323:23 -
           deprecated_member_use
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:323:74 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:357:77 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:375:76 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:394:73 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:417:74 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:432:74 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:451:72 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:454:52 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:456:66 - require_trailing_commas
-   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:460:70 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:325:74 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:359:77 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:377:76 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:396:73 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:419:74 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:434:74 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:453:72 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:456:52 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:458:66 - require_trailing_commas
+   info - Missing a required trailing comma - lib\screens\repository\items\add_item_screen.dart:462:70 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\repository\items\view_items_screen.dart:62:75 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\repository\items\view_items_screen.dart:83:60 - require_trailing_commas
    info - Missing a required trailing comma - lib\screens\repository\items\view_items_screen.dart:156:75 - require_trailing_commas
@@ -1979,26 +1973,23 @@ warning - The value of the local variable 'fkParents' isn't used - lib\services\
    info - Unnecessary braces in a string interpolation - lib\services\sync_service.dart:1643:29 - unnecessary_brace_in_string_interps
 warning - Unnecessary type check; the result is always 'true' - lib\services\sync_service.dart:1795:15 - unnecessary_type_check
    info - Missing a required trailing comma - lib\services\sync_service.dart:1833:49 - require_trailing_commas
-warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2191:48 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2411:48 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2634:44 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2759:44 -
-       dead_null_aware_expression
+warning - The '!' will have no effect because the receiver can't be null - lib\services\sync_service.dart:2191:44 -
+       unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\services\sync_service.dart:2411:44 -
+       unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\services\sync_service.dart:2634:40 -
+       unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\services\sync_service.dart:2759:40 -
+       unnecessary_non_null_assertion
    info - Missing a required trailing comma - lib\services\sync_service.dart:2818:103 - require_trailing_commas
    info - Missing a required trailing comma - lib\services\sync_service.dart:2826:97 - require_trailing_commas
    info - Missing a required trailing comma - lib\utils\logger.dart:135:57 - require_trailing_commas
    info - Missing a required trailing comma - lib\utils\logger.dart:139:58 - require_trailing_commas
-   info - The constant name '__' isn't a lowerCamelCase identifier - lib\utils\notifications_helper.dart:194:19 -
-          constant_identifier_names
-   info - The variable name '__' isn't a lowerCamelCase identifier - lib\utils\notifications_helper.dart:194:19 -
-          non_constant_identifier_names
-warning - The left operand can't be null, so the right operand is never executed - lib\utils\notifications_helper.dart:230:32 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\utils\notifications_helper.dart:231:34 -
-       dead_null_aware_expression
+  error - Expected an identifier - lib\utils\notifications_helper.dart:195:28 - missing_identifier
+  error - Expected to find ',' - lib\utils\notifications_helper.dart:195:29 - expected_token
+  error - Too many positional arguments: 1 expected, but 2 found - lib\utils\notifications_helper.dart:195:29 -
+         extra_positional_arguments_could_be_named
+  error - Undefined name '$1' - lib\utils\notifications_helper.dart:195:29 - undefined_identifier
    info - Library names are not necessary - lib\utils\text_direction.dart:21:9 - unnecessary_library_name
    info - Use interpolation to compose strings and values - lib\utils\text_direction.dart:177:10 -
           prefer_interpolation_to_compose_strings
@@ -2052,28 +2043,14 @@ warning - The receiver can't be null, so the null-aware operator '?.' is unneces
           lib\widgets\chat\image_viewer_screen.dart:651:37 - deprecated_member_use
    info - 'scale' is deprecated and shouldn't be used. Use scaleByVector3, scaleByVector4, or scaleByDouble instead -
           lib\widgets\chat\image_viewer_screen.dart:651:54 - deprecated_member_use
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\message_actions_sheet.dart:182:60
-       - dead_null_aware_expression
-warning - The operand can't be 'null', so the condition is always 'true' - lib\widgets\chat\message_actions_sheet.dart:188:16 -
+warning - The operand can't be 'null', so the condition is always 'true' - lib\widgets\chat\message_actions_sheet.dart:192:15 -
        unnecessary_null_comparison
-warning - The operand can't be 'null', so the condition is always 'true' - lib\widgets\chat\message_actions_sheet.dart:190:15 -
-       unnecessary_null_comparison
-   info - Unnecessary 'this.' qualifier - lib\widgets\chat\message_actions_sheet.dart:218:24 - unnecessary_this
-   info - Missing a required trailing comma - lib\widgets\chat\message_actions_sheet.dart:246:36 - require_trailing_commas
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\message_bubble.dart:239:57 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\message_bubble.dart:255:31 -
-       dead_null_aware_expression
-warning - The value of the local variable 'scheme' isn't used - lib\widgets\chat\message_bubble.dart:747:11 - unused_local_variable
-   info - Missing a required trailing comma - lib\widgets\chat\message_bubble.dart:786:12 - require_trailing_commas
+   info - Unnecessary 'this.' qualifier - lib\widgets\chat\message_actions_sheet.dart:220:24 - unnecessary_this
+   info - Missing a required trailing comma - lib\widgets\chat\message_actions_sheet.dart:248:36 - require_trailing_commas
+warning - The value of the local variable 'scheme' isn't used - lib\widgets\chat\message_bubble.dart:748:11 - unused_local_variable
+   info - Missing a required trailing comma - lib\widgets\chat\message_bubble.dart:787:12 - require_trailing_commas
    info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated
           after v3.18.0-0.1.pre - lib\widgets\chat\reply_preview.dart:95:24 - deprecated_member_use
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\reply_preview.dart:216:38 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\reply_preview.dart:227:38 -
-       dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\widgets\chat\reply_preview.dart:238:36 -
-       dead_null_aware_expression
 warning - Unnecessary type check; the result is always 'true' - lib\widgets\user_account_picker_dialog.dart:138:11 -
        unnecessary_type_check
    info - Missing a required trailing comma - lib\widgets\user_account_picker_dialog.dart:178:52 - require_trailing_commas
@@ -2088,5 +2065,5 @@ warning - Unused import: 'dart:math' - tool\sync_cross_device_smoke_test.dart:6:
 warning - The value of the local variable 'ownerLocal' isn't used - tool\sync_cross_device_smoke_test.dart:86:9 -
        unused_local_variable
 
-1541 issues found. (ran in 12.6s)
+1531 issues found. (ran in 10.0s)
 PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic>
