@@ -236,7 +236,7 @@ class MessageBubble extends StatelessWidget {
 
 // ---------- Helpers ----------
 
-  String _bodyOf(ChatMessage m) => (m.body ?? m.text ?? '').trim();
+  String _bodyOf(ChatMessage m) => (m.body ?? m.text).trim();
 
   String _replySnippetOf(ChatMessage m) => (m.replyToSnippet ?? '').trim();
 
@@ -252,7 +252,8 @@ class MessageBubble extends StatelessWidget {
 
       // 1) رابط HTTP/موقّع
       try {
-        final url = (a.url ?? a.signedUrl ?? '').toString().trim();
+        final primaryUrl = a.url.isNotEmpty ? a.url : (a.signedUrl ?? '');
+        final url = primaryUrl.trim();
         if (url.isNotEmpty) remote = url;
       } catch (_) {}
 

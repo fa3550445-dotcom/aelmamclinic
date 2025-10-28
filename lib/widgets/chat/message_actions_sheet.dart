@@ -153,8 +153,10 @@ class _MessageActionsSheet extends StatelessWidget {
   final bool? canInfo;
   final bool? canPin;
 
-  bool get _isMine =>
-      myUid != null && myUid!.isNotEmpty && message.senderUid == myUid;
+  bool get _isMine {
+    final uid = myUid;
+    return uid != null && uid.isNotEmpty && message.senderUid == uid;
+  }
   bool get _isText => message.kind == ChatMessageKind.text;
   bool get _isImage => message.kind == ChatMessageKind.image;
   bool get _isDeleted => message.deleted;
@@ -179,13 +181,13 @@ class _MessageActionsSheet extends StatelessWidget {
     final timeLabel = time.formatMessageTimestamp(message.createdAt);
 
     // نص فعلي قابل للنسخ (للنسخ المحلي fallback)
-    final rawCopyText = ((message.body ?? message.text) ?? '').trim();
+    final rawCopyText = (message.body ?? message.text).trim();
 
     // رابط أول مرفق (للرسائل الصورية) — يُستخدم كنسخ fallback عند عدم وجود نص
     String? firstAttachmentUrl;
     try {
       final atts = message.attachments;
-      if (atts != null && atts.isNotEmpty) {
+      if (atts.isNotEmpty) {
         final u = atts.first.url;
         if (u != null && u.trim().isNotEmpty) {
           firstAttachmentUrl = u.trim();
