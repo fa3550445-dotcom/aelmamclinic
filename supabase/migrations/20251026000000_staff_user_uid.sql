@@ -3,18 +3,14 @@
 
 ALTER TABLE public.doctors
   ADD COLUMN IF NOT EXISTS user_uid uuid;
-
 ALTER TABLE public.employees
   ADD COLUMN IF NOT EXISTS user_uid uuid;
-
 CREATE UNIQUE INDEX IF NOT EXISTS doctors_user_uid_key
   ON public.doctors(user_uid)
   WHERE user_uid IS NOT NULL;
-
 CREATE UNIQUE INDEX IF NOT EXISTS employees_user_uid_key
   ON public.employees(user_uid)
   WHERE user_uid IS NOT NULL;
-
 -- Ensure admin_attach_employee honors the new constraint.
 CREATE OR REPLACE FUNCTION public.admin_attach_employee(
   p_account uuid,
@@ -80,10 +76,8 @@ BEGIN
   END IF;
 END;
 $$;
-
 -- Expand list_employees_with_email to expose link status.
 DROP FUNCTION IF EXISTS public.list_employees_with_email(uuid);
-
 CREATE OR REPLACE FUNCTION public.list_employees_with_email(p_account uuid)
 RETURNS TABLE(
   user_uid uuid,
@@ -133,9 +127,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
-
 GRANT EXECUTE ON FUNCTION public.list_employees_with_email(uuid) TO authenticated;
-
 -- When removing a link, clear the staff user reference so it can be reused.
 CREATE OR REPLACE FUNCTION public.delete_employee(
   p_account uuid,

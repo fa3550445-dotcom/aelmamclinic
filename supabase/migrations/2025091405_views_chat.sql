@@ -2,13 +2,11 @@
 -- عروض مساعدة لمنظومة الدردشة
 
 SET search_path TO public;
-
 -- ───────────────────────── Drop existing (in dependency-safe order) ─────────────────────────
 DROP VIEW IF EXISTS public.v_chat_conversations_for_me;
 DROP VIEW IF EXISTS public.v_chat_reads_for_me;
 DROP VIEW IF EXISTS public.v_chat_last_message;
 DROP VIEW IF EXISTS public.v_chat_messages_with_attachments;
-
 -- ───────────────────────── View: v_chat_messages_with_attachments ─────────────────────────
 -- رسائل مع تجميع مرفقاتها في مصفوفة JSONB
 CREATE OR REPLACE VIEW public.v_chat_messages_with_attachments AS
@@ -46,10 +44,8 @@ LEFT JOIN public.chat_attachments a
 GROUP BY
   m.id, m.conversation_id, m.sender_uid, m.sender_email, m.kind, m.body,
   m.created_at, m.edited, m.deleted, m.edited_at, m.deleted_at;
-
 COMMENT ON VIEW public.v_chat_messages_with_attachments
 IS 'Chat messages with attachments aggregated as JSONB array.';
-
 -- ───────────────────────── View: v_chat_last_message ─────────────────────────
 -- آخر رسالة غير محذوفة لكل محادثة
 CREATE OR REPLACE VIEW public.v_chat_last_message AS
@@ -68,10 +64,8 @@ LEFT JOIN LATERAL (
   ORDER BY m.created_at DESC
   LIMIT 1
 ) lm ON TRUE;
-
 COMMENT ON VIEW public.v_chat_last_message
 IS 'Latest non-deleted message per conversation.';
-
 -- ───────────────────────── View: v_chat_reads_for_me ─────────────────────────
 -- آخر قراءة للمستخدم الحالي (حسب auth.uid())
 CREATE OR REPLACE VIEW public.v_chat_reads_for_me AS
@@ -81,10 +75,8 @@ SELECT
   r.last_read_at
 FROM public.chat_reads r
 WHERE r.user_uid = auth.uid();
-
 COMMENT ON VIEW public.v_chat_reads_for_me
 IS 'Per-conversation last read state for the current authenticated user (via auth.uid()).';
-
 -- ───────────────────────── View: v_chat_conversations_for_me ─────────────────────────
 -- محادثاتي (أنا عضوٌ فيها) + آخر رسالة + عدد غير المقروء + نص مختصر لآخر رسالة
 CREATE OR REPLACE VIEW public.v_chat_conversations_for_me AS
@@ -145,24 +137,20 @@ LEFT JOIN public.v_chat_last_message lm
   ON lm.conversation_id = c.id
 LEFT JOIN unread u
   ON u.conversation_id = c.id;
-
 COMMENT ON VIEW public.v_chat_conversations_for_me
 IS 'Conversations for current user (member via chat_participants + auth.uid()) with last message and unread counters.';
-
 -- ───────────────────────── Permissions ─────────────────────────
 -- المعرّفون فقط يمكنهم القراءة (RLS على الجداول الأساسية يقيّد النتائج).
 REVOKE ALL ON TABLE public.v_chat_messages_with_attachments FROM PUBLIC;
 REVOKE ALL ON TABLE public.v_chat_last_message FROM PUBLIC;
 REVOKE ALL ON TABLE public.v_chat_reads_for_me FROM PUBLIC;
 REVOKE ALL ON TABLE public.v_chat_conversations_for_me FROM PUBLIC;
-
 GRANT SELECT ON TABLE public.v_chat_messages_with_attachments TO authenticated;
 GRANT SELECT ON TABLE public.v_chat_last_message TO authenticated;
 GRANT SELECT ON TABLE public.v_chat_reads_for_me TO authenticated;
 GRANT SELECT ON TABLE public.v_chat_conversations_for_me TO authenticated;
-
 -- يمكنك السماح لـ service_role أيضًا عند الحاجة:
 -- GRANT SELECT ON TABLE public.v_chat_messages_with_attachments TO service_role;
 -- GRANT SELECT ON TABLE public.v_chat_last_message TO service_role;
 -- GRANT SELECT ON TABLE public.v_chat_reads_for_me TO service_role;
--- GRANT SELECT ON TABLE public.v_chat_conversations_for_me TO service_role;
+-- GRANT SELECT ON TABLE public.v_chat_conversations_for_me TO service_role;;

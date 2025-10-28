@@ -120,8 +120,10 @@ class AppConstants {
   static const String tableAccountUsers = 'account_users';
 
   static const bool chatPreferPublicUrls = false;
-  static const int? chatMaxAttachmentBytes = 20 * 1024 * 1024; // 20 MB إجمالي (null لإلغاء القيود)
-  static const int? chatMaxSingleAttachmentBytes = 10 * 1024 * 1024; // 10 MB لكل ملف (null لإلغاء القيود)
+  static const int? chatMaxAttachmentBytes =
+      20 * 1024 * 1024; // 20 MB إجمالي (null لإلغاء القيود)
+  static const int? chatMaxSingleAttachmentBytes =
+      10 * 1024 * 1024; // 10 MB لكل ملف (null لإلغاء القيود)
 
   // -------------------- أقسام UI --------------------
   static const String secBackup = 'نسخ احتياطي وإستعادة البيانات';

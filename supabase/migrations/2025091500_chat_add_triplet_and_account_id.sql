@@ -14,17 +14,14 @@
 -- في المحادثات: تأكد من وجود account_id
 ALTER TABLE IF EXISTS public.chat_conversations
   ADD COLUMN IF NOT EXISTS account_id uuid;
-
 -- في الرسائل: أضف triplet (account_id/device_id/local_id)
 ALTER TABLE IF EXISTS public.chat_messages
   ADD COLUMN IF NOT EXISTS account_id uuid,
   ADD COLUMN IF NOT EXISTS device_id  text,
   ADD COLUMN IF NOT EXISTS local_id   bigint;
-
 -- اختياري: تخزين device_id الأحدث للمستخدم على مستوى account_users (تستخدمه الخدمة)
 ALTER TABLE IF EXISTS public.account_users
   ADD COLUMN IF NOT EXISTS device_id text;
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ 2) تهيئة مبدئية (Backfill)                                                 │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -36,7 +33,6 @@ SET account_id = c.account_id
 FROM public.chat_conversations c
 WHERE m.conversation_id = c.id
   AND m.account_id IS NULL;
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ 3) تعليقات توضيحية                                                         │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -49,5 +45,4 @@ COMMENT ON COLUMN public.chat_messages.local_id IS
   'مُعرّف محلي متزايد (BIGINT) داخل الجهاز/الجلسة، يُستخدم لتجنّب التكرار أثناء الإرسال.';
 COMMENT ON COLUMN public.chat_conversations.account_id IS
   'معرّف الحساب (clinic/account) المرتبطة به المحادثة.';
-
--- انتهى
+-- انتهى;

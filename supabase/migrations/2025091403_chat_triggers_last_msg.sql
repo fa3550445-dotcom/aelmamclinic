@@ -2,7 +2,6 @@
 -- تحديث last_msg_at / last_msg_snippet تلقائياً بناءً على chat_messages.
 
 SET search_path TO public;
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ 1) Helper: بناء مقتطف الرسالة داخل SQL                                      │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -63,7 +62,6 @@ BEGIN
    WHERE id = p_conversation_id;
 END;
 $$;
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ 3) Trigger Function: استدعاء التحديث عند INSERT/UPDATE/DELETE               │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -79,7 +77,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ 4) Triggers على chat_messages                                               │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -89,12 +86,10 @@ CREATE TRIGGER trg_chat_messages_last_msg_upd
 AFTER INSERT OR UPDATE OF body, kind, deleted, created_at ON public.chat_messages
 FOR EACH ROW
 EXECUTE FUNCTION public.fn_chat_messages_touch_last_msg();
-
 -- في حال وُجد حذف فعلي (hard delete) لأي سبب، نحدّث الملخص أيضًا.
 DROP TRIGGER IF EXISTS trg_chat_messages_last_msg_del ON public.chat_messages;
 CREATE TRIGGER trg_chat_messages_last_msg_del
 AFTER DELETE ON public.chat_messages
 FOR EACH ROW
 EXECUTE FUNCTION public.fn_chat_messages_touch_last_msg();
-
--- انتهى
+-- انتهى;

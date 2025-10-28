@@ -11,10 +11,8 @@ CREATE TABLE IF NOT EXISTS public.chat_reactions (
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (message_id, user_uid, emoji)
 );
-
 -- 2) تمكين RLS
 ALTER TABLE public.chat_reactions ENABLE ROW LEVEL SECURITY;
-
 -- 3) سياسة SELECT — أي مشارك في نفس المحادثة التي تنتمي لها الرسالة
 DROP POLICY IF EXISTS "reactions select for participants" ON public.chat_reactions;
 CREATE POLICY "reactions select for participants"
@@ -31,7 +29,6 @@ USING (
     WHERE m.id = chat_reactions.message_id
   )
 );
-
 -- 4) سياسة INSERT — يجب أن يكون المُدخل مشاركًا، وباسمه فقط (user_uid = auth.uid())
 DROP POLICY IF EXISTS "reactions insert by participant self" ON public.chat_reactions;
 CREATE POLICY "reactions insert by participant self"
@@ -49,7 +46,6 @@ WITH CHECK (
     WHERE m.id = chat_reactions.message_id
   )
 );
-
 -- 5) سياسة DELETE — فقط صاحب التفاعل، ويجب أن يكون مشاركًا
 DROP POLICY IF EXISTS "reactions delete by owner participant" ON public.chat_reactions;
 CREATE POLICY "reactions delete by owner participant"
@@ -67,7 +63,6 @@ USING (
     WHERE m.id = chat_reactions.message_id
   )
 );
-
 -- لا نسمح بـ UPDATE (غير مطلوب وظيفيًا). إن رغبت لاحقًا، أضف سياسة مماثلة.
 
 -- 6) فهارس/تحسينات

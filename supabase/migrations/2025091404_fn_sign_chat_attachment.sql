@@ -2,10 +2,8 @@
 -- وظيفة: توقيع رابط مرفق دردشة بعد التحقق من صلاحية المستخدم للوصول إليه.
 
 SET search_path TO public;
-
 -- احذف الدالة إن وُجدت مسبقًا
 DROP FUNCTION IF EXISTS public.fn_sign_chat_attachment(text, text, integer);
-
 -- ملاحظة:
 -- تعتمد هذه الدالة على جداول:
 --   chat_attachments(message_id, bucket, path)
@@ -84,7 +82,6 @@ BEGIN
   );
 END;
 $$;
-
 -- الأذونات: اسمح بالتنفيذ للمستخدمين الموثّقين وامنع المجهولين
 REVOKE ALL ON FUNCTION public.fn_sign_chat_attachment(text, text, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.fn_sign_chat_attachment(text, text, integer) TO authenticated;

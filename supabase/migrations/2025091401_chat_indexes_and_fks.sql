@@ -8,39 +8,30 @@
 -- رسائل المحادثات: تسلسل حسب الوقت داخل محادثة
 CREATE INDEX IF NOT EXISTS idx_chat_messages_conv_created_at
   ON public.chat_messages (conversation_id, created_at);
-
 -- للمساعدة في الاستدعاءات اللحظية
 CREATE INDEX IF NOT EXISTS idx_chat_messages_conv_id
   ON public.chat_messages (conversation_id, id);
-
 -- حقل النوع/الحذف للاستعلام عن آخر رسالة غير محذوفة
 CREATE INDEX IF NOT EXISTS idx_chat_messages_kind_deleted
   ON public.chat_messages (kind, deleted);
-
 -- فهرس للمرسل (اختياري لكن مفيد)
 CREATE INDEX IF NOT EXISTS idx_chat_messages_sender
   ON public.chat_messages (sender_uid);
-
 -- آخر نشاط للمحادثة
 CREATE INDEX IF NOT EXISTS idx_chat_conversations_last_msg_at
   ON public.chat_conversations (last_msg_at DESC);
-
 -- ربط المشاركين بالمحادثة
 CREATE INDEX IF NOT EXISTS idx_chat_participants_conv_uid
   ON public.chat_participants (conversation_id, user_uid);
-
 -- حالة القراءة لكل مستخدم داخل محادثة
 CREATE INDEX IF NOT EXISTS idx_chat_reads_conv_uid
   ON public.chat_reads (conversation_id, user_uid);
-
 -- مرفقات الرسالة
 CREATE INDEX IF NOT EXISTS idx_chat_attachments_message
   ON public.chat_attachments (message_id);
-
 -- حساب المحادثة (لجلب اسم العيادة مثلاً)
 CREATE INDEX IF NOT EXISTS idx_chat_conversations_account
   ON public.chat_conversations (account_id);
-
 -- ───────────────────────────── علاقات (FK) مع حراسة ─────────────────────────────
 
 -- chat_attachments.message_id → chat_messages.id
@@ -63,7 +54,6 @@ BEGIN
     END IF;
   END IF;
 END$$;
-
 -- chat_messages.conversation_id → chat_conversations.id
 DO $$
 BEGIN
@@ -84,7 +74,6 @@ BEGIN
     END IF;
   END IF;
 END$$;
-
 -- chat_participants.conversation_id → chat_conversations.id
 DO $$
 BEGIN
@@ -105,7 +94,6 @@ BEGIN
     END IF;
   END IF;
 END$$;
-
 -- chat_reads.conversation_id → chat_conversations.id
 DO $$
 BEGIN
@@ -126,7 +114,6 @@ BEGIN
     END IF;
   END IF;
 END$$;
-
 -- chat_conversations.account_id → clinics.id (إن وجد جدول clinics)
 -- ⚠️ يتضمن تنظيف بيانات قديمة تحول دون إضافة القيد
 DO $$

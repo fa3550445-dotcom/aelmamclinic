@@ -6,12 +6,10 @@ ALTER VIEW public.v_chat_messages_with_attachments    SET (security_invoker = tr
 ALTER VIEW public.v_chat_reads_for_me                 SET (security_invoker = true);
 ALTER VIEW public.v_chat_conversations_for_me         SET (security_invoker = true);
 ALTER VIEW public.clinics                             SET (security_invoker = true);
-
 ---------------------------
 -- 2) super_admins: تفعيل RLS + سياسات
 ---------------------------
 ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -48,7 +46,6 @@ BEGIN
     WITH CHECK (true);
   END IF;
 END$$;
-
 ---------------------------
 -- 3) إنشاء جدول account_feature_permissions إن كان مفقودًا
 ---------------------------
@@ -75,7 +72,6 @@ BEGIN
   END LOOP;
 END;
 $$;
-
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id       uuid NOT NULL,
@@ -87,17 +83,14 @@ CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS account_feature_permissions_uix
   ON public.account_feature_permissions (account_id, user_uid);
-
 -- (اختياري) علاقات مرجعية إن كانت موجودة لديك
 -- ALTER TABLE public.account_feature_permissions
 --   ADD CONSTRAINT account_feature_permissions_account_fk
 --   FOREIGN KEY (account_id) REFERENCES public.accounts(id) ON DELETE CASCADE;
 
 ALTER TABLE public.account_feature_permissions ENABLE ROW LEVEL SECURITY;
-
 CREATE OR REPLACE FUNCTION public.tg_account_feature_permissions_touch()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -107,13 +100,11 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS account_feature_permissions_touch ON public.account_feature_permissions;
 CREATE TRIGGER account_feature_permissions_touch
 BEFORE UPDATE ON public.account_feature_permissions
 FOR EACH ROW
 EXECUTE FUNCTION public.tg_account_feature_permissions_touch();
-
 DO $$
 BEGIN
   -- قراءة المالك/العضو أو السوبر أدمن
@@ -219,7 +210,6 @@ BEGIN
     WITH CHECK (true);
   END IF;
 END$$;
-
 ---------------------------
 -- 4) RPCs مطلوبة من الواجهة
 ---------------------------
@@ -247,7 +237,6 @@ AS $$
   WHERE u.id = auth.uid()
   LIMIT 1;
 $$;
-
 -- أذونات الميزات للمستخدم داخل حسابه الحالي
 CREATE OR REPLACE FUNCTION public.my_feature_permissions()
 RETURNS TABLE (
@@ -273,14 +262,12 @@ AS $$
   WHERE au.user_uid = auth.uid()
   LIMIT 1;
 $$;
-
 ---------------------------
 -- 5) Storage: bucket وسياسات مرفقات الدردشة
 ---------------------------
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('chat-attachments','chat-attachments', false)
 ON CONFLICT (id) DO NOTHING;
-
 DO $storage$
 DECLARE lacking boolean := false;
 BEGIN
@@ -330,7 +317,6 @@ BEGIN
   EXECUTE 'reset role';
 END
 $storage$;
-
 ---------------------------
 -- 6) نشر Realtime لكل جداول public (تدريجيًا)
 ---------------------------
@@ -355,28 +341,22 @@ BEGIN
   END;
 END;
 $$;
-
 ---------------------------
 -- 7) chat_participants: أعمدة email/joined_at للتماشي مع التطبيق
 ---------------------------
 ALTER TABLE public.chat_participants
   ADD COLUMN IF NOT EXISTS email text;
-
 ALTER TABLE public.chat_participants
   ADD COLUMN IF NOT EXISTS joined_at timestamptz;
-
 UPDATE public.chat_participants AS cp
 SET joined_at = COALESCE(cp.joined_at, cc.created_at, now())
 FROM public.chat_conversations AS cc
 WHERE cp.conversation_id = cc.id
   AND cp.joined_at IS NULL;
-
 ALTER TABLE public.chat_participants
   ALTER COLUMN joined_at SET DEFAULT now();
-
 ALTER TABLE public.chat_participants
   ALTER COLUMN joined_at SET NOT NULL;
-
 ---------------------------
 -- 8) إنشاء جدول audit_logs وسياسات القراءة
 ---------------------------
@@ -393,21 +373,15 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
   diff        jsonb,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS audit_logs_account_created_idx
   ON public.audit_logs (account_id, created_at DESC);
-
 CREATE INDEX IF NOT EXISTS audit_logs_table_idx
   ON public.audit_logs (table_name);
-
 CREATE INDEX IF NOT EXISTS audit_logs_actor_idx
   ON public.audit_logs (actor_uid);
-
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-
 GRANT SELECT ON TABLE public.audit_logs TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.audit_logs TO service_role;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -441,7 +415,6 @@ BEGIN
     WITH CHECK (true);
   END IF;
 END$$;
-
 ---------------------------
 -- 9) إجراءات مساعدة للإدارة (RPC)
 ---------------------------
@@ -460,7 +433,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
 BEGIN
   IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
     RAISE EXCEPTION 'forbidden' USING errcode = '42501';
@@ -472,10 +445,8 @@ BEGIN
   ORDER BY a.created_at DESC;
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_list_clinics() FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_list_clinics() TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.admin_set_clinic_frozen(
   p_account_id uuid,
   p_frozen boolean
@@ -488,7 +459,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   updated_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -511,10 +482,8 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'account_id', updated_id::text, 'frozen', coalesce(p_frozen, false));
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.admin_delete_clinic(
   p_account_id uuid
 )
@@ -526,7 +495,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   deleted_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -548,10 +517,8 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'account_id', deleted_id::text);
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_delete_clinic(uuid) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_delete_clinic(uuid) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.admin_create_owner_full(
   p_clinic_name text,
   p_owner_email text,
@@ -565,7 +532,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   owner_uid uuid;
   account_id uuid;
 BEGIN
@@ -602,10 +569,8 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'account_id', account_id::text, 'owner_uid', owner_uid::text);
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_create_owner_full(text, text, text) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_create_owner_full(text, text, text) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.admin_create_employee_full(
   p_account uuid,
   p_email text,
@@ -620,7 +585,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   can_manage boolean;
   employee_uid uuid;
 BEGIN
@@ -662,10 +627,8 @@ BEGIN
   RETURN jsonb_build_object('ok', true, 'account_id', p_account::text, 'user_uid', employee_uid::text);
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_create_employee_full(uuid, text, text) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.chat_admin_start_dm(
   target_email text
 )
@@ -678,7 +641,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   normalized_email text := lower(coalesce(target_email, ''));
   target_uid uuid;
   target_account uuid;
@@ -752,6 +715,5 @@ BEGIN
   RETURN conv_id;
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.chat_admin_start_dm(text) FROM public;
 GRANT EXECUTE ON FUNCTION public.chat_admin_start_dm(text) TO authenticated;

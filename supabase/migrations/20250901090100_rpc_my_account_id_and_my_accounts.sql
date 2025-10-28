@@ -15,10 +15,8 @@ as $$
   order by created_at desc
   limit 1;
 $$;
-
 revoke all on function public.my_account_id() from public;
 grant execute on function public.my_account_id() to authenticated;
-
 create or replace function public.my_accounts()
 returns setof uuid
 language sql
@@ -31,10 +29,8 @@ as $$
     and coalesce(disabled, false) = false
   order by created_at desc;
 $$;
-
 revoke all on function public.my_accounts() from public;
 grant execute on function public.my_accounts() to authenticated;
-
 create or replace function public.my_profile()
 returns table (
   id uuid,
@@ -82,10 +78,8 @@ as $$
     coalesce(me.membership_accounts, array[]::uuid[]) as account_ids
   from me;
 $$;
-
 revoke all on function public.my_profile() from public;
 grant execute on function public.my_profile() to authenticated;
-
 create or replace function public.my_feature_permissions(p_account uuid)
 returns table (
   account_id uuid,
@@ -168,10 +162,8 @@ begin
     coalesce(v_can_delete, true);
 end;
 $$;
-
 revoke all on function public.my_feature_permissions(uuid) from public;
 grant execute on function public.my_feature_permissions(uuid) to authenticated;
-
 create or replace function public.admin_create_owner_full(
   p_clinic_name text,
   p_owner_email text,
@@ -221,10 +213,8 @@ begin
   );
 end;
 $$;
-
 revoke all on function public.admin_create_owner_full(text, text, text) from public;
 grant execute on function public.admin_create_owner_full(text, text, text) to authenticated;
-
 create or replace function public.admin_create_employee_full(
   p_account uuid,
   p_email text,
@@ -277,10 +267,8 @@ begin
   );
 end;
 $$;
-
 revoke all on function public.admin_create_employee_full(uuid, text, text) from public;
 grant execute on function public.admin_create_employee_full(uuid, text, text) to authenticated;
-
 create or replace function public.admin_list_clinics()
 returns table (
   id uuid,
@@ -311,10 +299,8 @@ begin
   order by a.created_at desc;
 end;
 $$;
-
 revoke all on function public.admin_list_clinics() from public;
 grant execute on function public.admin_list_clinics() to authenticated;
-
 create or replace function public.admin_set_clinic_frozen(
   p_account_id uuid,
   p_frozen boolean
@@ -355,10 +341,8 @@ begin
   end if;
 end;
 $$;
-
 revoke all on function public.admin_set_clinic_frozen(uuid, boolean) from public;
 grant execute on function public.admin_set_clinic_frozen(uuid, boolean) to authenticated;
-
 create or replace function public.admin_delete_clinic(p_account_id uuid)
 returns void
 language plpgsql
@@ -395,8 +379,6 @@ begin
   end if;
 end;
 $$;
-
 revoke all on function public.admin_delete_clinic(uuid) from public;
 grant execute on function public.admin_delete_clinic(uuid) to authenticated;
-
 notify pgrst, 'reload schema';

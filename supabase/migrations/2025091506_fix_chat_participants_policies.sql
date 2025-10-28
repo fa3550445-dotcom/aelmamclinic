@@ -3,7 +3,6 @@
 
 -- تأكد أن RLS مفعّل
 ALTER TABLE public.chat_participants ENABLE ROW LEVEL SECURITY;
-
 -- احذف جميع السياسات الحالية على chat_participants (أياً كانت أسماؤها)
 DO $$
 DECLARE p text;
@@ -16,14 +15,12 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.chat_participants', p);
   END LOOP;
 END$$;
-
 -- ✅ SELECT: اسمح للمستخدم برؤية صفوفه فقط (أو السوبر أدمن)
 CREATE POLICY part_select_self_or_super
 ON public.chat_participants
 FOR SELECT
 TO authenticated
 USING ( user_uid = auth.uid() OR fn_is_super_admin() );
-
 -- ✅ INSERT: اسمح لمنشئ المحادثة بإضافة المشاركين (أو السوبر أدمن)
 CREATE POLICY part_insert_by_creator_or_super
 ON public.chat_participants
@@ -38,7 +35,6 @@ WITH CHECK (
         AND c.created_by = auth.uid()
   )
 );
-
 -- (اختياري) UPDATE: عدّل صفك فقط (أو السوبر أدمن)
 CREATE POLICY part_update_self_or_super
 ON public.chat_participants
@@ -46,7 +42,6 @@ FOR UPDATE
 TO authenticated
 USING ( user_uid = auth.uid() OR fn_is_super_admin() )
 WITH CHECK ( user_uid = auth.uid() OR fn_is_super_admin() );
-
 -- (اختياري) DELETE: اسمح لمنشئ المحادثة بحذف المشاركين (أو السوبر أدمن)
 CREATE POLICY part_delete_by_creator_or_super
 ON public.chat_participants

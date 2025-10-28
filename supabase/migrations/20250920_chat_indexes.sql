@@ -8,17 +8,13 @@ ALTER TABLE public.chat_messages
   ADD COLUMN IF NOT EXISTS reply_to_message_id uuid,
   ADD COLUMN IF NOT EXISTS reply_to_snippet text,
   ADD COLUMN IF NOT EXISTS mentions jsonb;
-
 -- فهارس chat_messages الأساسية
 CREATE INDEX IF NOT EXISTS chat_messages_conv_created_idx
   ON public.chat_messages (conversation_id, created_at);
-
 CREATE INDEX IF NOT EXISTS chat_messages_created_idx
   ON public.chat_messages (created_at);
-
 CREATE INDEX IF NOT EXISTS chat_messages_reply_to_idx
   ON public.chat_messages (reply_to_message_id);
-
 -- فهرس trigram اختياري (يُنشأ فقط إذا كان امتداد pg_trgm متاحاً)
 DO $$
 BEGIN
@@ -38,25 +34,19 @@ BEGIN
   END IF;
 END;
 $$;
-
 -- فهارس chat_participants
 CREATE INDEX IF NOT EXISTS chat_participants_conv_user_idx
   ON public.chat_participants (conversation_id, user_uid);
-
 CREATE INDEX IF NOT EXISTS chat_participants_user_idx
   ON public.chat_participants (user_uid);
-
 -- فهارس chat_reads
 CREATE INDEX IF NOT EXISTS chat_reads_conv_user_idx
   ON public.chat_reads (conversation_id, user_uid);
-
 CREATE INDEX IF NOT EXISTS chat_reads_user_idx
   ON public.chat_reads (user_uid);
-
 -- فهرس زمني للمحادثات
 CREATE INDEX IF NOT EXISTS chat_conversations_last_msg_at_idx
   ON public.chat_conversations (last_msg_at);
-
 -- فهارس مرفقات الدردشة (إذا كان الجدول موجوداً)
 DO $$
 BEGIN

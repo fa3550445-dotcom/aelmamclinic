@@ -16,7 +16,6 @@ as $$
            ))[1])::uuid
          end
 $$;
-
 do $$
 begin
   begin
@@ -25,7 +24,6 @@ begin
     when insufficient_privilege then null;
   end;
 end $$;
-
 do $policies$
 begin
   begin

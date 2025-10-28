@@ -8,7 +8,6 @@ begin
   return new;
 end
 $$;
-
 -- Attach trigger to all data tables (idempotent)
 do $$
 declare

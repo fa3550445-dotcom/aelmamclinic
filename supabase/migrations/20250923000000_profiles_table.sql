@@ -10,9 +10,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS profiles_account_idx ON public.profiles(account_id);
-
 -- keep updated_at fresh
 CREATE OR REPLACE FUNCTION public.tg_profiles_set_updated_at()
 RETURNS trigger
@@ -23,17 +21,13 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS profiles_set_updated_at ON public.profiles;
 CREATE TRIGGER profiles_set_updated_at
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW
 EXECUTE FUNCTION public.tg_profiles_set_updated_at();
-
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated;
-
 -- policies: allow super admin, account managers, or the profile owner
 DO $$
 BEGIN
@@ -58,7 +52,6 @@ BEGIN
       );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -82,7 +75,6 @@ BEGIN
       );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -120,7 +112,6 @@ BEGIN
       );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (

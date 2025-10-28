@@ -11,7 +11,6 @@ language sql stable as $$
   group by t.typname
   order by t.typname;
 $$;
-
 create or replace function public.get_schema_info()
 returns jsonb
 language sql stable as $$
@@ -103,6 +102,5 @@ select jsonb_build_object(
   )
 );
 $$;
-
 -- refresh PostgREST cache
 notify pgrst, 'reload schema';

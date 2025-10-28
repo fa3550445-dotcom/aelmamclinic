@@ -1,14 +1,11 @@
 -- add updated_at if missing and make it NOT NULL with default now()
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS updated_at timestamptz;
-
 UPDATE public.profiles
 SET updated_at = COALESCE(updated_at, created_at, now());
-
 ALTER TABLE public.profiles
   ALTER COLUMN updated_at SET DEFAULT now(),
   ALTER COLUMN updated_at SET NOT NULL;
-
 -- ensure function exists
 CREATE OR REPLACE FUNCTION public.tg_profiles_set_updated_at()
 RETURNS trigger
@@ -19,7 +16,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 -- ensure trigger exists
 DO $$
 BEGIN

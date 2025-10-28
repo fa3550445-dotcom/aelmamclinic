@@ -4,7 +4,6 @@
 
 -- تجهيزات عامة ---------------------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- حسابات العيادات ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.accounts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -13,7 +12,6 @@ CREATE TABLE IF NOT EXISTS public.accounts (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE public.accounts IS 'عيادات/حسابات التطبيق';
-
 CREATE TABLE IF NOT EXISTS public.super_admins (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -23,7 +21,6 @@ CREATE TABLE IF NOT EXISTS public.super_admins (
   email text UNIQUE,
   user_uid uuid UNIQUE
 );
-
 CREATE TABLE IF NOT EXISTS public.account_users (
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
   user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -39,7 +36,6 @@ CREATE TABLE IF NOT EXISTS public.account_users (
 CREATE INDEX IF NOT EXISTS account_users_account_idx ON public.account_users(account_id);
 CREATE INDEX IF NOT EXISTS account_users_user_idx ON public.account_users(user_uid);
 CREATE INDEX IF NOT EXISTS account_users_role_idx ON public.account_users(role);
-
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
   user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -55,7 +51,6 @@ CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
   ON public.account_feature_permissions(account_id);
 CREATE INDEX IF NOT EXISTS account_feature_permissions_user_idx
   ON public.account_feature_permissions(user_uid);
-
 -- الجداول التشغيلية ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.patients (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -83,13 +78,10 @@ CREATE TABLE IF NOT EXISTS public.patients (
   doctor_input numeric NOT NULL DEFAULT 0,
   tower_share numeric NOT NULL DEFAULT 0,
   department_share numeric NOT NULL DEFAULT 0,
-  doctor_review_pending boolean NOT NULL DEFAULT false,
-  doctor_reviewed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   is_deleted boolean NOT NULL DEFAULT false
 );
-
 CREATE TABLE IF NOT EXISTS public.returns (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -106,7 +98,6 @@ CREATE TABLE IF NOT EXISTS public.returns (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.consumptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -121,7 +112,6 @@ CREATE TABLE IF NOT EXISTS public.consumptions (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.drugs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -134,7 +124,6 @@ CREATE TABLE IF NOT EXISTS public.drugs (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uix_drugs_account_lower_name
   ON public.drugs(account_id, lower(name));
-
 CREATE TABLE IF NOT EXISTS public.complaints (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -146,7 +135,6 @@ CREATE TABLE IF NOT EXISTS public.complaints (
   device_id text NOT NULL DEFAULT '',
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.appointments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -159,7 +147,6 @@ CREATE TABLE IF NOT EXISTS public.appointments (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.consumption_types (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -169,7 +156,6 @@ CREATE TABLE IF NOT EXISTS public.consumption_types (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.medical_services (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -181,7 +167,6 @@ CREATE TABLE IF NOT EXISTS public.medical_services (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.employees (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -199,7 +184,6 @@ CREATE TABLE IF NOT EXISTS public.employees (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.doctors (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -215,7 +199,6 @@ CREATE TABLE IF NOT EXISTS public.doctors (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.prescriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -227,7 +210,6 @@ CREATE TABLE IF NOT EXISTS public.prescriptions (
   device_id text NOT NULL DEFAULT '',
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.prescription_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -240,7 +222,6 @@ CREATE TABLE IF NOT EXISTS public.prescription_items (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.service_doctor_share (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -256,7 +237,6 @@ CREATE TABLE IF NOT EXISTS public.service_doctor_share (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS service_doctor_share_unique
   ON public.service_doctor_share(account_id, service_id, doctor_id);
-
 CREATE TABLE IF NOT EXISTS public.employees_loans (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -271,7 +251,6 @@ CREATE TABLE IF NOT EXISTS public.employees_loans (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.employees_salaries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -289,7 +268,6 @@ CREATE TABLE IF NOT EXISTS public.employees_salaries (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.employees_discounts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -302,7 +280,6 @@ CREATE TABLE IF NOT EXISTS public.employees_discounts (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.item_types (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -314,7 +291,6 @@ CREATE TABLE IF NOT EXISTS public.item_types (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS item_types_unique_name
   ON public.item_types(account_id, lower(name));
-
 CREATE TABLE IF NOT EXISTS public.items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -329,7 +305,6 @@ CREATE TABLE IF NOT EXISTS public.items (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS items_unique_type_name
   ON public.items(account_id, type_id, lower(name));
-
 CREATE TABLE IF NOT EXISTS public.purchases (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -342,7 +317,6 @@ CREATE TABLE IF NOT EXISTS public.purchases (
   device_id text NOT NULL DEFAULT '',
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.alert_settings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -356,7 +330,6 @@ CREATE TABLE IF NOT EXISTS public.alert_settings (
   last_triggered timestamptz,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.financial_logs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -372,7 +345,6 @@ CREATE TABLE IF NOT EXISTS public.financial_logs (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS public.patient_services (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -385,7 +357,6 @@ CREATE TABLE IF NOT EXISTS public.patient_services (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 -- صلاحيات الميزات لكل موظف ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
@@ -400,7 +371,6 @@ CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
 );
 CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
   ON public.account_feature_permissions(account_id);
-
 -- جدول سجلات التدقيق ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -419,7 +389,6 @@ CREATE INDEX IF NOT EXISTS audit_logs_account_created_idx
   ON public.audit_logs(account_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS audit_logs_table_idx
   ON public.audit_logs(table_name);
-
 -- الفهارس العامة على triplet --------------------------------------------------
 DO $$
 DECLARE
@@ -436,7 +405,6 @@ BEGIN
     EXECUTE format('CREATE INDEX IF NOT EXISTS %I_account_idx ON public.%I (account_id)', tbl, tbl);
   END LOOP;
 END $$;
-
 -- دالة تعيين updated_at -------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.tg_set_updated_at()
 RETURNS trigger
@@ -447,7 +415,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 -- تجهيز تريغر سجلات التدقيق --------------------------------------------------
 CREATE OR REPLACE FUNCTION public.tg_audit_logs_set_created_at()
 RETURNS trigger
@@ -461,7 +428,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DO $$
 DECLARE
   tbl text;
@@ -478,13 +444,11 @@ BEGIN
     EXECUTE format('CREATE TRIGGER %I_set_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at()', tbl, tbl);
   END LOOP;
 END $$;
-
 DROP TRIGGER IF EXISTS account_feature_permissions_set_updated_at
   ON public.account_feature_permissions;
 CREATE TRIGGER account_feature_permissions_set_updated_at
 BEFORE UPDATE ON public.account_feature_permissions
 FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
-
 -- تمكين الصلاحيات و RLS ------------------------------------------------------
 DO $$
 DECLARE
@@ -502,10 +466,8 @@ BEGIN
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', tbl);
   END LOOP;
 END $$;
-
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.audit_logs TO authenticated;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -525,17 +487,14 @@ BEGIN
       );
   END IF;
 END $$;
-
 ALTER TABLE public.accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.account_users ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.accounts TO authenticated;
 GRANT SELECT ON public.account_users TO authenticated;
-
 ALTER TABLE public.account_feature_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.account_feature_permissions TO authenticated;
 GRANT SELECT ON public.audit_logs TO authenticated;
-
 DO $$
 DECLARE
   tbl text;
@@ -581,7 +540,6 @@ BEGIN
     END IF;
   END LOOP;
 END $$;
-
 -- RLS خاصة بالحسابات/المستخدمين ---------------------------------------------
 DO $$
 BEGIN
@@ -600,7 +558,6 @@ BEGIN
     );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -619,7 +576,6 @@ BEGIN
     );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -705,7 +661,6 @@ BEGIN
       );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -726,7 +681,6 @@ BEGIN
       );
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -738,7 +692,6 @@ BEGIN
     WITH CHECK (fn_is_super_admin() = true);
   END IF;
 END $$;
-
 -- سجلات التدقيق -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
@@ -760,10 +713,8 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_table
   ON public.audit_logs(table_name);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor
   ON public.audit_logs(actor_uid);
-
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.audit_logs TO authenticated;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -789,12 +740,10 @@ BEGIN
       );
   END IF;
 END $$;
-
 -- عرض clinics ---------------------------------------------------------------
 CREATE OR REPLACE VIEW public.clinics AS
 SELECT id, name, frozen, created_at
 FROM public.accounts;
-
 DO $do$
 BEGIN
   EXECUTE $$
@@ -867,7 +816,6 @@ BEGIN
   EXECUTE 'GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role';
 END;
 $do$;
-
 CREATE OR REPLACE FUNCTION public.admin_bootstrap_clinic_for_email(clinic_name text, owner_email text, owner_role text DEFAULT 'owner')
 RETURNS uuid
 LANGUAGE plpgsql
@@ -908,11 +856,9 @@ BEGIN
   RETURN acc_id;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_bootstrap_clinic_for_email(text, text, text) TO authenticated;
-
 -- RPC مساعدة لإدارة الهوية والحسابات -----------------------------------------
 CREATE OR REPLACE FUNCTION public.my_profile()
 RETURNS TABLE (
@@ -966,10 +912,8 @@ BEGIN
          fn_is_super_admin();
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.my_profile() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.my_profile() TO service_role;
-
 CREATE OR REPLACE FUNCTION public.my_feature_permissions(p_account uuid)
 RETURNS TABLE (
   account_id uuid,
@@ -1041,10 +985,8 @@ BEGIN
                          coalesce(v_can_delete, true);
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.my_feature_permissions(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.my_feature_permissions(uuid) TO service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_create_owner_full(
   p_clinic_name text,
   p_owner_email text,
@@ -1093,10 +1035,8 @@ BEGIN
   );
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_create_owner_full(text, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_create_owner_full(text, text, text) TO service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_create_employee_full(
   p_account uuid,
   p_email text,
@@ -1149,10 +1089,8 @@ BEGIN
   );
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_list_clinics()
 RETURNS TABLE (
   id uuid,
@@ -1175,10 +1113,8 @@ BEGIN
   ORDER BY a.created_at DESC;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_list_clinics() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_list_clinics() TO service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_set_clinic_frozen(p_account_id uuid, p_frozen boolean)
 RETURNS void
 LANGUAGE plpgsql
@@ -1199,10 +1135,8 @@ BEGIN
    WHERE id = p_account_id;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_set_clinic_frozen(uuid, boolean) TO service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_delete_clinic(p_account_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -1222,8 +1156,6 @@ BEGIN
    WHERE id = p_account_id;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.admin_delete_clinic(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_delete_clinic(uuid) TO service_role;
-
 NOTIFY pgrst, 'reload schema';

@@ -4,7 +4,6 @@
 -- سماحية الاستدعاء: owner/admin على الحساب أو السوبر أدمن.
 
 drop function if exists public.set_employee_disabled(uuid, uuid, boolean);
-
 create or replace function public.set_employee_disabled(
   p_account uuid,
   p_user_uid uuid,
@@ -44,6 +43,5 @@ end;
 $$ language plpgsql
 security definer
 set search_path = public, auth;
-
 revoke all on function public.set_employee_disabled(uuid, uuid, boolean) from public;
 grant execute on function public.set_employee_disabled(uuid, uuid, boolean) to authenticated;

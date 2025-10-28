@@ -1,6 +1,5 @@
 -- Deploy admin_attach_employee hardening to existing environments
 BEGIN;
-
 CREATE OR REPLACE FUNCTION public.admin_attach_employee(p_account uuid, p_user_uid uuid, p_role text DEFAULT 'employee')
 RETURNS void
 LANGUAGE plpgsql
@@ -62,10 +61,8 @@ BEGIN
   END IF;
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.admin_attach_employee(uuid, uuid, text) FROM anon;
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_attach_employee(uuid, uuid, text) TO service_role;
-
 COMMIT;

@@ -3,7 +3,6 @@
 -- سماحية الاستدعاء: owner/admin على نفس الحساب، أو السوبر أدمن بالبريد المحدد.
 
 drop function if exists public.list_employees_with_email(uuid);
-
 create or replace function public.list_employees_with_email(p_account uuid)
 returns table(
   user_uid uuid,
@@ -48,6 +47,5 @@ end;
 $$ language plpgsql
 security definer
 set search_path = public, auth;
-
 revoke all on function public.list_employees_with_email(uuid) from public;
 grant execute on function public.list_employees_with_email(uuid) to authenticated;

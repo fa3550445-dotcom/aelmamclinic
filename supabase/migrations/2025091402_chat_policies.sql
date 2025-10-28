@@ -22,7 +22,6 @@ AS $$
              AND lower(au.role) = 'superadmin'
          );
 $$;
-
 -- آخر account_id للمستخدم الحالي (كنص)
 CREATE OR REPLACE FUNCTION public.fn_my_latest_account_id()
 RETURNS text
@@ -42,14 +41,12 @@ BEGIN
   RETURN acc;
 END;
 $$;
-
 -- ───────────────────────── Enable RLS (idempotent) ─────────────────────────
 ALTER TABLE public.chat_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_participants  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_reads         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_attachments   ENABLE ROW LEVEL SECURITY;
-
 -- ───────────────────────── chat_conversations ─────────────────────────
 
 -- SELECT: المشارك في المحادثة أو السوبر أدمن
@@ -74,7 +71,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- INSERT: المنشئ هو المستخدم الحالي + حارس account_id
 DO $$
 BEGIN
@@ -103,7 +99,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- UPDATE: صاحب الإنشاء أو السوبر + ثبات حارس الحساب
 DO $$
 BEGIN
@@ -132,7 +127,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- ───────────────────────── chat_participants ─────────────────────────
 
 -- SELECT: أي مستخدم مشارك في نفس المحادثة أو سوبر
@@ -157,7 +151,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- INSERT: منشئ المحادثة أو السوبر فقط يضيف مشاركين
 DO $$
 BEGIN
@@ -180,7 +173,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- UPDATE/DELETE: منشئ المحادثة أو السوبر
 DO $$
 BEGIN
@@ -211,7 +203,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -233,7 +224,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- ───────────────────────── chat_messages ─────────────────────────
 
 -- SELECT: المشارك أو السوبر
@@ -258,7 +248,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- INSERT: المرسل هو المستخدم الحالي + عضو بالمحادثة
 DO $$
 BEGIN
@@ -281,7 +270,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- UPDATE/DELETE: صاحب الرسالة أو السوبر
 DO $$
 BEGIN
@@ -298,7 +286,6 @@ BEGIN
     WITH CHECK (fn_is_super_admin() = true OR sender_uid::text = auth.uid()::text);
   END IF;
 END$$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -313,7 +300,6 @@ BEGIN
     USING (fn_is_super_admin() = true OR sender_uid::text = auth.uid()::text);
   END IF;
 END$$;
-
 -- ───────────────────────── chat_reads ─────────────────────────
 
 -- SELECT: صفوف قراءتي فقط وفي محادثات أنا عضو فيها (أو سوبر)
@@ -341,7 +327,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- INSERT: أكتب فقط لقراءتي وفي محادثة أنا عضو فيها
 DO $$
 BEGIN
@@ -364,7 +349,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- UPDATE: أحدّث فقط صفّي وفي محادثة أنا عضو فيها (أو سوبر)
 DO $$
 BEGIN
@@ -401,7 +385,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- ───────────────────────── chat_attachments (DB) ─────────────────────────
 
 -- SELECT: المشارك أو السوبر
@@ -429,7 +412,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- INSERT: مشارك في المحادثة المرتبطة بالرسالة (أو سوبر)
 DO $$
 BEGIN
@@ -455,7 +437,6 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- DELETE: صاحب الرسالة أو السوبر
 DO $$
 BEGIN

@@ -3,7 +3,6 @@
 -- سماحية الاستدعاء: owner/admin على الحساب أو السوبر أدمن.
 
 drop function if exists public.delete_employee(uuid, uuid);
-
 create or replace function public.delete_employee(
   p_account uuid,
   p_user_uid uuid
@@ -41,6 +40,5 @@ end;
 $$ language plpgsql
 security definer
 set search_path = public, auth;
-
 revoke all on function public.delete_employee(uuid, uuid) from public;
 grant execute on function public.delete_employee(uuid, uuid) to authenticated;

@@ -3,7 +3,6 @@
 -- بحيث تكون الهجرات اللاحقة (فهارس، سياسات، عروض) مبنية على مخطط واضح ومتناسق.
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول المحادثات                                                              │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -20,9 +19,7 @@ CREATE TABLE IF NOT EXISTS public.chat_conversations (
   deleted_at      timestamptz,
   is_deleted      boolean NOT NULL DEFAULT false
 );
-
 COMMENT ON TABLE public.chat_conversations IS 'قائمة المحادثات (قناة جماعية أو محادثة مباشرة) ضمن حساب العيادة.';
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول المشاركين                                                              │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -39,9 +36,7 @@ CREATE TABLE IF NOT EXISTS public.chat_participants (
   FOREIGN KEY (account_id, user_uid)
     REFERENCES public.account_users(account_id, user_uid)
 );
-
 COMMENT ON TABLE public.chat_participants IS 'ربط المستخدمين بالمحادثات مع بيانات إضافية (الدور، البريد، حالة الكتم).';
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول الرسائل                                                                │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -71,13 +66,10 @@ CREATE TABLE IF NOT EXISTS public.chat_messages (
   FOREIGN KEY (account_id, sender_uid)
     REFERENCES public.account_users(account_id, user_uid)
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS uq_chat_messages_device_local
   ON public.chat_messages (account_id, device_id, local_id)
   WHERE account_id IS NOT NULL AND device_id IS NOT NULL AND local_id IS NOT NULL;
-
 COMMENT ON TABLE public.chat_messages IS 'الرسائل داخل كل محادثة مع دعم الحقول التفاؤلية (triplet) للمزامنة عبر الأجهزة.';
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول حالات القراءة                                                          │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -91,9 +83,7 @@ CREATE TABLE IF NOT EXISTS public.chat_reads (
   FOREIGN KEY (account_id, user_uid)
     REFERENCES public.account_users(account_id, user_uid)
 );
-
 COMMENT ON TABLE public.chat_reads IS 'آخر حالة قراءة لكل مشارك داخل المحادثات.';
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول المرفقات                                                                │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -115,13 +105,10 @@ CREATE TABLE IF NOT EXISTS public.chat_attachments (
   FOREIGN KEY (message_id)
     REFERENCES public.chat_messages(id) ON DELETE CASCADE
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS uq_chat_attachments_device_local
   ON public.chat_attachments (account_id, device_id, local_id)
   WHERE account_id IS NOT NULL AND device_id IS NOT NULL AND local_id IS NOT NULL;
-
 COMMENT ON TABLE public.chat_attachments IS 'البيانات الوصفية لمرفقات الرسائل (المسار داخل Storage، الأبعاد، الحجم...).';
-
 -- ╭──────────────────────────────────────────────────────────────────────────────╮
 -- │ جدول التفاعلات على الرسائل                                                  │
 -- ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -139,11 +126,8 @@ CREATE TABLE IF NOT EXISTS public.chat_reactions (
   FOREIGN KEY (account_id, user_uid)
     REFERENCES public.account_users(account_id, user_uid)
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS uq_chat_reactions_device_local
   ON public.chat_reactions (account_id, device_id, local_id, emoji)
   WHERE account_id IS NOT NULL AND device_id IS NOT NULL AND local_id IS NOT NULL;
-
 COMMENT ON TABLE public.chat_reactions IS 'تفاعلات المستخدمين على الرسائل (إيموجي) مع تتبع triplet للمزامنة.';
-
--- انتهى
+-- انتهى;;
