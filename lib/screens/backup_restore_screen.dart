@@ -271,7 +271,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 icon: const Icon(Icons.share_rounded),
                 onPressed: () async {
                   try {
-                    await SharePlus.instance.shareXFiles(files: [XFile(_lastBackupPath!)],
+                    await Share.shareXFiles(files: [XFile(_lastBackupPath!)],
                         text: 'نسخة ELMAM Clinic');
                   } catch (e) {
                     _showSnack('تعذّرت المشاركة: $e', error: true);
@@ -337,7 +337,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                                       label: 'مشاركة',
                                       onPressed: () async {
                                         try {
-                                          await SharePlus.instance.shareXFiles(
+                                          await Share.shareXFiles(
                                               [XFile(_lastBackupPath!)],
                                               text: 'نسخة ELMAM Clinic');
                                         } catch (e) {

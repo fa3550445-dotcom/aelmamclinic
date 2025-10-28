@@ -213,7 +213,7 @@ class ReplyPreview extends StatelessWidget {
     }
 
     if (m.kind == ChatMessageKind.image) {
-      final t = (m.body ?? m.text ?? '').trim();
+      final t = _primaryText(m);
       final label = t.isNotEmpty ? '📷 $t' : '📷 صورة';
       final url = m.attachments.isNotEmpty ? m.attachments.first.url : null;
       return _SnippetMeta(
@@ -224,7 +224,7 @@ class ReplyPreview extends StatelessWidget {
     }
 
     if (m.kind == ChatMessageKind.file) {
-      final t = (m.body ?? m.text ?? '').trim();
+      final t = _primaryText(m);
       final label = t.isNotEmpty ? '📎 $t' : '📎 ملف';
       // يمكن لاحقًا دعم صورة مصغّرة للملفات إن وُجدت
       return _SnippetMeta(
@@ -235,12 +235,21 @@ class ReplyPreview extends StatelessWidget {
     }
 
     // الافتراضي (نص / أي نوع آخر غير معرّف لدينا)
-    final t = (m.body ?? m.text ?? '').trim();
+    final t = _primaryText(m);
     return _SnippetMeta(
       snippet: t.isNotEmpty ? t : 'رسالة',
       kind: ChatMessageKind.text,
       thumbUrl: null,
     );
+  }
+
+  String _primaryText(ChatMessage message) {
+    final body = message.body;
+    if (body != null) {
+      final trimmed = body.trim();
+      if (trimmed.isNotEmpty) return trimmed;
+    }
+    return message.text.trim();
   }
 }
 

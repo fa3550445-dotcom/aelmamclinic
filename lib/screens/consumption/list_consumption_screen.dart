@@ -132,7 +132,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-استهلاك-العيادة.xlsx');
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.shareXFiles(
+      await Share.shareXFiles(
         [XFile(file.path)],
         text: 'ملف كشف استهلاك العيادة',
       );

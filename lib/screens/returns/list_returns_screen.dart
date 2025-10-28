@@ -194,7 +194,7 @@ class _ListReturnsScreenState extends State<ListReturnsScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-العودات.xlsx');
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'كشف العودات المحفوظ');
+      await Share.shareXFiles(files: [XFile(file.path)], text: 'كشف العودات المحفوظ');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
