@@ -24,6 +24,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 
+import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:aelmamclinic/models/account_user_summary.dart';
@@ -585,6 +586,11 @@ class AuthSupabaseService {
     final metaRole = (_client.auth.currentUser?.appMetadata['role'] as String?)
         ?.toLowerCase();
     return email == superAdminEmail.toLowerCase() || metaRole == 'superadmin';
+  }
+
+  @visibleForTesting
+  Future<dynamic> runRpc(String fn, {Map<String, dynamic>? params}) {
+    return _client.rpc(fn, params: params);
   }
 
   bool get isSignedIn => _client.auth.currentUser != null;
@@ -1524,7 +1530,7 @@ class AuthSupabaseService {
       return FeaturePermissions.defaultsAllAllowed();
     }
     try {
-      final res = await _client.rpc('my_feature_permissions', params: {
+      final res = await runRpc('my_feature_permissions', params: {
         'p_account': accountId,
       });
       return FeaturePermissions.fromRpcPayload(res);
