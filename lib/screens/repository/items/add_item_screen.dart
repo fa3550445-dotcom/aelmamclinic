@@ -133,10 +133,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
       final name = ctrl.text.trim();
       final repo = context.read<RepositoryProvider>();
       await repo.addType(name);
+      if (!mounted) return;
       // اضبط النوع المختار على النوع الذي أضيف للتو
       setState(() => _selectedType = repo.types.last);
       // وضع التركيز مباشرة على اسم الصنف
       await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!mounted) return;
       _nameNode.requestFocus();
     }
   }

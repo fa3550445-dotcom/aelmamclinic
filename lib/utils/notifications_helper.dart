@@ -191,8 +191,8 @@ class NotificationsHelper {
 
   /// إلغاء إشعار صنف محدّد
   Future<void> cancelForItem(Item item) async {
-    final (id, _, __) = _extractItemInfo(item);
-    await _fln.cancel(id);
+    final info = _extractItemInfo(item);
+    await _fln.cancel(info.\$1);
   }
 
   /// إلغاء جميع الإشعارات
@@ -227,8 +227,8 @@ class NotificationsHelper {
       }
     }
 
-    final name = (item.name ?? 'صنف').toString();
-    final stock = (item.stock ?? 0);
+    final name = item.name;
+    final stock = item.stock;
 
     return (id, name, stock);
   }
