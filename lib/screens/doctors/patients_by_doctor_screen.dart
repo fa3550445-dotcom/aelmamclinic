@@ -133,7 +133,7 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/قائمة-مرضى-د_${widget.doctor.name}.xlsx');
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.shareXFiles(
+      await Share.shareXFiles(
         [XFile(file.path)],
         text: 'قائمة المرضى للطبيب ${widget.doctor.name}',
       );

@@ -258,7 +258,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/كشف-اسماء-المرضى.xlsx');
     await file.writeAsBytes(bytes);
-    await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'ملف المرضى المحفوظ');
+    await Share.shareXFiles(files: [XFile(file.path)], text: 'ملف المرضى المحفوظ');
   }
 
   Future<void> _downloadFile() async {
