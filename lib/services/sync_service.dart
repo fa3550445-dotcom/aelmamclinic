@@ -396,6 +396,9 @@ class SyncService {
       'patient_id': 'patients',
       'service_id': 'medical_services',
     },
+    'financial_logs': {
+      'employee_id': 'employees',
+    },
   };
 
   /// Mapperات اختيارية لكل جدول — إن لم تُضبط، يُستخدم المسار الاحتياطي.

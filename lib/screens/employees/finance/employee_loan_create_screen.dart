@@ -206,7 +206,7 @@ class _EmployeeLoanCreateScreenState extends State<EmployeeLoanCreateScreen> {
         transactionType: "Loan",
         operation: "create",
         amount: loan,
-        employeeId: widget.empId.toString(),
+        employeeId: widget.empId,
         description: "تم إنشاء سلفة للموظف رقم ${widget.empId} بقيمة $loan",
       );
 

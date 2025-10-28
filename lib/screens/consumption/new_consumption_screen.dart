@@ -61,7 +61,7 @@ class _NewConsumptionScreenState extends State<NewConsumptionScreen> {
         transactionType: "Consumption",
         operation: "create",
         amount: amount,
-        employeeId: "N/A",
+        employeeId: null,
         description: "تم تسجيل عملية استهلاك لنوع $_selectedConsumptionType",
       );
       if (!mounted) return;

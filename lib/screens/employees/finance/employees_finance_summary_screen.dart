@@ -332,7 +332,7 @@ class _EmployeesFinanceSummaryScreenState
         transactionType: "FinanceSummary",
         operation: "create",
         amount: net,
-        employeeId: "N/A",
+        employeeId: null,
         description:
             "الخلاصة من ${_dateFmt.format(from)} إلى ${_dateFmt.format(to)}",
       );
