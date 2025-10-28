@@ -138,21 +138,9 @@ begin
   into v_allowed, v_can_create, v_can_update, v_can_delete
   from public.account_feature_permissions afp
   where afp.account_id = p_account
-    and afp.user_uid = v_uid
+    and (afp.user_uid = v_uid or afp.user_uid is null)
+  order by case when afp.user_uid = v_uid then 0 else 1 end
   limit 1;
-
-  if v_allowed is null and v_can_create is null and v_can_update is null and v_can_delete is null then
-    select
-      afp.allowed_features,
-      afp.can_create,
-      afp.can_update,
-      afp.can_delete
-    into v_allowed, v_can_create, v_can_update, v_can_delete
-    from public.account_feature_permissions afp
-    where afp.account_id = p_account
-      and afp.user_uid is null
-    limit 1;
-  end if;
 
   return query select
     p_account,
