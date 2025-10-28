@@ -1962,6 +1962,8 @@ warning - Unused import: 'package:supabase_flutter/supabase_flutter.dart' - lib\
           always_use_package_imports
    info - Use 'package:' imports for files in the 'lib' directory - lib\services\sync_orchestrator.dart:8:8 -
           always_use_package_imports
+   info - The import of 'package:postgrest/postgrest.dart' is unnecessary because all of the used elements are also provided by the
+          import of 'package:supabase_flutter/supabase_flutter.dart' - lib\services\sync_service.dart:8:8 - unnecessary_import
    info - Invalid use of a private type in a public API - lib\services\sync_service.dart:82:10 - library_private_types_in_public_api
    info - Missing a required trailing comma - lib\services\sync_service.dart:254:5 - require_trailing_commas
    info - 'NAMESPACE_URL' is deprecated and shouldn't be used. Please use the Namespace enum in enums.dart instead -
@@ -1977,39 +1979,16 @@ warning - The value of the local variable 'fkParents' isn't used - lib\services\
    info - Unnecessary braces in a string interpolation - lib\services\sync_service.dart:1643:29 - unnecessary_brace_in_string_interps
 warning - Unnecessary type check; the result is always 'true' - lib\services\sync_service.dart:1795:15 - unnecessary_type_check
    info - Missing a required trailing comma - lib\services\sync_service.dart:1833:49 - require_trailing_commas
-warning - The value of the local variable 'remoteUuid' isn't used - lib\services\sync_service.dart:2174:22 - unused_local_variable
-  error - The name 'remoteUuid' is already defined - lib\services\sync_service.dart:2174:22 - duplicate_definition
-warning - The value of the local variable 'localId' isn't used - lib\services\sync_service.dart:2176:14 - unused_local_variable
-  error - The name 'localId' is already defined - lib\services\sync_service.dart:2176:14 - duplicate_definition
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2180:26 - undefined_identifier
-warning - The operand can't be 'null', so the condition is always 'false' - lib\services\sync_service.dart:2183:21 -
-       unnecessary_null_comparison
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2184:21 - undefined_identifier
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2188:61 - undefined_identifier
-warning - The value of the local variable 'remoteUuid' isn't used - lib\services\sync_service.dart:2393:22 - unused_local_variable
-  error - The name 'remoteUuid' is already defined - lib\services\sync_service.dart:2393:22 - duplicate_definition
-warning - The value of the local variable 'localId' isn't used - lib\services\sync_service.dart:2395:14 - unused_local_variable
-  error - The name 'localId' is already defined - lib\services\sync_service.dart:2395:14 - duplicate_definition
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2399:26 - undefined_identifier
-warning - The operand can't be 'null', so the condition is always 'false' - lib\services\sync_service.dart:2402:21 -
-       unnecessary_null_comparison
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2403:21 - undefined_identifier
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2407:61 - undefined_identifier
-warning - The value of the local variable 'remoteUuid' isn't used - lib\services\sync_service.dart:2615:18 - unused_local_variable
-  error - The name 'remoteUuid' is already defined - lib\services\sync_service.dart:2615:18 - duplicate_definition
-warning - The value of the local variable 'localId' isn't used - lib\services\sync_service.dart:2617:10 - unused_local_variable
-  error - The name 'localId' is already defined - lib\services\sync_service.dart:2617:10 - duplicate_definition
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2621:22 - undefined_identifier
-warning - The operand can't be 'null', so the condition is always 'false' - lib\services\sync_service.dart:2624:17 -
-       unnecessary_null_comparison
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2625:17 - undefined_identifier
-  error - Undefined name 'sourceLocalId' - lib\services\sync_service.dart:2629:57 - undefined_identifier
-warning - The value of the local variable 'remoteUuid' isn't used - lib\services\sync_service.dart:2739:18 - unused_local_variable
-  error - The name 'remoteUuid' is already defined - lib\services\sync_service.dart:2739:18 - duplicate_definition
-warning - The operand can't be 'null', so the condition is always 'false' - lib\services\sync_service.dart:2757:17 -
-       unnecessary_null_comparison
-   info - Missing a required trailing comma - lib\services\sync_service.dart:2814:103 - require_trailing_commas
-   info - Missing a required trailing comma - lib\services\sync_service.dart:2822:97 - require_trailing_commas
+warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2191:48 -
+       dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2411:48 -
+       dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2634:44 -
+       dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\sync_service.dart:2759:44 -
+       dead_null_aware_expression
+   info - Missing a required trailing comma - lib\services\sync_service.dart:2818:103 - require_trailing_commas
+   info - Missing a required trailing comma - lib\services\sync_service.dart:2826:97 - require_trailing_commas
    info - Missing a required trailing comma - lib\utils\logger.dart:135:57 - require_trailing_commas
    info - Missing a required trailing comma - lib\utils\logger.dart:139:58 - require_trailing_commas
    info - The constant name '__' isn't a lowerCamelCase identifier - lib\utils\notifications_helper.dart:194:19 -
@@ -2109,5 +2088,5 @@ warning - Unused import: 'dart:math' - tool\sync_cross_device_smoke_test.dart:6:
 warning - The value of the local variable 'ownerLocal' isn't used - tool\sync_cross_device_smoke_test.dart:86:9 -
        unused_local_variable
 
-1563 issues found. (ran in 11.5s)
+1541 issues found. (ran in 12.6s)
 PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic>
