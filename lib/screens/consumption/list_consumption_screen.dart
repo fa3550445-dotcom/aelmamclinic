@@ -132,11 +132,14 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-استهلاك-العيادة.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'ملف كشف استهلاك العيادة',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'ملف كشف استهلاك العيادة',
+        ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
       );
@@ -156,6 +159,7 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
           await ExportService.exportConsumptionToExcel(_filteredConsumptions);
       await saveExcelFile(bytes, 'كشف-استهلاك-العيادة.xlsx');
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء التنزيل: $e')),
       );
@@ -211,8 +215,11 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.all(10),
-                      child: const Icon(Icons.receipt_long_rounded,
-                          color: kPrimaryColor, size: 26),
+                      child: const Icon(
+                        Icons.receipt_long_rounded,
+                        color: kPrimaryColor,
+                        size: 26,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
@@ -318,7 +325,9 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
 
                           return NeuCard(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                             child: ListTile(
                               dense: true,
                               contentPadding: EdgeInsets.zero,
@@ -328,8 +337,11 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(8),
-                                child: const Icon(Icons.request_quote_rounded,
-                                    color: kPrimaryColor, size: 22),
+                                child: const Icon(
+                                  Icons.request_quote_rounded,
+                                  color: kPrimaryColor,
+                                  size: 22,
+                                ),
                               ),
                               title: Text(
                                 'مبلغ: ${c.amount.toStringAsFixed(2)}',
@@ -343,7 +355,9 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                                 child: Text(
                                   'تاريخ: $date | نوع: ${c.note}',
                                   style: TextStyle(
-                                    color: scheme.onSurface.withValues(alpha: .65),
+                                    color: scheme.onSurface.withValues(
+                                      alpha: .65,
+                                    ),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -351,8 +365,10 @@ class _ListConsumptionScreenState extends State<ListConsumptionScreen> {
                               trailing: IconButton(
                                 tooltip: 'حذف',
                                 onPressed: () => _deleteItem(c.id!),
-                                icon: const Icon(Icons.delete_rounded,
-                                    color: Colors.red),
+                                icon: const Icon(
+                                  Icons.delete_rounded,
+                                  color: Colors.red,
+                                ),
                               ),
                             ),
                           );

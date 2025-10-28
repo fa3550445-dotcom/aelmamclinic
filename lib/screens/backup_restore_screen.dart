@@ -5,14 +5,12 @@ import 'dart:ui' as ui show TextDirection;
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart' as p;
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 
-/*── تصميم TBIAN ─*/
 import 'package:aelmamclinic/core/neumorphism.dart';
 import 'package:aelmamclinic/core/tbian_ui.dart';
-
 import 'package:aelmamclinic/models/storage_type.dart';
 import 'package:aelmamclinic/services/backup_restore_service.dart';
 
@@ -38,16 +36,16 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     super.dispose();
   }
 
-  /*────────────────── النسخ الاحتياطي ──────────────────*/
+  /*������������������ ????? ????????? ������������������*/
   Future<void> _backup({required StorageType storageType}) async {
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
-      // 1) إنشاء النسخة عبر الخدمة
       final file = await BackupRestoreService.backupDatabase(
         storageType: storageType,
       );
+      if (!mounted) return;
 
-      // 2) عند المحلي على Android: انسخ إلى مجلد التحميلات
       File backupFile = file;
       if (storageType == StorageType.local && Platform.isAndroid) {
         try {
@@ -59,96 +57,102 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
           final destPath = p.join(aelmamDir.path, p.basename(file.path));
           backupFile = await file.copy(destPath);
         } catch (_) {
-          backupFile = file; // fallback
+          backupFile = file;
         }
       }
 
-      // 3) تحديث بيانات آخر نسخة
       final info = await backupFile.stat();
+      if (!mounted) return;
       setState(() {
         _lastBackupDate = info.modified;
         _lastBackupSize = _formatFileSize(info.size);
         _lastBackupPath = backupFile.path;
       });
 
-      // 4) حوار تفاصيل
+      if (!mounted) return;
       _showDetailedDialog(
-        'تم إنشاء النسخة الاحتياطية بنجاح',
+        '?? ????? ?????? ?????????? ?????',
         '''
-المسار: ${backupFile.path}
-الحجم: $_lastBackupSize
-التاريخ: ${DateFormat('yyyy/MM/dd HH:mm').format(_lastBackupDate!)}
-المحتويات:
-• قاعدة البيانات
-• جميع المرفقات
+??????: ${backupFile.path}
+?????: $_lastBackupSize
+???????: ${DateFormat('yyyy/MM/dd HH:mm').format(_lastBackupDate!)}
+?????????:
+ ????? ????????
+ ???? ????????
 ''',
       );
     } catch (e) {
-      _showSnack('فشل في النسخ الاحتياطي: ${e.toString()}', error: true);
+      _showSnack('??? ?? ????? ?????????: ${e.toString()}', error: true);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
-  /*────────────────── الاستعادة ──────────────────*/
+  /*������������������ ????????? ������������������*/
   Future<void> _restore({required StorageType storageType}) async {
     String source;
     if (storageType == StorageType.local) {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip', 'db'],
-        dialogTitle: 'اختر ملف النسخة الاحتياطية',
+        dialogTitle: '???? ??? ?????? ??????????',
       );
+      if (!mounted) return;
       if (result == null || result.files.single.path == null) return;
       source = result.files.single.path!;
     } else {
       source = await _promptForDriveId();
-      if (source.isEmpty) return;
+      if (!mounted || source.isEmpty) return;
     }
 
-    // اختيار وضع الاستعادة
     final merge = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('اختر نوع الاستعادة'),
+        title: const Text('???? ??? ?????????'),
         content: const Text(
-            'دمج البيانات الجديدة (يحافظ على القديمة) أو استبدال كامل؟'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('استبدال كامل')),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('دمج البيانات')),
-        ],
-      ),
-    );
-    if (merge == null) return;
-
-    // تأكيد نهائي
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(merge ? 'تأكيد دمج البيانات' : 'تأكيد الاستبدال الكامل'),
-        content: Text(
-          merge
-              ? 'سيتم إضافة السجلات الجديدة دون مسح القديمة. أكيد؟'
-              : 'سيتم مسح جميع البيانات واستيراد النسخة كاملة. أكيد؟',
+          '??? ???????? ??????? (????? ??? ???????) ?? ??????? ?????',
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('إلغاء')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('??????? ????'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700),
-            child: const Text('تأكيد'),
+            child: const Text('??? ????????'),
           ),
         ],
       ),
     );
-    if (confirm != true) return;
+    if (!mounted || merge == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(merge ? '????? ??? ????????' : '????? ????????? ??????'),
+        content: Text(
+          merge
+              ? '???? ????? ??????? ??????? ??? ??? ???????. ?????'
+              : '???? ??? ???? ???????? ???????? ?????? ?????. ?????',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('?????'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+            ),
+            child: const Text('?????'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirm != true) return;
 
     setState(() => _busy = true);
     try {
@@ -157,44 +161,50 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
         storageType: storageType,
         merge: merge,
       );
-      _showSnack('تمت الاستعادة بنجاح. يُرجى إعادة تشغيل التطبيق.');
+      if (!mounted) return;
+      _showSnack('??? ????????? ?????. ????? ????? ????? ???????.');
     } catch (e) {
-      _showSnack('فشل في الاستعادة: ${e.toString()}', error: true);
+      _showSnack('??? ?? ?????????: ${e.toString()}', error: true);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
-  /*────────────────── أدوات مساعدة ──────────────────*/
+  /*������������������ ????? ?????? ������������������*/
   Future<String> _promptForDriveId() async {
+    if (!mounted) return '';
     _driveIdController.clear();
-    return await showDialog<String>(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('استعادة من Google Drive'),
-            content: TextField(
-              controller: _driveIdController,
-              decoration: const InputDecoration(
-                labelText: 'معرّف الملف (33 حرفًا)',
-                hintText: 'أدخل معرّف النسخة الاحتياطية',
-              ),
-              maxLength: 33,
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context, ''),
-                  child: const Text('إلغاء')),
-              ElevatedButton(
-                  onPressed: () =>
-                      Navigator.pop(context, _driveIdController.text),
-                  child: const Text('استعادة')),
-            ],
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('??????? ?? Google Drive'),
+        content: TextField(
+          controller: _driveIdController,
+          decoration: const InputDecoration(
+            labelText: '????? ????? (33 ?????)',
+            hintText: '???? ????? ?????? ??????????',
           ),
-        ) ??
-        '';
+          maxLength: 33,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, ''),
+            child: const Text('?????'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, _driveIdController.text),
+            child: const Text('???????'),
+          ),
+        ],
+      ),
+    );
+    return result ?? '';
   }
 
   void _showSnack(String msg, {bool error = false}) {
+    if (!mounted) return;
     final scheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -206,6 +216,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   }
 
   void _showDetailedDialog(String title, String content) {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -213,7 +224,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
         content: SingleChildScrollView(child: Text(content)),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('تم')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('??'),
+          ),
         ],
       ),
     );
@@ -223,12 +236,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     if (bytes <= 0) return '0 B';
     const suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
     final i = (log(bytes) / log(1024)).floor();
-    final value = bytes / pow(1024, i);
-    final idx = i.clamp(0, suffixes.length - 1);
-    return '${value.toStringAsFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${suffixes[idx]}';
+    final size = bytes / pow(1024, i);
+    return '${size.toStringAsFixed(2)} ${suffixes[i]}';
   }
 
-  /*────────────────── واجهة المستخدم ──────────────────*/
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -237,44 +248,22 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: true,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/logo.png',
-                height: 24,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
-              const SizedBox(width: 8),
-              const Text('ELMAM CLINIC'),
-            ],
-          ),
+          title: const Text('??? ???????'),
           actions: [
-            if (_lastBackupDate != null)
-              IconButton(
-                tooltip: 'تفاصيل آخر نسخة',
-                icon: const Icon(Icons.history_rounded),
-                onPressed: () => _showDetailedDialog(
-                  'آخر نسخة احتياطية',
-                  '''
-التاريخ: ${DateFormat('yyyy/MM/dd HH:mm').format(_lastBackupDate!)}
-الحجم: $_lastBackupSize
-المسار: ${_lastBackupPath ?? 'غير متاح'}
-''',
-                ),
-              ),
             if (_lastBackupPath != null)
               IconButton(
-                tooltip: 'مشاركة آخر نسخة',
+                tooltip: '?????? ??? ????',
                 icon: const Icon(Icons.share_rounded),
                 onPressed: () async {
                   try {
-                    await Share.shareXFiles(files: [XFile(_lastBackupPath!)],
-                        text: 'نسخة ELMAM Clinic');
+                    await SharePlus.instance.share(
+                      ShareParams(
+                        files: [XFile(_lastBackupPath!)],
+                        text: '???? ELMAM Clinic',
+                      ),
+                    );
                   } catch (e) {
-                    _showSnack('تعذّرت المشاركة: $e', error: true);
+                    _showSnack('?????? ????????: $e', error: true);
                   }
                 },
               ),
@@ -286,31 +275,33 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               ListView(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
                 children: [
-                  const TSectionHeader('آخر نسخة احتياطية'),
+                  const TSectionHeader('??? ???? ????????'),
                   NeuCard(
                     padding: const EdgeInsets.all(14),
                     child: _lastBackupDate == null
-                        ? const Text('لم تُنشأ نسخة احتياطية بعد.',
-                            style: TextStyle(fontWeight: FontWeight.w700))
+                        ? const Text(
+                            '?? ????? ???? ???????? ???.',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          )
                         : Wrap(
                             spacing: 16,
                             runSpacing: 16,
                             children: [
                               TInfoCard(
                                 icon: Icons.calendar_month_rounded,
-                                label: 'التاريخ',
+                                label: '???????',
                                 value: DateFormat('yyyy/MM/dd HH:mm')
                                     .format(_lastBackupDate!),
                               ),
                               TInfoCard(
                                 icon: Icons.sd_storage_rounded,
-                                label: 'الحجم',
+                                label: '?????',
                                 value: _lastBackupSize,
                               ),
                               if (_lastBackupPath != null)
                                 TInfoCard(
                                   icon: Icons.folder_open_rounded,
-                                  label: 'المسار',
+                                  label: '??????',
                                   value: _lastBackupPath!,
                                   maxLines: 2,
                                 ),
@@ -319,13 +310,13 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                                   Expanded(
                                     child: TOutlinedButton(
                                       icon: Icons.info_outline_rounded,
-                                      label: 'تفاصيل',
+                                      label: '??????',
                                       onPressed: () => _showDetailedDialog(
-                                        'آخر نسخة احتياطية',
+                                        '??? ???? ????????',
                                         '''
-التاريخ: ${DateFormat('yyyy/MM/dd HH:mm').format(_lastBackupDate!)}
-الحجم: $_lastBackupSize
-المسار: ${_lastBackupPath ?? 'غير متاح'}
+???????: ${DateFormat('yyyy/MM/dd HH:mm').format(_lastBackupDate!)}
+?????: $_lastBackupSize
+??????: ${_lastBackupPath ?? '??? ????'}
 ''',
                                       ),
                                     ),
@@ -334,15 +325,20 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                                   if (_lastBackupPath != null)
                                     NeuButton.flat(
                                       icon: Icons.share_rounded,
-                                      label: 'مشاركة',
+                                      label: '??????',
                                       onPressed: () async {
                                         try {
-                                          await Share.shareXFiles(
-                                              [XFile(_lastBackupPath!)],
-                                              text: 'نسخة ELMAM Clinic');
+                                          await SharePlus.instance.share(
+                                            ShareParams(
+                                              files: [XFile(_lastBackupPath!)],
+                                              text: '???? ELMAM Clinic',
+                                            ),
+                                          );
                                         } catch (e) {
-                                          _showSnack('تعذّرت المشاركة: $e',
-                                              error: true);
+                                          _showSnack(
+                                            '?????? ????????: $e',
+                                            error: true,
+                                          );
                                         }
                                       },
                                     ),
@@ -352,21 +348,21 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                           ),
                   ),
                   const SizedBox(height: 18),
-                  const TSectionHeader('إنشاء نسخة احتياطية'),
+                  const TSectionHeader('????? ???? ????????'),
                   Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     children: [
                       NeuButton.primary(
                         icon: Icons.backup_rounded,
-                        label: 'نسخة احتياطية (محلي)',
+                        label: '???? ???????? (????)',
                         onPressed: _busy
                             ? null
                             : () => _backup(storageType: StorageType.local),
                       ),
                       NeuButton.flat(
                         icon: Icons.cloud_upload_rounded,
-                        label: 'نسخة احتياطية (Google Drive)',
+                        label: '???? ???????? (Google Drive)',
                         onPressed: _busy
                             ? null
                             : () =>
@@ -375,7 +371,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  const TSectionHeader('استعادة نسخة'),
+                  const TSectionHeader('??????? ????'),
                   NeuCard(
                     padding: const EdgeInsets.all(14),
                     child: Column(
@@ -385,37 +381,38 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                             Expanded(
                               child: TOutlinedButton(
                                 icon: Icons.download_rounded,
-                                label: 'استيراد (محلي)',
+                                label: '??????? (????)',
                                 onPressed: _busy
                                     ? null
                                     : () => _restore(
-                                        storageType: StorageType.local),
+                                          storageType: StorageType.local,
+                                        ),
                               ),
                             ),
                             const SizedBox(width: 10),
                             NeuButton.flat(
                               icon: Icons.cloud_download_rounded,
-                              label: 'استيراد (Google Drive)',
+                              label: '??????? (Google Drive)',
                               onPressed: _busy
                                   ? null
                                   : () => _restore(
-                                      storageType: StorageType.googleDrive),
+                                        storageType: StorageType.googleDrive,
+                                      ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'ملاحظة: في وضع "استبدال كامل" سيتم حذف البيانات الحالية واستبدالها بالكامل.',
+                          '??????: ?? ??? "??????? ????" ???? ??? ???????? ??????? ?????????? ???????.',
                           style: TextStyle(
-                              color: scheme.onSurface.withValues(alpha: .75)),
+                            color: scheme.onSurface.withValues(alpha: .75),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-
-              // طبقة انشغال لطيفة
               if (_busy)
                 Positioned.fill(
                   child: Container(

@@ -1,6 +1,9 @@
 هذه الاخطاء التي لدي حاليا قم بحلها وتاكد بعدها ان التطبيق يعمل بكل مميزاته وخدماته واكواده بنسبة 100%:
+
+
+
 [{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
 		"value": "undefined_named_parameter",
@@ -12,15 +15,15 @@
 		}
 	},
 	"severity": 8,
-	"message": "The named parameter 'text' isn't defined.\nTry correcting the name to an existing named parameter's name, or defining a named parameter with the name 'text'.",
+	"message": "The named parameter 'files' isn't defined.\nTry correcting the name to an existing named parameter's name, or defining a named parameter with the name 'files'.",
 	"source": "dart",
-	"startLineNumber": 110,
-	"startColumn": 36,
-	"endLineNumber": 110,
-	"endColumn": 40,
+	"startLineNumber": 274,
+	"startColumn": 45,
+	"endLineNumber": 274,
+	"endColumn": 50,
 	"origin": "extHost1"
 },{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
 		"value": "not_enough_positional_arguments",
@@ -32,252 +35,12 @@
 		}
 	},
 	"severity": 8,
-	"message": "1 positional argument expected by 'share', but 0 found.\nTry adding the missing argument.",
-	"source": "dart",
-	"startLineNumber": 110,
-	"startColumn": 36,
-	"endLineNumber": 110,
-	"endColumn": 40,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "always_use_package_imports",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/always_use_package_imports",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Use 'package:' imports for files in the 'lib' directory.\nTry converting the URI to a 'package:' URI.",
-	"source": "dart",
-	"startLineNumber": 21,
-	"startColumn": 8,
-	"endLineNumber": 21,
-	"endColumn": 52,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 119,
-	"startColumn": 107,
-	"endLineNumber": 119,
-	"endColumn": 108,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 123,
-	"startColumn": 41,
-	"endLineNumber": 123,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 126,
-	"startColumn": 41,
-	"endLineNumber": 126,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "use_build_context_synchronously",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/use_build_context_synchronously",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Don't use 'BuildContext's across async gaps.\nTry rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check.",
-	"source": "dart",
-	"startLineNumber": 168,
-	"startColumn": 28,
-	"endLineNumber": 168,
-	"endColumn": 35,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "use_build_context_synchronously",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/use_build_context_synchronously",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Don't use 'BuildContext's across async gaps.\nTry rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check.",
-	"source": "dart",
-	"startLineNumber": 192,
-	"startColumn": 45,
-	"endLineNumber": 192,
-	"endColumn": 52,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 295,
-	"startColumn": 59,
-	"endLineNumber": 295,
-	"endColumn": 60,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 375,
-	"startColumn": 53,
-	"endLineNumber": 375,
-	"endColumn": 54,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 383,
-	"startColumn": 75,
-	"endLineNumber": 383,
-	"endColumn": 76,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/activation_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 390,
-	"startColumn": 48,
-	"endLineNumber": 390,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "undefined_method",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/undefined_method",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 8,
-	"message": "The method 'shareXFiles' isn't defined for the type 'SharePlus'.\nTry correcting the name to the name of an existing method, or defining a method named 'shareXFiles'.",
+	"message": "1 positional argument expected by 'shareXFiles', but 0 found.\nTry adding the missing argument.",
 	"source": "dart",
 	"startLineNumber": 274,
-	"startColumn": 46,
+	"startColumn": 45,
 	"endLineNumber": 274,
-	"endColumn": 57,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "undefined_method",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/undefined_method",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 8,
-	"message": "The method 'shareXFiles' isn't defined for the type 'SharePlus'.\nTry correcting the name to the name of an existing method, or defining a method named 'shareXFiles'.",
-	"source": "dart",
-	"startLineNumber": 340,
-	"startColumn": 68,
-	"endLineNumber": 340,
-	"endColumn": 79,
+	"endColumn": 50,
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
@@ -463,6 +226,52 @@
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'Share' is deprecated and shouldn't be used. Use SharePlus instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 274,
+	"startColumn": 27,
+	"endLineNumber": 274,
+	"endColumn": 32,
+	"tags": [
+		2
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 274,
+	"startColumn": 33,
+	"endLineNumber": 274,
+	"endColumn": 44,
+	"tags": [
+		2
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
 		"value": "require_trailing_commas",
 		"target": {
 			"$mid": 1,
@@ -498,6 +307,52 @@
 	"startColumn": 74,
 	"endLineNumber": 294,
 	"endColumn": 75,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'Share' is deprecated and shouldn't be used. Use SharePlus instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 340,
+	"startColumn": 49,
+	"endLineNumber": 340,
+	"endColumn": 54,
+	"tags": [
+		2
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 340,
+	"startColumn": 55,
+	"endLineNumber": 340,
+	"endColumn": 66,
+	"tags": [
+		2
+	],
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/backup_restore_screen.dart",
@@ -600,164 +455,44 @@
 	"endColumn": 78,
 	"origin": "extHost1"
 },{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
-		"value": "undefined_method",
+		"value": "undefined_named_parameter",
 		"target": {
 			"$mid": 1,
-			"path": "/diagnostics/undefined_method",
+			"path": "/diagnostics/undefined_named_parameter",
 			"scheme": "https",
 			"authority": "dart.dev"
 		}
 	},
 	"severity": 8,
-	"message": "The method 'shareXFiles' isn't defined for the type 'SharePlus'.\nTry correcting the name to the name of an existing method, or defining a method named 'shareXFiles'.",
+	"message": "The named parameter 'files' isn't defined.\nTry correcting the name to an existing named parameter's name, or defining a named parameter with the name 'files'.",
 	"source": "dart",
-	"startLineNumber": 135,
-	"startColumn": 32,
-	"endLineNumber": 135,
-	"endColumn": 43,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "use_build_context_synchronously",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/use_build_context_synchronously",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Don't use 'BuildContext's across async gaps.\nTry rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check.",
-	"source": "dart",
-	"startLineNumber": 140,
-	"startColumn": 28,
-	"endLineNumber": 140,
-	"endColumn": 35,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "use_build_context_synchronously",
-		"target": {
-			"$mid": 1,
-			"path": "/diagnostics/use_build_context_synchronously",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Don't use 'BuildContext's across async gaps.\nTry rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check.",
-	"source": "dart",
-	"startLineNumber": 159,
-	"startColumn": 28,
-	"endLineNumber": 159,
-	"endColumn": 35,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 215,
-	"startColumn": 57,
-	"endLineNumber": 215,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 321,
-	"startColumn": 61,
-	"endLineNumber": 321,
-	"endColumn": 62,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 332,
-	"startColumn": 67,
-	"endLineNumber": 332,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/consumption/list_consumption_screen.dart",
-	"owner": "_generated_diagnostic_collection_name_#3",
-	"code": {
-		"value": "require_trailing_commas",
-		"target": {
-			"$mid": 1,
-			"path": "/lints/require_trailing_commas",
-			"scheme": "https",
-			"authority": "dart.dev"
-		}
-	},
-	"severity": 2,
-	"message": "Missing a required trailing comma.\nTry adding a trailing comma.",
-	"source": "dart",
-	"startLineNumber": 355,
-	"startColumn": 54,
-	"endLineNumber": 355,
-	"endColumn": 55,
+	"startLineNumber": 90,
+	"startColumn": 31,
+	"endLineNumber": 90,
+	"endColumn": 36,
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
-		"value": "undefined_method",
+		"value": "not_enough_positional_arguments",
 		"target": {
 			"$mid": 1,
-			"path": "/diagnostics/undefined_method",
+			"path": "/diagnostics/not_enough_positional_arguments",
 			"scheme": "https",
 			"authority": "dart.dev"
 		}
 	},
 	"severity": 8,
-	"message": "The method 'shareXFiles' isn't defined for the type 'SharePlus'.\nTry correcting the name to the name of an existing method, or defining a method named 'shareXFiles'.",
+	"message": "1 positional argument expected by 'shareXFiles', but 0 found.\nTry adding the missing argument.",
 	"source": "dart",
 	"startLineNumber": 90,
-	"startColumn": 32,
+	"startColumn": 31,
 	"endLineNumber": 90,
-	"endColumn": 43,
+	"endColumn": 36,
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
@@ -818,6 +553,52 @@
 	"startColumn": 28,
 	"endLineNumber": 72,
 	"endColumn": 35,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'Share' is deprecated and shouldn't be used. Use SharePlus instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 90,
+	"startColumn": 13,
+	"endLineNumber": 90,
+	"endColumn": 18,
+	"tags": [
+		2
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 90,
+	"startColumn": 19,
+	"endLineNumber": 90,
+	"endColumn": 30,
+	"tags": [
+		2
+	],
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/doctors/list_doctors_screen.dart",
@@ -3446,21 +3227,41 @@
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",
 	"owner": "_generated_diagnostic_collection_name_#3",
 	"code": {
-		"value": "undefined_method",
+		"value": "undefined_named_parameter",
 		"target": {
 			"$mid": 1,
-			"path": "/diagnostics/undefined_method",
+			"path": "/diagnostics/undefined_named_parameter",
 			"scheme": "https",
 			"authority": "dart.dev"
 		}
 	},
 	"severity": 8,
-	"message": "The method 'shareXFiles' isn't defined for the type 'SharePlus'.\nTry correcting the name to the name of an existing method, or defining a method named 'shareXFiles'.",
+	"message": "The named parameter 'files' isn't defined.\nTry correcting the name to an existing named parameter's name, or defining a named parameter with the name 'files'.",
 	"source": "dart",
 	"startLineNumber": 197,
-	"startColumn": 32,
+	"startColumn": 31,
 	"endLineNumber": 197,
-	"endColumn": 43,
+	"endColumn": 36,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "not_enough_positional_arguments",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/not_enough_positional_arguments",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "1 positional argument expected by 'shareXFiles', but 0 found.\nTry adding the missing argument.",
+	"source": "dart",
+	"startLineNumber": 197,
+	"startColumn": 31,
+	"endLineNumber": 197,
+	"endColumn": 36,
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",
@@ -3521,6 +3322,52 @@
 	"startColumn": 40,
 	"endLineNumber": 177,
 	"endColumn": 47,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'Share' is deprecated and shouldn't be used. Use SharePlus instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 197,
+	"startColumn": 13,
+	"endLineNumber": 197,
+	"endColumn": 18,
+	"tags": [
+		2
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",
+	"owner": "_generated_diagnostic_collection_name_#3",
+	"code": {
+		"value": "deprecated_member_use",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/deprecated_member_use",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 2,
+	"message": "'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead.\nTry replacing the use of the deprecated member with the replacement.",
+	"source": "dart",
+	"startLineNumber": 197,
+	"startColumn": 19,
+	"endLineNumber": 197,
+	"endColumn": 30,
+	"tags": [
+		2
+	],
 	"origin": "extHost1"
 },{
 	"resource": "/C:/Users/zidan/AndroidStudioProjects/aelmamclinic/lib/screens/returns/list_returns_screen.dart",

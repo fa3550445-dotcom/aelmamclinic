@@ -133,9 +133,11 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/قائمة-مرضى-د_${widget.doctor.name}.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'قائمة المرضى للطبيب ${widget.doctor.name}',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'قائمة المرضى للطبيب ${widget.doctor.name}',
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -306,7 +308,9 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                             final group = groups[index];
                             final patient = group[0];
                             final totalPaid = group.fold<double>(
-                                0.0, (sum, p) => sum + p.paidAmount);
+                              0.0,
+                              (sum, p) => sum + p.paidAmount,
+                            );
 
                             return NeuCard(
                               margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -346,7 +350,8 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                 title: Text(
                                   patient.name,
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.w800),
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                                 subtitle: Text(
                                   group.length > 1
@@ -356,7 +361,9 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withValues(alpha: .7),
+                                        .withValues(
+                                          alpha: .7,
+                                        ),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -369,9 +376,11 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                           _makePhoneCall(patient.phoneNumber);
                                         } else {
                                           ScaffoldMessenger.of(context)
-                                              .showSnackBar(const SnackBar(
-                                                  content: Text(
-                                                      'لا يوجد رقم هاتف')));
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text('لا يوجد رقم هاتف'),
+                                            ),
+                                          );
                                         }
                                         break;
                                       case 'edit':
@@ -380,10 +389,10 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (_) => EditPatientScreen(
-                                                  patient: patient),
+                                                patient: patient,
+                                              ),
                                             ),
-                                          ).then(
-                                              (_) => _loadPatientsByDoctor());
+                                          ).then((_) => _loadPatientsByDoctor());
                                         }
                                         break;
                                       case 'delete':
@@ -397,11 +406,13 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                         value: 'call',
                                         child: Row(
                                           children: [
-                                            Icon(Icons.phone_rounded,
-                                                size: 20,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary),
+                                            Icon(
+                                              Icons.phone_rounded,
+                                              size: 20,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
                                             const SizedBox(width: 8),
                                             const Text('اتصال'),
                                           ],
@@ -412,11 +423,13 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                           value: 'edit',
                                           child: Row(
                                             children: [
-                                              Icon(Icons.edit_rounded,
-                                                  size: 20,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary),
+                                              Icon(
+                                                Icons.edit_rounded,
+                                                size: 20,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
                                               const SizedBox(width: 8),
                                               const Text('تعديل'),
                                             ],
@@ -426,8 +439,11 @@ class _PatientsByDoctorScreenState extends State<PatientsByDoctorScreen> {
                                         value: 'delete',
                                         child: Row(
                                           children: const [
-                                            Icon(Icons.delete_rounded,
-                                                size: 20, color: Colors.red),
+                                            Icon(
+                                              Icons.delete_rounded,
+                                              size: 20,
+                                              color: Colors.red,
+                                            ),
                                             SizedBox(width: 8),
                                             Text('حذف'),
                                           ],
@@ -472,7 +488,8 @@ class _StatPill extends StatelessWidget {
           Text(
             '$label: ',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
+              color:
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: .7),
               fontWeight: FontWeight.w700,
             ),
           ),

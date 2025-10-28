@@ -302,7 +302,12 @@ class _PdfUtils {
         "${dir.path}/${prefix}_${DateTime.now().millisecondsSinceEpoch}.pdf";
     final file = File(path);
     await file.writeAsBytes(await doc.save());
-    await Share.shareXFiles(files: [XFile(path)], text: prefix);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(path)],
+        text: prefix,
+      ),
+    );
   }
 
   /// تنزيل

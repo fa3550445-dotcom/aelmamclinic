@@ -6,16 +6,18 @@ import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:postgrest/postgrest.dart' show PostgrestException;
+import 'package:uuid/enums.dart';
 import 'package:uuid/uuid.dart';
 
 /// كلاس مساعد اختياري لتحويل الحقول عند الدفع/السحب.
 /// ضع أي من الدالتين إن كنت تحتاج مسار تحويل مخصص لهذا الجدول.
 class EntityMapper {
-  final Map<String, dynamic> Function(Map<String, dynamic> localRow)? toCloudMap;
+  final Map<String, dynamic> Function(Map<String, dynamic> localRow)?
+      toCloudMap;
   final Map<String, dynamic> Function(
-      Map<String, dynamic> remoteRow,
-      Set<String> allowedLocalColumns,
-      )? fromCloudMap;
+    Map<String, dynamic> remoteRow,
+    Set<String> allowedLocalColumns,
+  )? fromCloudMap;
 
   const EntityMapper({this.toCloudMap, this.fromCloudMap});
 }
@@ -69,8 +71,14 @@ class RemoteIdMapper {
     final rows = await _db.query(
       _tableName,
       columns: const ['uuid'],
-      where: 'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
-      whereArgs: [tableName, accountId.trim(), _normalizeDeviceId(deviceId), localId],
+      where:
+          'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
+      whereArgs: [
+        tableName,
+        accountId.trim(),
+        _normalizeDeviceId(deviceId),
+        localId
+      ],
       limit: 1,
     );
     if (rows.isEmpty) return null;
@@ -101,7 +109,8 @@ class RemoteIdMapper {
         ? rawLocal.toInt()
         : int.tryParse('${rawLocal ?? ''}') ?? 0;
     if (localId <= 0) return null;
-    return _LocalSyncTriple(accountId: account, deviceId: device, localId: localId);
+    return _LocalSyncTriple(
+        accountId: account, deviceId: device, localId: localId);
   }
 }
 
@@ -224,20 +233,80 @@ class SyncService {
       'doctor',
       'notes',
     },
-    'consumptions': {'patient_id', 'item_id', 'quantity', 'date', 'amount', 'note'},
+    'consumptions': {
+      'patient_id',
+      'item_id',
+      'quantity',
+      'date',
+      'amount',
+      'note'
+    },
     'drugs': {'name', 'notes', 'created_at'},
     'prescriptions': {'patient_id', 'doctor_id', 'record_date', 'created_at'},
-    'prescription_items': {'prescription_id', 'drug_id', 'days', 'times_per_day'},
+    'prescription_items': {
+      'prescription_id',
+      'drug_id',
+      'days',
+      'times_per_day'
+    },
     'complaints': {'title', 'description', 'status', 'created_at'},
     'appointments': {'patient_id', 'appointment_time', 'status', 'notes'},
-    'doctors': {'employee_id', 'user_uid', 'name', 'specialization', 'phone_number', 'start_time', 'end_time', 'print_counter'},
+    'doctors': {
+      'employee_id',
+      'user_uid',
+      'name',
+      'specialization',
+      'phone_number',
+      'start_time',
+      'end_time',
+      'print_counter'
+    },
     'consumption_types': {'type'},
     'medical_services': {'name', 'cost', 'service_type'},
-    'service_doctor_share': {'service_id', 'doctor_id', 'share_percentage', 'tower_share_percentage', 'is_hidden'},
-    'employees': {'name', 'identity_number', 'phone_number', 'job_title', 'address', 'marital_status', 'basic_salary', 'final_salary', 'is_doctor', 'user_uid'},
-    'employees_loans': {'employee_id', 'loan_date_time', 'final_salary', 'ratio_sum', 'loan_amount', 'leftover'},
-    'employees_salaries': {'employee_id', 'year', 'month', 'final_salary', 'ratio_sum', 'total_loans', 'net_pay', 'is_paid', 'payment_date'},
-    'employees_discounts': {'employee_id', 'discount_date_time', 'amount', 'notes'},
+    'service_doctor_share': {
+      'service_id',
+      'doctor_id',
+      'share_percentage',
+      'tower_share_percentage',
+      'is_hidden'
+    },
+    'employees': {
+      'name',
+      'identity_number',
+      'phone_number',
+      'job_title',
+      'address',
+      'marital_status',
+      'basic_salary',
+      'final_salary',
+      'is_doctor',
+      'user_uid'
+    },
+    'employees_loans': {
+      'employee_id',
+      'loan_date_time',
+      'final_salary',
+      'ratio_sum',
+      'loan_amount',
+      'leftover'
+    },
+    'employees_salaries': {
+      'employee_id',
+      'year',
+      'month',
+      'final_salary',
+      'ratio_sum',
+      'total_loans',
+      'net_pay',
+      'is_paid',
+      'payment_date'
+    },
+    'employees_discounts': {
+      'employee_id',
+      'discount_date_time',
+      'amount',
+      'notes'
+    },
     'items': {'type_id', 'name', 'price', 'stock', 'created_at'},
     'item_types': {'name'},
     // نرسل total بدل unit_price + نضيف date
@@ -252,8 +321,21 @@ class SyncService {
       'created_at',
       'notify_time'
     },
-    'financial_logs': {'transaction_type', 'operation', 'amount', 'employee_id', 'description', 'modification_details', 'timestamp'},
-    'patient_services': {'patient_id', 'service_id', 'service_name', 'service_cost'},
+    'financial_logs': {
+      'transaction_type',
+      'operation',
+      'amount',
+      'employee_id',
+      'description',
+      'modification_details',
+      'timestamp'
+    },
+    'patient_services': {
+      'patient_id',
+      'service_id',
+      'service_name',
+      'service_cost'
+    },
   };
 
   /// أعمدة Boolean على السحابة (نحوّل 0/1 المحلي إلى true/false عند الدفع).
@@ -323,9 +405,11 @@ class SyncService {
       toCloudMap: (local) {
         final out = <String, dynamic>{}..addAll(local);
         final q = out['quantity'];
-        final up = out.containsKey('unitPrice') ? out['unitPrice'] : out['unit_price'];
+        final up =
+            out.containsKey('unitPrice') ? out['unitPrice'] : out['unit_price'];
         double? qty = (q is num) ? q.toDouble() : double.tryParse('${q ?? ''}');
-        double? unit = (up is num) ? up.toDouble() : double.tryParse('${up ?? ''}');
+        double? unit =
+            (up is num) ? up.toDouble() : double.tryParse('${up ?? ''}');
         if (qty != null && unit != null) {
           out['total'] = qty * unit;
         }
@@ -346,7 +430,8 @@ class SyncService {
         }
 
         final existingDate = parseDate(out['date']);
-        final DateTime effectiveDate = existingDate ?? createdAt ?? DateTime.now().toUtc();
+        final DateTime effectiveDate =
+            existingDate ?? createdAt ?? DateTime.now().toUtc();
         out['date'] = effectiveDate.toIso8601String();
 
         return out;
@@ -357,8 +442,10 @@ class SyncService {
         if (!hasTotalLocally) {
           final rq = remote['quantity'];
           final rt = remote['total'];
-          final double? qty = (rq is num) ? rq.toDouble() : double.tryParse('${rq ?? ''}');
-          final double? tot = (rt is num) ? rt.toDouble() : double.tryParse('${rt ?? ''}');
+          final double? qty =
+              (rq is num) ? rq.toDouble() : double.tryParse('${rq ?? ''}');
+          final double? tot =
+              (rt is num) ? rt.toDouble() : double.tryParse('${rt ?? ''}');
           if (tot != null && qty != null && qty > 0) {
             if (allowed.contains('unitPrice')) {
               map['unitPrice'] = tot / qty;
@@ -398,9 +485,8 @@ class SyncService {
         }
         out.remove('lastTriggered');
 
-        final dynamic rawUuid = out.containsKey('item_uuid')
-            ? out['item_uuid']
-            : out['itemUuid'];
+        final dynamic rawUuid =
+            out.containsKey('item_uuid') ? out['item_uuid'] : out['itemUuid'];
         if (rawUuid is String) {
           final trimmed = rawUuid.trim();
           out['item_uuid'] = trimmed.isEmpty ? null : trimmed;
@@ -517,13 +603,13 @@ class SyncService {
   }
 
   SyncService(
-      Database database,
-      this.accountId, {
-        this.deviceId,
-        this.enableLogs = false,
-        this.pushDebounce = const Duration(seconds: 1),
-      })  : _db = database,
-            _remoteIds = RemoteIdMapper(database);
+    Database database,
+    this.accountId, {
+    this.deviceId,
+    this.enableLogs = false,
+    this.pushDebounce = const Duration(seconds: 1),
+  })  : _db = database,
+        _remoteIds = RemoteIdMapper(database);
 
   void _log(String msg) {
     if (enableLogs) {
@@ -535,11 +621,12 @@ class SyncService {
   bool get _hasAccount => accountId.trim().isNotEmpty;
   bool get _hasDevice =>
       deviceId != null &&
-          deviceId!.trim().isNotEmpty &&
-          deviceId!.trim().toLowerCase() != 'app-unknown';
+      deviceId!.trim().isNotEmpty &&
+      deviceId!.trim().toLowerCase() != 'app-unknown';
 
-  String get _safeDeviceId =>
-      (deviceId != null && deviceId!.trim().isNotEmpty) ? deviceId!.trim() : 'app-unknown';
+  String get _safeDeviceId => (deviceId != null && deviceId!.trim().isNotEmpty)
+      ? deviceId!.trim()
+      : 'app-unknown';
 
   String _normalizeDeviceId(String? value) {
     final normalized = (value ?? '').trim();
@@ -550,7 +637,8 @@ class SyncService {
   }
 
   String _uuidKey(String table, String device, int local) {
-    final normalizedDevice = device.trim().isEmpty ? 'app-unknown' : device.trim();
+    final normalizedDevice =
+        device.trim().isEmpty ? 'app-unknown' : device.trim();
     return '$table|$accountId|$normalizedDevice|$local';
   }
 
@@ -569,12 +657,14 @@ class SyncService {
     return uuid.isEmpty ? null : uuid;
   }
 
-  Future<String?> _getUuidForSyncKey(String table, String device, int local) async {
+  Future<String?> _getUuidForSyncKey(
+      String table, String device, int local) async {
     if (local <= 0) return null;
     final rows = await _db.query(
       _uuidMappingTable,
       columns: const ['uuid'],
-      where: 'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
+      where:
+          'table_name = ? AND account_id = ? AND device_id = ? AND local_sync_id = ?',
       whereArgs: [table, accountId, device, local],
       limit: 1,
     );
@@ -614,9 +704,9 @@ class SyncService {
   Future<_RowIdentity?> _loadRowIdentity(
     String table,
     int recordId, {
-      String? device,
-      int? local,
-    }) async {
+    String? device,
+    int? local,
+  }) async {
     if (recordId <= 0) return null;
 
     String resolvedDevice = _normalizeDeviceId(device);
@@ -624,7 +714,8 @@ class SyncService {
 
     if (resolvedLocal == null || resolvedLocal <= 0 || device == null) {
       final cols = await _getLocalColumns(table);
-      final deviceCol = device == null ? _col(cols, 'deviceId', 'device_id') : null;
+      final deviceCol =
+          device == null ? _col(cols, 'deviceId', 'device_id') : null;
       final localCol = (resolvedLocal == null || resolvedLocal <= 0)
           ? _col(cols, 'localId', 'local_id')
           : null;
@@ -651,7 +742,8 @@ class SyncService {
           }
           if (localCol != null) {
             final li = row[localCol];
-            final parsed = (li is num) ? li.toInt() : int.tryParse('${li ?? ''}');
+            final parsed =
+                (li is num) ? li.toInt() : int.tryParse('${li ?? ''}');
             if (parsed != null && parsed > 0) {
               resolvedLocal = parsed;
             }
@@ -660,7 +752,8 @@ class SyncService {
       }
     }
 
-    final int safeLocal = (resolvedLocal != null && resolvedLocal > 0) ? resolvedLocal : recordId;
+    final int safeLocal =
+        (resolvedLocal != null && resolvedLocal > 0) ? resolvedLocal : recordId;
     return _RowIdentity(
       deviceId: resolvedDevice,
       localId: safeLocal,
@@ -679,13 +772,15 @@ class SyncService {
     final existing = await _getUuidForRecord(table, recordId);
     if (existing != null) return existing;
 
-    final identity = await _loadRowIdentity(table, recordId, device: device, local: local);
+    final identity =
+        await _loadRowIdentity(table, recordId, device: device, local: local);
     if (identity == null) return null;
 
-    final cached = await _getUuidForSyncKey(table, identity.deviceId, identity.localId);
+    final cached =
+        await _getUuidForSyncKey(table, identity.deviceId, identity.localId);
     final uuid = cached ??
         _uuidGen.v5(
-          Uuid.NAMESPACE_URL,
+          Namespace.url.value,
           _uuidKey(table, identity.deviceId, identity.localId),
         );
 
@@ -737,13 +832,15 @@ class SyncService {
     );
   }
 
-  Future<String?> _uuidForLocalForeignKey(String table, dynamic rawValue) async {
+  Future<String?> _uuidForLocalForeignKey(
+      String table, dynamic rawValue) async {
     if (rawValue == null) return null;
     final str = rawValue.toString().trim();
     if (_looksLikeUuid(str)) {
       return str;
     }
-    final int? recordId = (rawValue is num) ? rawValue.toInt() : int.tryParse(str);
+    final int? recordId =
+        (rawValue is num) ? rawValue.toInt() : int.tryParse(str);
     if (recordId == null || recordId <= 0) return null;
     return _ensureUuidForRecord(table: table, recordId: recordId);
   }
@@ -809,14 +906,16 @@ class SyncService {
     if (rows.isEmpty) return null;
     final row = rows.first;
     final accVal = accCol != null ? '${row[accCol] ?? ''}'.trim() : accountId;
-    final devVal = devCol != null ? '${row[devCol] ?? ''}'.trim() : _safeDeviceId;
+    final devVal =
+        devCol != null ? '${row[devCol] ?? ''}'.trim() : _safeDeviceId;
     final locVal = locCol != null ? row[locCol] : null;
     final resolvedLocalId = locVal is num
         ? locVal.toInt()
         : int.tryParse('${locVal ?? ''}') ?? localPrimaryId;
     final acc = accVal.isEmpty ? accountId : accVal;
     final dev = devVal.isEmpty ? _safeDeviceId : devVal;
-    return _LocalSyncTriple(accountId: acc, deviceId: dev, localId: resolvedLocalId);
+    return _LocalSyncTriple(
+        accountId: acc, deviceId: dev, localId: resolvedLocalId);
   }
 
   Future<int?> _findLocalRowIdByTriple({
@@ -922,11 +1021,11 @@ class SyncService {
 
   Future<void> _cacheRemoteMapping(
     String table, {
-      required int localPk,
-      required String remoteId,
-      String? remoteDeviceId,
-      int? remoteLocalId,
-    }) async {
+    required int localPk,
+    required String remoteId,
+    String? remoteDeviceId,
+    int? remoteLocalId,
+  }) async {
     if (remoteId.trim().isEmpty) return;
     await _ensureFkMappingStore();
     final now = DateTime.now().toIso8601String();
@@ -1010,8 +1109,9 @@ class SyncService {
       if (remote == null) return null;
       final String deviceId = (remote['device_id'] ?? '').toString();
       final dynamic localDyn = remote['local_id'];
-      final int? remoteLocal =
-          localDyn is num ? localDyn.toInt() : int.tryParse('${localDyn ?? ''}');
+      final int? remoteLocal = localDyn is num
+          ? localDyn.toInt()
+          : int.tryParse('${localDyn ?? ''}');
       if (remoteLocal == null) return null;
       int? localPk = await _lookupLocalPkFromMeta(table, deviceId, remoteLocal);
       localPk ??= await _findLocalIdByRawFk(table, remoteLocal);
@@ -1158,8 +1258,9 @@ class SyncService {
       if (remoteId.isEmpty) continue;
       final String deviceId = (row['device_id'] ?? '').toString();
       final dynamic localDyn = row['local_id'];
-      final int? remoteLocal =
-          localDyn is num ? localDyn.toInt() : int.tryParse('${localDyn ?? ''}');
+      final int? remoteLocal = localDyn is num
+          ? localDyn.toInt()
+          : int.tryParse('${localDyn ?? ''}');
 
       int? localPk;
       if (remoteLocal != null) {
@@ -1255,7 +1356,8 @@ class SyncService {
     cols.add('id');
 
     if (remoteAllowed != null) {
-      cols.retainWhere((c) => _reservedCols.contains(c) || remoteAllowed.contains(c) || c == 'id');
+      cols.retainWhere((c) =>
+          _reservedCols.contains(c) || remoteAllowed.contains(c) || c == 'id');
     }
 
     cols.removeWhere((element) => element.trim().isEmpty);
@@ -1299,9 +1401,9 @@ class SyncService {
   /// توليد localId عشوائي (1..1e9-1) مع تحقّق تصادُم بسيط داخل الجدول/الجهاز الحالي.
   /// ✅ يدعم camelCase و snake_case تلقائيًا ولا يحتاج لمعرفة مسبقة بأسماء الأعمدة.
   Future<int> _newLocalId31(
-      String table, {
-        required String myDeviceId,
-      }) async {
+    String table, {
+    required String myDeviceId,
+  }) async {
     final cols = await _getLocalColumns(table);
     final locCol = cols.contains('local_id')
         ? 'local_id'
@@ -1312,7 +1414,8 @@ class SyncService {
 
     final rng = Random.secure();
     for (int i = 0; i < 20; i++) {
-      final candidate = 1 + rng.nextInt(_composeBlock - 2); // 1.._composeBlock-1
+      final candidate =
+          1 + rng.nextInt(_composeBlock - 2); // 1.._composeBlock-1
 
       if (locCol == null) {
         // لو ما في عمود local_id محليًا، ارجع المرشح مباشرة (لن نكتبه أصلاً لاحقًا).
@@ -1351,8 +1454,9 @@ class SyncService {
         'SELECT COALESCE(MAX(id),0) AS m FROM $table WHERE id < ?',
         [_composeBlock],
       );
-      final maxOwn =
-      (r.isNotEmpty && r.first['m'] != null) ? (r.first['m'] as num).toInt() : 0;
+      final maxOwn = (r.isNotEmpty && r.first['m'] != null)
+          ? (r.first['m'] as num).toInt()
+          : 0;
 
       // اضبط عدّاد AUTOINCREMENT ليقف عند آخر id محلي (التالي سيكون maxOwn+1)
       await _db.rawQuery(
@@ -1371,10 +1475,10 @@ class SyncService {
   /// - يُحدّث الأعمدة الموجودة فقط (لا يلمس الأعمدة غير الممرَّرة).
   /// - إن لم يوجد الصف، يُدرج (IGNORE لتفادي السباقات) ثم يُحدّث.
   Future<void> _upsertLocalNonDestructive(
-      String table,
-      Map<String, dynamic> row, {
-        required int id,
-      }) async {
+    String table,
+    Map<String, dynamic> row, {
+    required int id,
+  }) async {
     final updateMap = Map<String, dynamic>.from(row)..remove('id');
 
     final updated = await _db.update(
@@ -1404,10 +1508,10 @@ class SyncService {
 
   /// تنفيذ مع إعادة محاولة Backoff بسيطة (3 محاولات إجمالًا).
   Future<T> _withRetry<T>(
-      Future<T> Function() action, {
-        int maxAttempts = 3,
-        Duration firstDelay = const Duration(milliseconds: 350),
-      }) async {
+    Future<T> Function() action, {
+    int maxAttempts = 3,
+    Duration firstDelay = const Duration(milliseconds: 350),
+  }) async {
     int attempt = 0;
     while (true) {
       try {
@@ -1486,7 +1590,8 @@ class SyncService {
       final vDev = existing['deviceId'] ?? existing['device_id'];
       if (vDev != null) {
         final dv = vDev.toString().trim();
-        currentDeviceId = dv.isEmpty || dv.toLowerCase() == 'app-unknown' ? null : dv;
+        currentDeviceId =
+            dv.isEmpty || dv.toLowerCase() == 'app-unknown' ? null : dv;
       }
 
       final vLoc = existing['localId'] ?? existing['local_id'];
@@ -1540,12 +1645,17 @@ class SyncService {
     final data = Map<String, dynamic>.from(localRow);
 
     final dynamic localIdDyn = data['id'];
-    int localPk =
-        (localIdDyn is num) ? localIdDyn.toInt() : int.tryParse('${localIdDyn ?? 0}') ?? 0;
+    int localPk;
+    if (localIdDyn is num) {
+      localPk = localIdDyn.toInt();
+    } else if (localIdDyn != null) {
+      localPk = int.tryParse(localIdDyn.toString()) ?? 0;
+    } else {
+      localPk = 0;
+    }
 
     // fallback لـ localId عند غيابه
-    int fallbackLocalId =
-    (localIdDyn is num) ? localIdDyn.toInt() : int.tryParse('${localIdDyn ?? 0}') ?? 0;
+    int fallbackLocalId = localPk;
     if (fallbackLocalId <= 0) {
       fallbackLocalId = DateTime.now().millisecondsSinceEpoch % 2147483647;
     }
@@ -1561,8 +1671,9 @@ class SyncService {
 
     final int locForRow = (() {
       final li = data['localId'] ?? data['local_id'];
-      final parsed = (li is num) ? li.toInt() : int.tryParse('${li ?? ''}');
-      return parsed ?? fallbackLocalId;
+      if (li is num) return li.toInt();
+      if (li == null) return fallbackLocalId;
+      return int.tryParse(li.toString()) ?? fallbackLocalId;
     })();
 
     final uuid = await _ensureUuidForRecord(
@@ -1572,7 +1683,7 @@ class SyncService {
           local: locForRow,
         ) ??
         _uuidGen.v5(
-          Uuid.NAMESPACE_URL,
+          Namespace.url.value,
           _uuidKey(remoteTable, devForRow, locForRow),
         );
 
@@ -1584,17 +1695,19 @@ class SyncService {
       local: locForRow,
     );
 
-    final fkParents = _fkMap[remoteTable];
-    if (fkParents != null && fkParents.isNotEmpty) {
-      for (final entry in fkParents.entries) {
+    final fkParentMap = _fkMap[remoteTable];
+    if (fkParentMap != null && fkParentMap.isNotEmpty) {
+      for (final entry in fkParentMap.entries) {
         final fkSnake = entry.key;
         final parentTable = entry.value;
         final fkCamel = _toCamel(fkSnake);
 
         if (data.containsKey(fkCamel)) {
-          data[fkCamel] = await _uuidForLocalForeignKey(parentTable, data[fkCamel]);
+          data[fkCamel] =
+              await _uuidForLocalForeignKey(parentTable, data[fkCamel]);
         } else if (data.containsKey(fkSnake)) {
-          data[fkSnake] = await _uuidForLocalForeignKey(parentTable, data[fkSnake]);
+          data[fkSnake] =
+              await _uuidForLocalForeignKey(parentTable, data[fkSnake]);
         }
       }
     }
@@ -1627,9 +1740,8 @@ class SyncService {
       snake = _mapKeysToSnake(mapper!.toCloudMap!(snake));
     }
 
-    final fkParents = _fkMap[remoteTable];
-    if (fkParents != null && fkParents.isNotEmpty) {
-      for (final entry in fkParents.entries) {
+    if (fkParentMap != null && fkParentMap.isNotEmpty) {
+      for (final entry in fkParentMap.entries) {
         final fkSnake = entry.key;
         if (!snake.containsKey(fkSnake)) continue;
         final rawValue = snake[fkSnake];
@@ -1685,7 +1797,8 @@ class SyncService {
     // فلترة allow-list كمسار احتياطي
     final tableAllow = _remoteAllow[remoteTable];
     if (tableAllow != null && tableAllow.isNotEmpty) {
-      snake.removeWhere((k, _) => !_reservedCols.contains(k) && !tableAllow.contains(k));
+      snake.removeWhere(
+          (k, _) => !_reservedCols.contains(k) && !tableAllow.contains(k));
     }
 
     // حقول التزامن — نرسل أصل السجل
@@ -1727,8 +1840,9 @@ class SyncService {
       final cols = await _getLocalColumns(localTable);
       final hasIsDeletedSnake = cols.contains('is_deleted');
       final hasIsDeletedCamel = cols.contains('isDeleted');
-      final delCol =
-      hasIsDeletedSnake ? 'is_deleted' : (hasIsDeletedCamel ? 'isDeleted' : null);
+      final delCol = hasIsDeletedSnake
+          ? 'is_deleted'
+          : (hasIsDeletedCamel ? 'isDeleted' : null);
 
       final whereClause = delCol != null ? 'IFNULL($delCol,0)=0' : null;
 
@@ -1743,7 +1857,8 @@ class SyncService {
       final devId = _safeDeviceId;
       for (final r in localRows) {
         final int id = (r['id'] as num).toInt();
-        await _stampLocalSyncMeta(localTable: localTable, localId: id, devId: devId);
+        await _stampLocalSyncMeta(
+            localTable: localTable, localId: id, devId: devId);
       }
 
       // تجهيز ودفع
@@ -1764,7 +1879,9 @@ class SyncService {
           'deviceId': (remoteMap['device_id'] ?? '').toString(),
           'localId': localIdDyn is num
               ? localIdDyn.toInt()
-              : int.tryParse('${localIdDyn ?? ''}'),
+              : (localIdDyn == null
+                  ? null
+                  : int.tryParse(localIdDyn.toString())),
         };
         outgoingMeta.add(meta);
       }
@@ -1781,7 +1898,8 @@ class SyncService {
         await _remapOutgoingForeignKeys(remoteTable, chunk, errors: fkErrors);
 
         try {
-          _log('PUSH $remoteTable: ${chunk.length} rows (acc=$accountId, dev=$_safeDeviceId)');
+          _log(
+              'PUSH $remoteTable: ${chunk.length} rows (acc=$accountId, dev=$_safeDeviceId)');
           final response = await _withRetry(() async {
             return await _client
                 .from(remoteTable)
@@ -1795,7 +1913,8 @@ class SyncService {
           if (response is List) {
             await _cacheRemoteIdsFromResponse(remoteTable, response, metaChunk);
           } else if (response is Map<String, dynamic>) {
-            await _cacheRemoteIdsFromResponse(remoteTable, [response], metaChunk);
+            await _cacheRemoteIdsFromResponse(
+                remoteTable, [response], metaChunk);
           }
         } on PostgrestException catch (e) {
           final String code = e.code ?? '';
@@ -1812,8 +1931,10 @@ class SyncService {
                   det.contains('drugs_unique_name_per_account'));
 
           if (isNameUniqueConflict) {
-            _log('PUSH $remoteTable: unique-name conflict -> merging by (account_id,name)');
-            await _mergeByNaturalKey(remoteTable, 'name', accountScoped: true, rows: chunk);
+            _log(
+                'PUSH $remoteTable: unique-name conflict -> merging by (account_id,name)');
+            await _mergeByNaturalKey(remoteTable, 'name',
+                accountScoped: true, rows: chunk);
             await _ensureChunkRemoteMappings(remoteTable, metaChunk);
             continue;
           }
@@ -1829,8 +1950,12 @@ class SyncService {
             _log(
               'PUSH $remoteTable: composite natural key conflict -> merging by (account_id,type_id,name)',
             );
-            await _mergeByCompositeNaturalKeys(remoteTable, ['type_id', 'name'],
-                accountScoped: true, rows: chunk);
+            await _mergeByCompositeNaturalKeys(
+              remoteTable,
+              ['type_id', 'name'],
+              accountScoped: true,
+              rows: chunk,
+            );
             await _ensureChunkRemoteMappings(remoteTable, metaChunk);
             continue;
           }
@@ -1854,7 +1979,8 @@ class SyncService {
             continue;
           }
 
-          _log('PUSH FAILED for $remoteTable: code=$code message=$msg details=$det');
+          _log(
+              'PUSH FAILED for $remoteTable: code=$code message=$msg details=$det');
           await _ensureChunkRemoteMappings(remoteTable, metaChunk);
           continue; // لا نرمي الاستثناء
         } catch (e) {
@@ -1865,7 +1991,8 @@ class SyncService {
       }
 
       if (fkErrors.isNotEmpty) {
-        _log('PUSH $remoteTable: ${fkErrors.length} FK mapping errors\n  - ${fkErrors.join('\n  - ')}');
+        _log(
+            'PUSH $remoteTable: ${fkErrors.length} FK mapping errors\n  - ${fkErrors.join('\n  - ')}');
       }
     } finally {
       _pushBusy[remoteTable] = false;
@@ -1874,11 +2001,11 @@ class SyncService {
 
   /// دمج اعتمادًا على مفتاح طبيعي واحد (مثل name) داخل نفس الحساب.
   Future<void> _mergeByNaturalKey(
-      String remoteTable,
-      String key, {
-        required bool accountScoped,
-        required List<Map<String, dynamic>> rows,
-      }) async {
+    String remoteTable,
+    String key, {
+    required bool accountScoped,
+    required List<Map<String, dynamic>> rows,
+  }) async {
     for (final row in rows) {
       try {
         final val = (row[key] ?? '').toString();
@@ -1889,7 +2016,8 @@ class SyncService {
           ..remove('device_id')
           ..remove('local_id');
 
-        if (updateMap.isEmpty || (updateMap.keys.length == 1 && updateMap.containsKey(key))) {
+        if (updateMap.isEmpty ||
+            (updateMap.keys.length == 1 && updateMap.containsKey(key))) {
           continue;
         }
 
@@ -1907,11 +2035,11 @@ class SyncService {
 
   /// دمج اعتمادًا على عدة مفاتيح طبيعية (مثلاً items: type_id+name) داخل الحساب.
   Future<void> _mergeByCompositeNaturalKeys(
-      String remoteTable,
-      List<String> keys, {
-        required bool accountScoped,
-        required List<Map<String, dynamic>> rows,
-      }) async {
+    String remoteTable,
+    List<String> keys, {
+    required bool accountScoped,
+    required List<Map<String, dynamic>> rows,
+  }) async {
     for (final row in rows) {
       try {
         // تحقق من وجود كل المفاتيح
@@ -1951,15 +2079,17 @@ class SyncService {
 
   /// تراجع عند تعارض الفهرس المركَّب: تحديث الصفوف الموجودة بالمفتاح (account_id,device_id,local_id)
   Future<void> _fallbackUpdateByComposite(
-      String remoteTable,
-      List<Map<String, dynamic>> rows,
-      ) async {
+    String remoteTable,
+    List<Map<String, dynamic>> rows,
+  ) async {
     for (final row in rows) {
       try {
         final acc = (row['account_id'] ?? accountId).toString();
         final dev = (row['device_id'] ?? _safeDeviceId).toString();
         final locDyn = row['local_id'];
-        final loc = (locDyn is num) ? locDyn.toInt() : int.tryParse('${locDyn ?? 0}') ?? 0;
+        final loc = (locDyn is num)
+            ? locDyn.toInt()
+            : int.tryParse('${locDyn ?? 0}') ?? 0;
 
         // حقول التحديث فقط (بدون مفاتيح التعارض)
         final updateMap = Map<String, dynamic>.from(row)
@@ -1974,7 +2104,8 @@ class SyncService {
               await _client.from(remoteTable).insert(row);
             });
           } catch (e) {
-            _log('fallbackUpdateByComposite[$remoteTable]: insert-only failed: $e');
+            _log(
+                'fallbackUpdateByComposite[$remoteTable]: insert-only failed: $e');
           }
           continue;
         }
@@ -2007,7 +2138,9 @@ class SyncService {
             // لو حصل سباق وأعطى duplicate مرة أخرى، أعد UPDATE وتجاوز
             final code = e.code ?? '';
             final msg = e.message;
-            if (code == '23505' && msg.contains('acc') && msg.contains('local')) {
+            if (code == '23505' &&
+                msg.contains('acc') &&
+                msg.contains('local')) {
               try {
                 await _client
                     .from(remoteTable)
@@ -2017,7 +2150,8 @@ class SyncService {
                     .eq('local_id', loc);
               } catch (_) {/* تجاهل */}
             } else {
-              _log('fallbackUpdateByComposite[$remoteTable]: insert failed: $e');
+              _log(
+                  'fallbackUpdateByComposite[$remoteTable]: insert failed: $e');
             }
           } catch (e) {
             _log('fallbackUpdateByComposite[$remoteTable]: insert failed: $e');
@@ -2037,8 +2171,9 @@ class SyncService {
     final cols = await _getLocalColumns(localTable);
     final hasIsDeletedSnake = cols.contains('is_deleted');
     final hasIsDeletedCamel = cols.contains('isDeleted');
-    final delCol =
-    hasIsDeletedSnake ? 'is_deleted' : (hasIsDeletedCamel ? 'isDeleted' : null);
+    final delCol = hasIsDeletedSnake
+        ? 'is_deleted'
+        : (hasIsDeletedCamel ? 'isDeleted' : null);
     if (delCol == null) return; // الجدول لا يدعم الحذف المنطقي محليًا
 
     final rows = await _db.query(
@@ -2067,7 +2202,8 @@ class SyncService {
           return parsed ?? (r['id'] as num).toInt();
         })();
 
-        _log('PUSH DELETE $remoteTable: (acc=$accountId, dev=$originDev, local=$originLocal)');
+        _log(
+            'PUSH DELETE $remoteTable: (acc=$accountId, dev=$originDev, local=$originLocal)');
         await _withRetry(() async {
           await _client
               .from(remoteTable)
@@ -2161,16 +2297,20 @@ class SyncService {
         })();
 
         final dynamic rawLocalId = raw['local_id'];
-        final int? rawLocalInt =
-            rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
+        final int? rawLocalInt = rawLocalId is num
+            ? rawLocalId.toInt()
+            : int.tryParse(rawLocalId.toString());
         final int sourceLocalId = rawLocalInt ?? 0;
 
-        final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
+        final String remoteDeviceIdRaw =
+            (raw['device_id'] ?? '').toString().trim();
         final String remoteDeviceId =
             remoteDeviceIdRaw.isEmpty ? _safeDeviceId : remoteDeviceIdRaw;
 
         final String? remoteUpdatedAt =
-            (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
+            (raw['updated_at'] ?? '').toString().isNotEmpty
+                ? raw['updated_at'].toString()
+                : null;
 
         int? localId = await _findLocalRowIdByTriple(
           table: localTable,
@@ -2227,7 +2367,8 @@ class SyncService {
           filtered[updCol] = remoteUpdatedAt;
         }
 
-        await _upsertLocalNonDestructive(localTable, filtered, id: resolvedLocalId);
+        await _upsertLocalNonDestructive(localTable, filtered,
+            id: resolvedLocalId);
 
         if (remoteUuid != null && remoteUuid.isNotEmpty) {
           final int syncLocal = (rawLocalId is num)
@@ -2277,7 +2418,8 @@ class SyncService {
     if (currentValue == null) return null;
 
     final columnType =
-        (await _getLocalColumnType(childLocalTable, childLocalColumnName)) ?? '';
+        (await _getLocalColumnType(childLocalTable, childLocalColumnName)) ??
+            '';
     final isTextColumn = columnType.contains('TEXT');
 
     dynamic toLocal(dynamic value) =>
@@ -2295,9 +2437,8 @@ class SyncService {
       return isTextColumn ? stringValue : null;
     }
 
-    final int? remoteLocalId = currentValue is num
-        ? currentValue.toInt()
-        : int.tryParse(stringValue);
+    final int? remoteLocalId =
+        currentValue is num ? currentValue.toInt() : int.tryParse(stringValue);
     if (remoteLocalId == null || remoteLocalId <= 0) {
       return null;
     }
@@ -2329,12 +2470,10 @@ class SyncService {
   }
 
   Future<void> _pullTableRemapFKs(
-      String localTable,
-      String remoteTable, {
-        required Map<String, String> fkParentTables,
-      }
-
-) async {
+    String localTable,
+    String remoteTable, {
+    required Map<String, String> fkParentTables,
+  }) async {
     if (!_hasAccount) {
       _log('PULL $remoteTable skipped (no accountId)');
       return;
@@ -2381,16 +2520,20 @@ class SyncService {
 
         // id المحلي للسجل نفسه
         final dynamic rawLocalId = raw['local_id'];
-        final int? rawLocalInt =
-            rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
+        final int? rawLocalInt = rawLocalId is num
+            ? rawLocalId.toInt()
+            : int.tryParse(rawLocalId.toString());
         final int sourceLocalId = rawLocalInt ?? 0;
 
-        final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
+        final String remoteDeviceIdRaw =
+            (raw['device_id'] ?? '').toString().trim();
         final String remoteDeviceId =
             remoteDeviceIdRaw.isEmpty ? _safeDeviceId : remoteDeviceIdRaw;
 
         final String? remoteUpdatedAt =
-            (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
+            (raw['updated_at'] ?? '').toString().isNotEmpty
+                ? raw['updated_at'].toString()
+                : null;
 
         int? localId = await _findLocalRowIdByTriple(
           table: localTable,
@@ -2473,7 +2616,8 @@ class SyncService {
           filtered[updCol] = remoteUpdatedAt;
         }
 
-        await _upsertLocalNonDestructive(localTable, filtered, id: resolvedLocalId);
+        await _upsertLocalNonDestructive(localTable, filtered,
+            id: resolvedLocalId);
 
         if (remoteUuid != null && remoteUuid.isNotEmpty) {
           final int syncLocal = (rawLocalId is num)
@@ -2489,7 +2633,8 @@ class SyncService {
         }
       }
 
-      await _clampAutoincrement(localTable); // ← منع قفزة AUTOINCREMENT بعد السحب (FK)
+      await _clampAutoincrement(
+          localTable); // ← منع قفزة AUTOINCREMENT بعد السحب (FK)
 
       from += remoteRows.length;
       if (remoteRows.length < _pullPageSize) break;
@@ -2508,10 +2653,10 @@ class SyncService {
   }
 
   Future<void> _subscribeTableRealtime(
-      String localTable,
-      String remoteTable, {
-        Map<String, String>? fkParentTables,
-      }) async {
+    String localTable,
+    String remoteTable, {
+    Map<String, String>? fkParentTables,
+  }) async {
     if (!_hasAccount) return;
     final key = 'rt:$remoteTable:$accountId';
     // إغلاق القناة القديمة إن وُجدت بنفس المفتاح لتفادي الازدواج
@@ -2586,11 +2731,11 @@ class SyncService {
   }
 
   Future<void> _applyRealtimeUpsert(
-      String localTable,
-      String remoteTable,
-      Map<String, dynamic>? newRecord,
-      Map<String, String>? fkParentTables,
-      ) async {
+    String localTable,
+    String remoteTable,
+    Map<String, dynamic>? newRecord,
+    Map<String, String>? fkParentTables,
+  ) async {
     if (newRecord == null || !_hasAccount) return;
 
     final allowedCols = await _getLocalColumns(localTable);
@@ -2604,8 +2749,9 @@ class SyncService {
       return str.isEmpty ? null : str;
     })();
     final dynamic rawLocalId = raw['local_id'];
-    final int? rawLocalInt =
-        rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
+    final int? rawLocalInt = rawLocalId is num
+        ? rawLocalId.toInt()
+        : int.tryParse(rawLocalId.toString());
     final int sourceLocalId = rawLocalInt ?? 0;
 
     final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
@@ -2613,7 +2759,9 @@ class SyncService {
         remoteDeviceIdRaw.isEmpty ? _safeDeviceId : remoteDeviceIdRaw;
 
     final String? remoteUpdatedAt =
-        (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
+        (raw['updated_at'] ?? '').toString().isNotEmpty
+            ? raw['updated_at'].toString()
+            : null;
 
     int? localId = await _findLocalRowIdByTriple(
       table: localTable,
@@ -2713,13 +2861,14 @@ class SyncService {
       );
     }
 
-    await _clampAutoincrement(localTable); // ← منع قفزة AUTOINCREMENT بعد Realtime upsert
+    await _clampAutoincrement(
+        localTable); // ← منع قفزة AUTOINCREMENT بعد Realtime upsert
   }
 
   Future<void> _applyRealtimeDelete(
-      String localTable,
-      Map<String, dynamic>? oldRecord,
-      ) async {
+    String localTable,
+    Map<String, dynamic>? oldRecord,
+  ) async {
     if (oldRecord == null || !_hasAccount) return;
 
     final allowedCols = await _getLocalColumns(localTable);
@@ -2733,8 +2882,9 @@ class SyncService {
       return str.isEmpty ? null : str;
     })();
     final dynamic rawLocalId = raw['local_id'];
-    final int sourceLocalId =
-        rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString()) ?? 0;
+    final int sourceLocalId = rawLocalId is num
+        ? rawLocalId.toInt()
+        : int.tryParse(rawLocalId.toString()) ?? 0;
 
     final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
     final String remoteDeviceId =
@@ -2766,7 +2916,8 @@ class SyncService {
         localTable,
         {
           'isDeleted': 1,
-          if (allowedCols.contains('deletedAt')) 'deletedAt': DateTime.now().toIso8601String(),
+          if (allowedCols.contains('deletedAt'))
+            'deletedAt': DateTime.now().toIso8601String(),
         },
         where: 'id = ?',
         whereArgs: [resolvedLocalId],
@@ -2776,13 +2927,15 @@ class SyncService {
         localTable,
         {
           'is_deleted': 1,
-          if (allowedCols.contains('deleted_at')) 'deleted_at': DateTime.now().toIso8601String(),
+          if (allowedCols.contains('deleted_at'))
+            'deleted_at': DateTime.now().toIso8601String(),
         },
         where: 'id = ?',
         whereArgs: [resolvedLocalId],
       );
     } else {
-      await _db.delete(localTable, where: 'id = ?', whereArgs: [resolvedLocalId]);
+      await _db
+          .delete(localTable, where: 'id = ?', whereArgs: [resolvedLocalId]);
     }
 
     if (remoteUuid != null && remoteUuid.isNotEmpty) {
@@ -2811,32 +2964,86 @@ class SyncService {
     // لا نُشغّل Realtime للمرفقات (محلي فقط)
     await _subscribeTableRealtime('drugs', 'drugs');
     await _subscribeTableRealtime('item_types', 'item_types');
-    await _subscribeTableRealtime('items', 'items', fkParentTables: _fkMap['items']);
+    await _subscribeTableRealtime(
+      'items',
+      'items',
+      fkParentTables: _fkMap['items'],
+    );
     await _subscribeTableRealtime('medical_services', 'medical_services');
-    await _subscribeTableRealtime('doctors', 'doctors', fkParentTables: _fkMap['doctors']);
     await _subscribeTableRealtime(
-        'service_doctor_share', 'service_doctor_share', fkParentTables: _fkMap['service_doctor_share']);
+      'doctors',
+      'doctors',
+      fkParentTables: _fkMap['doctors'],
+    );
+    await _subscribeTableRealtime(
+      'service_doctor_share',
+      'service_doctor_share',
+      fkParentTables: _fkMap['service_doctor_share'],
+    );
 
-    await _subscribeTableRealtime('patients', 'patients', fkParentTables: _fkMap['patients']);
+    await _subscribeTableRealtime(
+      'patients',
+      'patients',
+      fkParentTables: _fkMap['patients'],
+    );
     await _subscribeTableRealtime('returns', 'returns');
-    await _subscribeTableRealtime('appointments', 'appointments', fkParentTables: _fkMap['appointments']);
-
-    await _subscribeTableRealtime('prescriptions', 'prescriptions', fkParentTables: _fkMap['prescriptions']);
     await _subscribeTableRealtime(
-        'prescription_items', 'prescription_items', fkParentTables: _fkMap['prescription_items']);
+      'appointments',
+      'appointments',
+      fkParentTables: _fkMap['appointments'],
+    );
+
+    await _subscribeTableRealtime(
+      'prescriptions',
+      'prescriptions',
+      fkParentTables: _fkMap['prescriptions'],
+    );
+    await _subscribeTableRealtime(
+      'prescription_items',
+      'prescription_items',
+      fkParentTables: _fkMap['prescription_items'],
+    );
     await _subscribeTableRealtime('complaints', 'complaints');
 
-    await _subscribeTableRealtime('consumptions', 'consumptions', fkParentTables: _fkMap['consumptions']);
-    await _subscribeTableRealtime('purchases', 'purchases', fkParentTables: _fkMap['purchases']);
-    await _subscribeTableRealtime('alert_settings', 'alert_settings', fkParentTables: _fkMap['alert_settings']);
+    await _subscribeTableRealtime(
+      'consumptions',
+      'consumptions',
+      fkParentTables: _fkMap['consumptions'],
+    );
+    await _subscribeTableRealtime(
+      'purchases',
+      'purchases',
+      fkParentTables: _fkMap['purchases'],
+    );
+    await _subscribeTableRealtime(
+      'alert_settings',
+      'alert_settings',
+      fkParentTables: _fkMap['alert_settings'],
+    );
 
     await _subscribeTableRealtime('employees', 'employees');
-    await _subscribeTableRealtime('employees_loans', 'employees_loans', fkParentTables: _fkMap['employees_loans']);
-    await _subscribeTableRealtime('employees_salaries', 'employees_salaries', fkParentTables: _fkMap['employees_salaries']);
-    await _subscribeTableRealtime('employees_discounts', 'employees_discounts', fkParentTables: _fkMap['employees_discounts']);
+    await _subscribeTableRealtime(
+      'employees_loans',
+      'employees_loans',
+      fkParentTables: _fkMap['employees_loans'],
+    );
+    await _subscribeTableRealtime(
+      'employees_salaries',
+      'employees_salaries',
+      fkParentTables: _fkMap['employees_salaries'],
+    );
+    await _subscribeTableRealtime(
+      'employees_discounts',
+      'employees_discounts',
+      fkParentTables: _fkMap['employees_discounts'],
+    );
 
     await _subscribeTableRealtime('financial_logs', 'financial_logs');
-    await _subscribeTableRealtime('patient_services', 'patient_services', fkParentTables: _fkMap['patient_services']);
+    await _subscribeTableRealtime(
+      'patient_services',
+      'patient_services',
+      fkParentTables: _fkMap['patient_services'],
+    );
   }
 
   /// إلغاء جميع الاشتراكات.
@@ -2853,7 +3060,8 @@ class SyncService {
 
   /// Bootstrap مريح بعد تسجيل الدخول (سحب أولي + اشتراك لحظي)
   Future<void> bootstrap({bool pull = true, bool realtime = true}) async {
-    _log('Bootstrap sync (acc=$accountId, dev=$_safeDeviceId) pull=$pull, rt=$realtime');
+    _log(
+        'Bootstrap sync (acc=$accountId, dev=$_safeDeviceId) pull=$pull, rt=$realtime');
     if (!_hasAccount) {
       _log('Bootstrap skipped (no accountId)');
       return;
@@ -2915,132 +3123,139 @@ class SyncService {
 
   Future<void> pushPatients() => _pushTable('patients', 'patients');
   Future<void> pullPatients() => _pullTableRemapFKs(
-    'patients',
-    'patients',
-    fkParentTables: _fkMap['patients']!,
-  );
+        'patients',
+        'patients',
+        fkParentTables: _fkMap['patients']!,
+      );
 
   Future<void> pushReturns() => _pushTable('returns', 'returns');
   Future<void> pullReturns() => _pullTable('returns', 'returns');
 
   Future<void> pushConsumptions() => _pushTable('consumptions', 'consumptions');
   Future<void> pullConsumptions() => _pullTableRemapFKs(
-    'consumptions',
-    'consumptions',
-    fkParentTables: _fkMap['consumptions']!,
-  );
+        'consumptions',
+        'consumptions',
+        fkParentTables: _fkMap['consumptions']!,
+      );
 
   Future<void> pushDrugs() => _pushTable('drugs', 'drugs');
   Future<void> pullDrugs() => _pullTable('drugs', 'drugs');
 
-  Future<void> pushPrescriptions() => _pushTable('prescriptions', 'prescriptions');
+  Future<void> pushPrescriptions() =>
+      _pushTable('prescriptions', 'prescriptions');
   Future<void> pullPrescriptions() => _pullTableRemapFKs(
-    'prescriptions',
-    'prescriptions',
-    fkParentTables: _fkMap['prescriptions']!,
-  );
+        'prescriptions',
+        'prescriptions',
+        fkParentTables: _fkMap['prescriptions']!,
+      );
 
   Future<void> pushPrescriptionItems() =>
       _pushTable('prescription_items', 'prescription_items');
   Future<void> pullPrescriptionItems() => _pullTableRemapFKs(
-    'prescription_items',
-    'prescription_items',
-    fkParentTables: _fkMap['prescription_items']!,
-  );
+        'prescription_items',
+        'prescription_items',
+        fkParentTables: _fkMap['prescription_items']!,
+      );
 
   Future<void> pushComplaints() => _pushTable('complaints', 'complaints');
   Future<void> pullComplaints() => _pullTable('complaints', 'complaints');
 
   Future<void> pushAppointments() => _pushTable('appointments', 'appointments');
   Future<void> pullAppointments() => _pullTableRemapFKs(
-    'appointments',
-    'appointments',
-    fkParentTables: _fkMap['appointments']!,
-  );
+        'appointments',
+        'appointments',
+        fkParentTables: _fkMap['appointments']!,
+      );
 
   Future<void> pushDoctors() => _pushTable('doctors', 'doctors');
   Future<void> pullDoctors() => _pullTableRemapFKs(
-    'doctors',
-    'doctors',
-    fkParentTables: _fkMap['doctors']!,
-  );
+        'doctors',
+        'doctors',
+        fkParentTables: _fkMap['doctors']!,
+      );
 
   Future<void> pushConsumptionTypes() =>
       _pushTable('consumption_types', 'consumption_types');
-  Future<void> pullConsumptionTypes() => _pullTable('consumption_types', 'consumption_types');
+  Future<void> pullConsumptionTypes() =>
+      _pullTable('consumption_types', 'consumption_types');
 
   Future<void> pushMedicalServices() =>
       _pushTable('medical_services', 'medical_services');
-  Future<void> pullMedicalServices() => _pullTable('medical_services', 'medical_services');
+  Future<void> pullMedicalServices() =>
+      _pullTable('medical_services', 'medical_services');
 
   Future<void> pushServiceDoctorShares() =>
       _pushTable('service_doctor_share', 'service_doctor_share');
   Future<void> pullServiceDoctorShares() => _pullTableRemapFKs(
-    'service_doctor_share',
-    'service_doctor_share',
-    fkParentTables: _fkMap['service_doctor_share']!,
-  );
+        'service_doctor_share',
+        'service_doctor_share',
+        fkParentTables: _fkMap['service_doctor_share']!,
+      );
 
   Future<void> pushEmployees() => _pushTable('employees', 'employees');
   Future<void> pullEmployees() => _pullTable('employees', 'employees');
 
-  Future<void> pushEmployeeLoans() => _pushTable('employees_loans', 'employees_loans');
+  Future<void> pushEmployeeLoans() =>
+      _pushTable('employees_loans', 'employees_loans');
   Future<void> pullEmployeeLoans() => _pullTableRemapFKs(
-    'employees_loans',
-    'employees_loans',
-    fkParentTables: _fkMap['employees_loans']!,
-  );
+        'employees_loans',
+        'employees_loans',
+        fkParentTables: _fkMap['employees_loans']!,
+      );
 
   Future<void> pushEmployeeSalaries() =>
       _pushTable('employees_salaries', 'employees_salaries');
   Future<void> pullEmployeeSalaries() => _pullTableRemapFKs(
-    'employees_salaries',
-    'employees_salaries',
-    fkParentTables: _fkMap['employees_salaries']!,
-  );
+        'employees_salaries',
+        'employees_salaries',
+        fkParentTables: _fkMap['employees_salaries']!,
+      );
 
   Future<void> pushEmployeeDiscounts() =>
       _pushTable('employees_discounts', 'employees_discounts');
   Future<void> pullEmployeeDiscounts() => _pullTableRemapFKs(
-    'employees_discounts',
-    'employees_discounts',
-    fkParentTables: _fkMap['employees_discounts']!,
-  );
+        'employees_discounts',
+        'employees_discounts',
+        fkParentTables: _fkMap['employees_discounts']!,
+      );
 
   Future<void> pushItemTypes() => _pushTable('item_types', 'item_types');
   Future<void> pullItemTypes() => _pullTable('item_types', 'item_types');
 
   Future<void> pushItems() => _pushTable('items', 'items');
   Future<void> pullItems() => _pullTableRemapFKs(
-    'items',
-    'items',
-    fkParentTables: _fkMap['items']!,
-  );
+        'items',
+        'items',
+        fkParentTables: _fkMap['items']!,
+      );
 
   Future<void> pushPurchases() => _pushTable('purchases', 'purchases');
   Future<void> pullPurchases() => _pullTableRemapFKs(
-    'purchases',
-    'purchases',
-    fkParentTables: _fkMap['purchases']!,
-  );
+        'purchases',
+        'purchases',
+        fkParentTables: _fkMap['purchases']!,
+      );
 
-  Future<void> pushAlertSettings() => _pushTable('alert_settings', 'alert_settings');
+  Future<void> pushAlertSettings() =>
+      _pushTable('alert_settings', 'alert_settings');
   Future<void> pullAlertSettings() => _pullTableRemapFKs(
-    'alert_settings',
-    'alert_settings',
-    fkParentTables: _fkMap['alert_settings']!,
-  );
+        'alert_settings',
+        'alert_settings',
+        fkParentTables: _fkMap['alert_settings']!,
+      );
 
-  Future<void> pushFinancialLogs() => _pushTable('financial_logs', 'financial_logs');
-  Future<void> pullFinancialLogs() => _pullTable('financial_logs', 'financial_logs');
+  Future<void> pushFinancialLogs() =>
+      _pushTable('financial_logs', 'financial_logs');
+  Future<void> pullFinancialLogs() =>
+      _pullTable('financial_logs', 'financial_logs');
 
   Future<void> pushPatientServices() =>
       _pushTable('patient_services', 'patient_services');
   Future<void> pullPatientServices() => _pullTableRemapFKs(
-    'patient_services',
-    'patient_services',
-    fkParentTables: _fkMap['patient_services']!,
-  );
+        'patient_services',
+        'patient_services',
+        fkParentTables: _fkMap['patient_services']!,
+      );
 
   /*──────────────────── Bulk (مرتَّبة حسب الاعتمادات) ───────────────────*/
 

@@ -6,14 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'new_patient_screen.dart';
-import 'edit_patient_screen.dart';
-import 'view_patient_screen.dart';
-import 'duplicate_patients_screen.dart';
+import 'package:aelmamclinic/screens/patients/new_patient_screen.dart';
+import 'package:aelmamclinic/screens/patients/edit_patient_screen.dart';
+import 'package:aelmamclinic/screens/patients/view_patient_screen.dart';
+import 'package:aelmamclinic/screens/patients/duplicate_patients_screen.dart';
 
 import 'package:aelmamclinic/core/formatters.dart';
 import 'package:aelmamclinic/core/theme.dart';
@@ -46,7 +45,6 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
   bool _isLoading = false;
   Timer? _debounce;
   int? _activeDoctorId;
-  bool _doctorRestricted = false;
 
   @override
   void initState() {
@@ -81,7 +79,6 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
       }
       if (!mounted) return;
       _activeDoctorId = doctorId;
-      _doctorRestricted = doctorId != null;
       await _loadPatients(showSpinner: false);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -93,11 +90,12 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
       setState(() => _isLoading = true);
     }
     try {
-      final patients = await DBService.instance
-          .getAllPatients(doctorId: _activeDoctorId);
+      final patients =
+          await DBService.instance.getAllPatients(doctorId: _activeDoctorId);
       final db = await DBService.instance.database;
 
-      final ids = patients.where((p) => p.id != null).map((p) => p.id!).toList();
+      final ids =
+          patients.where((p) => p.id != null).map((p) => p.id!).toList();
       final svcMap = <int, List<PatientService>>{};
 
       if (ids.isNotEmpty) {
@@ -154,7 +152,8 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
     );
     if (picked != null) {
       setState(
-          () => _startDate = DateTime(picked.year, picked.month, picked.day));
+        () => _startDate = DateTime(picked.year, picked.month, picked.day),
+      );
       _filterPatients();
     }
   }
@@ -168,14 +167,17 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
       lastDate: DateTime(2100),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: scheme.primary),
+          colorScheme: ColorScheme.light(
+            primary: scheme.primary,
+          ),
         ),
         child: child!,
       ),
     );
     if (picked != null) {
       setState(
-          () => _endDate = DateTime(picked.year, picked.month, picked.day));
+        () => _endDate = DateTime(picked.year, picked.month, picked.day),
+      );
       _filterPatients();
     }
   }
@@ -222,11 +224,13 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
         content: const Text('هل تريد حذف سجل المريض؟'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('إلغاء')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('إلغاء'),
+          ),
           ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('حذف')),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('حذف'),
+          ),
         ],
       ),
     );
@@ -258,7 +262,12 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/كشف-اسماء-المرضى.xlsx');
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles(files: [XFile(file.path)], text: 'ملف المرضى المحفوظ');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        text: 'ملف المرضى المحفوظ',
+      ),
+    );
   }
 
   Future<void> _downloadFile() async {
@@ -316,8 +325,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
       grouped.putIfAbsent(key, () => []).add(p);
     }
     final groups = grouped.values.toList()
-      ..sort((a, b) =>
-          b.first.registerDate.compareTo(a.first.registerDate)); // الأحدث أولاً
+      ..sort(
+        (a, b) => b.first.registerDate.compareTo(a.first.registerDate),
+      ); // الأحدث أولاً
     final uniqueCount = grouped.length;
     final casesCount = _filteredPatients.length;
 
@@ -327,19 +337,25 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
         title: const Text('قائمة المرضى'),
         actions: [
           IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: _shareFile,
-              tooltip: 'مشاركة'),
+            icon: const Icon(Icons.share),
+            onPressed: _shareFile,
+            tooltip: 'مشاركة',
+          ),
           IconButton(
-              icon: const Icon(Icons.download),
-              onPressed: _downloadFile,
-              tooltip: 'تنزيل'),
+            icon: const Icon(Icons.download),
+            onPressed: _downloadFile,
+            tooltip: 'تنزيل',
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const NewPatientScreen()));
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const NewPatientScreen(),
+            ),
+          );
           await _loadPatients();
         },
         icon: const Icon(Icons.add),
@@ -401,8 +417,10 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
 
               // الإحصائيات (NeuCard)
               NeuCard(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -411,7 +429,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                       style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
-                        color: scheme.onSurface.withValues(alpha: .9),
+                        color: scheme.onSurface.withValues(
+                          alpha: .9,
+                        ),
                       ),
                     ),
                     Text(
@@ -419,7 +439,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                       style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
-                        color: scheme.onSurface.withValues(alpha: .9),
+                        color: scheme.onSurface.withValues(
+                          alpha: .9,
+                        ),
                       ),
                     ),
                   ],
@@ -441,9 +463,10 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
 
                   final allSvcs = grp
                       .where((pp) => pp.id != null)
-                      .expand((pp) =>
-                          _servicesByPatient[pp.id!] ??
-                          const <PatientService>[])
+                      .expand(
+                        (pp) => _servicesByPatient[pp.id!] ??
+                            const <PatientService>[],
+                      )
                       .toList();
 
                   final svcSummary = _summarizeServices(allSvcs);
@@ -457,7 +480,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: NeuCard(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 6),
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       child: ListTile(
                         onTap: () {
                           // إذا مجموعة>1 → شاشة المكرّرات، وإلا شاشة عرض المريض
@@ -477,7 +502,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ViewPatientScreen(patient: p),
+                                builder: (_) => ViewPatientScreen(
+                                  patient: p,
+                                ),
                               ),
                             ).then((_) => _loadPatients());
                           }
@@ -495,17 +522,22 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                         ),
                         title: Text(
                           p.name,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         subtitle: Text(
                           '$diagnosis  •  خدمات: $svcSummary  •  الإجمالي: ${totalCost.toStringAsFixed(2)}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: .75)),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(
+                                  alpha: .75,
+                                ),
+                          ),
                         ),
                         trailing: PopupMenuButton<String>(
                           icon: const Icon(Icons.more_vert),
@@ -517,7 +549,8 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text('لا يوجد رقم هاتف')),
+                                      content: Text('لا يوجد رقم هاتف'),
+                                    ),
                                   );
                                 }
                                 break;
@@ -538,8 +571,9 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          EditPatientScreen(patient: p),
+                                      builder: (_) => EditPatientScreen(
+                                        patient: p,
+                                      ),
                                     ),
                                   );
                                   await _loadPatients();

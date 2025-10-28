@@ -107,7 +107,11 @@ class _ActivationScreenState extends State<ActivationScreen> {
   }
 
   Future<void> _shareCode() async {
-    await Share.share('السيريال الخاص بي: $serialCode');
+    await SharePlus.instance.share(
+      ShareParams(
+        text: 'السيريال الخاص بي: $serialCode',
+      ),
+    );
   }
 
   Future<void> _refreshSerialCode() async {

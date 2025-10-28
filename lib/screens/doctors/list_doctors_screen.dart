@@ -11,8 +11,8 @@ import 'package:aelmamclinic/core/neumorphism.dart';
 import 'package:aelmamclinic/models/doctor.dart';
 import 'package:aelmamclinic/services/db_service.dart';
 import 'package:aelmamclinic/services/export_service.dart';
-import 'edit_doctor_screen.dart';
-import 'view_doctor_screen.dart';
+import 'package:aelmamclinic/screens/doctors/edit_doctor_screen.dart';
+import 'package:aelmamclinic/screens/doctors/view_doctor_screen.dart';
 
 class ListDoctorsScreen extends StatefulWidget {
   const ListDoctorsScreen({super.key});
@@ -42,6 +42,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
 
   Future<void> _loadDoctors() async {
     final doctorsList = await DBService.instance.getAllDoctors();
+    if (!mounted) return;
     setState(() {
       _doctors = doctorsList;
       _filteredDoctors = doctorsList;
@@ -69,6 +70,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('لا يمكن إجراء المكالمة')),
       );
@@ -77,6 +79,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
 
   Future<void> _shareDoctorsFile() async {
     if (_filteredDoctors.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('لا توجد بيانات للمشاركة')),
       );
@@ -87,8 +90,14 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/قائمة-الأطباء.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(files: [XFile(file.path)], text: 'قائمة الأطباء');
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'قائمة الأطباء',
+        ),
+      );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
       );
@@ -97,6 +106,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
 
   Future<void> _downloadDoctorsFile() async {
     if (_filteredDoctors.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('لا توجد بيانات للتنزيل')),
       );
@@ -107,10 +117,12 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
       final dir = await getApplicationDocumentsDirectory();
       final path = '${dir.path}/قائمة-الأطباء.xlsx';
       await File(path).writeAsBytes(bytes);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('تم التنزيل إلى: $path')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء التنزيل: $e')),
       );
@@ -183,7 +195,9 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
 
                           return NeuCard(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                             child: ListTile(
                               contentPadding: EdgeInsets.zero,
                               onTap: () {
@@ -196,7 +210,9 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                               },
                               leading: Container(
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor.withValues(alpha: .10),
+                                  color: kPrimaryColor.withValues(
+                                    alpha: .10,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(10),
@@ -215,7 +231,9 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                               subtitle: Text(
                                 d.specialization,
                                 style: TextStyle(
-                                  color: scheme.onSurface.withValues(alpha: .65),
+                                  color: scheme.onSurface.withValues(
+                                    alpha: .65,
+                                  ),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -246,8 +264,11 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                                     value: 'delete',
                                     child: Row(
                                       children: const [
-                                        Icon(Icons.delete_rounded,
-                                            size: 20, color: Colors.red),
+                                        Icon(
+                                          Icons.delete_rounded,
+                                          size: 20,
+                                          color: Colors.red,
+                                        ),
                                         SizedBox(width: 8),
                                         Text('حذف'),
                                       ],
@@ -261,9 +282,11 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
                                         _makePhoneCall(d.phoneNumber);
                                       } else {
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                                content:
-                                                    Text('لا يوجد رقم هاتف')));
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text('لا يوجد رقم هاتف'),
+                                          ),
+                                        );
                                       }
                                       break;
                                     case 'edit':

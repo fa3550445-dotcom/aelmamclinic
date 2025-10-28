@@ -55,7 +55,7 @@ class Doctor {
     if (v == null) return fallback;
     final s = v.toString();
     return s.isEmpty ? fallback : s;
-    }
+  }
 
   static String? _toStrN(dynamic v) {
     final s = _toStr(v, '');
@@ -145,4 +145,3 @@ class Doctor {
         printCounter,
       );
 }
-

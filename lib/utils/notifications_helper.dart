@@ -191,8 +191,8 @@ class NotificationsHelper {
 
   /// إلغاء إشعار صنف محدّد
   Future<void> cancelForItem(Item item) async {
-    final info = _extractItemInfo(item);
-    await _fln.cancel(info.\$1);
+    final (notificationId, _, _) = _extractItemInfo(item);
+    await _fln.cancel(notificationId);
   }
 
   /// إلغاء جميع الإشعارات

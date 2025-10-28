@@ -181,7 +181,12 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
     final dir = await getTemporaryDirectory();
     final file = await PrescriptionPdfService.saveTempFile(bytes, dir);
 
-    await Share.shareXFiles(files: [XFile(file.path)], text: 'قائمة الوصفات');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        text: 'قائمة الوصفات',
+      ),
+    );
   }
 
   /*──────────────── الواجهة ────────────────*/
@@ -361,8 +366,8 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
                                       contentPadding: EdgeInsets.zero,
                                       leading: Container(
                                         decoration: BoxDecoration(
-                                          color:
-                                              scheme.primary.withValues(alpha: .10),
+                                          color: scheme.primary
+                                              .withValues(alpha: .10),
                                           borderRadius:
                                               BorderRadius.circular(14),
                                         ),

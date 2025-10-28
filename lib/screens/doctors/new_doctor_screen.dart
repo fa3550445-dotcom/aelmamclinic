@@ -1,16 +1,12 @@
-// lib/screens/doctors/new_doctor_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
-import 'package:provider/provider.dart';
+
 import 'package:aelmamclinic/core/theme.dart';
 import 'package:aelmamclinic/core/neumorphism.dart';
 
 import 'package:aelmamclinic/models/doctor.dart';
-import 'package:aelmamclinic/models/account_user_summary.dart';
-import 'package:aelmamclinic/providers/auth_provider.dart';
 import 'package:aelmamclinic/services/db_service.dart';
-import 'package:aelmamclinic/services/auth_supabase_service.dart';
 import 'employee_search_dialog.dart';
 
 class NewDoctorScreen extends StatefulWidget {
@@ -28,11 +24,6 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
   final _phoneCtrl = TextEditingController();
 
   int? _selectedEmployeeId;
-  AccountUserSummary? _selectedAccount;
-  List<AccountUserSummary> _availableAccounts = const [];
-  bool _loadingAccounts = false;
-  final AuthSupabaseService _authService = AuthSupabaseService();
-  Map<String, dynamic>? _selectedEmployee;
 
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -43,14 +34,6 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
     _specializationCtrl.dispose();
     _phoneCtrl.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadAvailableAccounts();
-    });
   }
 
   String _formatTimeOfDay(TimeOfDay? time) {
@@ -67,146 +50,27 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
     );
   }
 
-  Future<void> _openEmployeePicker() async {
+  Future<void> _openEmployeeSearchDialog() async {
     final selectedEmployee = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (_) => const EmployeeSearchDialog(),
     );
 
-    if (selectedEmployee == null) return;
-
-    setState(() {
-      _selectedEmployee = Map<String, dynamic>.from(selectedEmployee);
-      _selectedEmployeeId = selectedEmployee['id'] as int?;
-      _doctorNameCtrl.text = (selectedEmployee['name'] ?? '').toString();
-      _specializationCtrl.text = (selectedEmployee['jobTitle'] ?? '').toString();
-      _phoneCtrl.text = (selectedEmployee['phoneNumber'] ?? '').toString();
-    });
-
-    final linkedUid = (selectedEmployee['userUid'] ??
-            selectedEmployee['user_uid'])
-        ?.toString()
-        .trim();
-    if (linkedUid == null || linkedUid.isEmpty) {
-      setState(() => _selectedAccount = null);
-      return;
-    }
-
-    final existing = _availableAccounts.firstWhere(
-      (a) => a.userUid == linkedUid,
-      orElse: () => AccountUserSummary(
-        userUid: linkedUid,
-        email: (selectedEmployee['email'] ?? '').toString(),
-        disabled: selectedEmployee['disabled'] == true,
-      ),
-    );
-
-    setState(() {
-      _selectedAccount = existing;
-    });
-  }
-
-  Future<void> _loadAvailableAccounts() async {
-    final accountId = context.read<AuthProvider>().accountId;
-    if (accountId == null || accountId.isEmpty) {
-      return;
-    }
-    setState(() => _loadingAccounts = true);
-    try {
-      final accounts = await _authService.listAccountUsersWithEmail(
-        accountId: accountId,
-        includeDisabled: false,
-      );
-      final linked = await DBService.instance.getDoctorUserUids();
-      final filtered = accounts.where((a) => !linked.contains(a.userUid)).toList();
-      if (!mounted) return;
+    if (selectedEmployee != null) {
       setState(() {
-        _availableAccounts = filtered;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذّر تحميل حسابات الموظفين: $e')),
-      );
-    } finally {
-      if (mounted) setState(() => _loadingAccounts = false);
-    }
-  }
-
-  Future<void> _pickAccount() async {
-    if (_loadingAccounts) return;
-    if (_availableAccounts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد حسابات متاحة غير مرتبطة بأطباء.')),
-      );
-      return;
-    }
-
-    final chosen = await showModalBottomSheet<AccountUserSummary>(
-      context: context,
-      builder: (ctx) {
-        final scheme = Theme.of(ctx).colorScheme;
-        return Directionality(
-          textDirection: ui.TextDirection.rtl,
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text('اختر حساب الموظف', style: TextStyle(fontWeight: FontWeight.w800)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.refresh_rounded),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _loadAvailableAccounts();
-                    },
-                  ),
-                ),
-                const Divider(height: 1),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _availableAccounts.length,
-                    itemBuilder: (context, index) {
-                      final acc = _availableAccounts[index];
-                      return ListTile(
-                        title: Text(acc.email.isEmpty ? acc.userUid : acc.email,
-                            style: const TextStyle(fontWeight: FontWeight.w700)),
-                        subtitle: acc.email.isEmpty
-                            ? Text(acc.userUid, style: TextStyle(color: scheme.onSurfaceVariant))
-                            : Text(acc.userUid, style: TextStyle(color: scheme.onSurfaceVariant)),
-                        trailing: const Icon(Icons.chevron_left_rounded),
-                        onTap: () => Navigator.pop(ctx, acc),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (chosen != null && mounted) {
-      setState(() {
-        _selectedAccount = chosen;
+        _selectedEmployeeId = selectedEmployee['id'] as int?;
+        _doctorNameCtrl.text = selectedEmployee['name'] ?? '';
+        _specializationCtrl.text = selectedEmployee['jobTitle'] ?? '';
+        _phoneCtrl.text = selectedEmployee['phoneNumber'] ?? '';
       });
     }
   }
 
   Future<void> _saveDoctor() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى ربط الطبيب بحساب موظف قبل الحفظ.')),
-      );
-      return;
-    }
 
     final newDoctor = Doctor(
       employeeId: _selectedEmployeeId,
-      userUid: _selectedAccount!.userUid,
       name: _doctorNameCtrl.text.trim(),
       specialization: _specializationCtrl.text.trim(),
       phoneNumber: _phoneCtrl.text.trim(),
@@ -251,92 +115,33 @@ class _NewDoctorScreenState extends State<NewDoctorScreen> {
               key: _formKey,
               child: ListView(
                 children: [
-                  // اختيار الحساب المرتبط
+                  // اختيار الموظف
                   NeuCard(
-                    onTap: _openEmployeePicker,
+                    onTap: _openEmployeeSearchDialog,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withValues(alpha: .10),
+                          color: kPrimaryColor.withOpacity(.10),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(10),
-                        child: const Icon(
-                          Icons.badge_rounded,
-                          color: kPrimaryColor,
-                        ),
+                        child:
+                            const Icon(Icons.badge_rounded, color: kPrimaryColor),
                       ),
                       title: Text(
-                        _selectedEmployee == null
-                            ? 'اختيار الموظف'
-                            : (_selectedEmployee!['name']?.toString().isNotEmpty ?? false)
-                                ? _selectedEmployee!['name'].toString()
-                                : 'موظف رقم ${_selectedEmployeeId ?? ''}',
+                        _selectedEmployeeId != null
+                            ? 'تم اختيار الموظف (ID: $_selectedEmployeeId)'
+                            : 'اختر الموظف المرتبط بالطبيب',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
-                      subtitle: Text(
-                        _selectedEmployee == null
-                            ? 'اضغط لاختيار الموظف لربط بياناته بالطبيب'
-                            : (_selectedEmployee!['jobTitle']?.toString().isNotEmpty ?? false)
-                                ? _selectedEmployee!['jobTitle'].toString()
-                                : (_selectedEmployeeId != null
-                                    ? 'معرّف الموظف: $_selectedEmployeeId'
-                                    : 'سيُستخدم اسم الموظف الحالي'),
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: .6),
-                          fontWeight: FontWeight.w600,
-                        ),
+                      subtitle: const Text(
+                        'اضغط لاختيار الموظف من القائمة',
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      trailing: const Icon(Icons.search_rounded),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  NeuCard(
-                    onTap: _pickAccount,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        decoration: BoxDecoration(
-                          color: kPrimaryColor.withValues(alpha: .10),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child: const Icon(Icons.account_circle_rounded, color: kPrimaryColor),
-                      ),
-                      title: Text(
-                        _selectedAccount == null
-                            ? 'ربطه بحساب'
-                            : (_selectedAccount!.email.isNotEmpty
-                                ? _selectedAccount!.email
-                                : _selectedAccount!.userUid),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      subtitle: Text(
-                        _loadingAccounts
-                            ? 'جارٍ تحميل الحسابات…'
-                            : _availableAccounts.isEmpty
-                                ? 'لا توجد حسابات موظفين متاحة للربط'
-                                : 'اضغط لاختيار حساب الموظف المرتبط بهذا الطبيب',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .6),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      trailing: _loadingAccounts
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.chevron_left_rounded),
+                      trailing: const Icon(Icons.chevron_left_rounded),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -443,7 +248,7 @@ class _TimePickerCard extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         leading: Container(
           decoration: BoxDecoration(
-            color: kPrimaryColor.withValues(alpha: .10),
+            color: kPrimaryColor.withOpacity(.10),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(10),
@@ -456,7 +261,7 @@ class _TimePickerCard extends StatelessWidget {
         subtitle: Text(
           value,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .6),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -465,3 +270,4 @@ class _TimePickerCard extends StatelessWidget {
     );
   }
 }
+

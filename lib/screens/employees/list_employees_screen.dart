@@ -12,9 +12,9 @@ import 'package:aelmamclinic/core/tbian_ui.dart';
 
 import 'package:aelmamclinic/services/db_service.dart';
 import 'package:aelmamclinic/services/export_service.dart';
-import 'view_employee_screen.dart';
-import 'edit_employee_screen.dart';
-import 'new_employee_screen.dart';
+import 'package:aelmamclinic/screens/employees/view_employee_screen.dart';
+import 'package:aelmamclinic/screens/employees/edit_employee_screen.dart';
+import 'package:aelmamclinic/screens/employees/new_employee_screen.dart';
 
 class ListEmployeesScreen extends StatefulWidget {
   const ListEmployeesScreen({super.key});
@@ -47,6 +47,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
     setState(() => _loading = true);
     try {
       final data = await DBService.instance.getAllEmployees();
+      if (!mounted) return;
       setState(() {
         _allEmployees = data;
         _filteredEmployees = data;
@@ -104,8 +105,12 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
       final filePath = '${dir.path}/قائمة-الموظفين.xlsx';
       final file = File(filePath);
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(files: [XFile(file.path)],
-          text: 'قائمة الموظفين المحفوظة');
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'قائمة الموظفين المحفوظة',
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,8 +154,9 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
         content: const Text('سيتم حذف الموظف نهائيًا، هل أنت متأكد؟'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('إلغاء')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('إلغاء'),
+          ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.delete_rounded),
@@ -274,7 +280,8 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                       child: Text(
                                         'لا توجد نتائج',
                                         style: TextStyle(
-                                          color: cs.onSurface.withValues(alpha: .6),
+                                          color: cs.onSurface
+                                              .withValues(alpha: .6),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -298,7 +305,8 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
 
                                     return NeuCard(
                                       margin: const EdgeInsets.symmetric(
-                                          vertical: 6),
+                                        vertical: 6,
+                                      ),
                                       child: ListTile(
                                         onTap: () async {
                                           await Navigator.push(
@@ -312,8 +320,9 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                         },
                                         leading: Container(
                                           decoration: BoxDecoration(
-                                            color:
-                                                kPrimaryColor.withValues(alpha: .10),
+                                            color: kPrimaryColor.withValues(
+                                              alpha: .10,
+                                            ),
                                             borderRadius:
                                                 BorderRadius.circular(12),
                                           ),
@@ -329,20 +338,24 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                         title: Text(
                                           name.isEmpty ? '—' : name,
                                           style: const TextStyle(
-                                              fontWeight: FontWeight.w800),
+                                            fontWeight: FontWeight.w800,
+                                          ),
                                         ),
                                         subtitle: Text(
                                           jobTitle.isEmpty
                                               ? (phone.isEmpty ? '—' : phone)
                                               : jobTitle,
                                           style: TextStyle(
-                                            color: cs.onSurface.withValues(alpha: .7),
+                                            color: cs.onSurface.withValues(
+                                              alpha: .7,
+                                            ),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                         trailing: PopupMenuButton<String>(
                                           icon: const Icon(
-                                              Icons.more_vert_rounded),
+                                            Icons.more_vert_rounded,
+                                          ),
                                           onSelected: (value) async {
                                             switch (value) {
                                               case 'call':
@@ -353,8 +366,10 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
                                                     const SnackBar(
-                                                        content: Text(
-                                                            'لا يوجد رقم هاتف للموظف')),
+                                                      content: Text(
+                                                        'لا يوجد رقم هاتف للموظف',
+                                                      ),
+                                                    ),
                                                   );
                                                 }
                                                 break;
@@ -364,7 +379,8 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                                   MaterialPageRoute(
                                                     builder: (_) =>
                                                         EditEmployeeScreen(
-                                                            empId: id),
+                                                      empId: id,
+                                                    ),
                                                   ),
                                                 );
                                                 await _loadEmployees();
@@ -379,9 +395,11 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                               value: 'call',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.phone_rounded,
-                                                      size: 20,
-                                                      color: cs.primary),
+                                                  Icon(
+                                                    Icons.phone_rounded,
+                                                    size: 20,
+                                                    color: cs.primary,
+                                                  ),
                                                   const SizedBox(width: 8),
                                                   const Text('اتصال'),
                                                 ],
@@ -391,9 +409,11 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                               value: 'edit',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.edit_rounded,
-                                                      size: 20,
-                                                      color: cs.primary),
+                                                  Icon(
+                                                    Icons.edit_rounded,
+                                                    size: 20,
+                                                    color: cs.primary,
+                                                  ),
                                                   const SizedBox(width: 8),
                                                   const Text('تعديل'),
                                                 ],
@@ -403,9 +423,11 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
                                               value: 'delete',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.delete_rounded,
-                                                      size: 20,
-                                                      color: Colors.red),
+                                                  Icon(
+                                                    Icons.delete_rounded,
+                                                    size: 20,
+                                                    color: Colors.red,
+                                                  ),
                                                   SizedBox(width: 8),
                                                   Text('حذف'),
                                                 ],

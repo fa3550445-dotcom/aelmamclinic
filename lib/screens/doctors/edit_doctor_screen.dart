@@ -75,9 +75,9 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
       id: widget.doctor.id,
       employeeId: widget.doctor.employeeId,
       userUid: widget.doctor.userUid,
-      name: widget.doctor.name,
-      specialization: widget.doctor.specialization,
-      phoneNumber: widget.doctor.phoneNumber,
+      name: _nameCtrl.text.trim(),
+      specialization: _specializationCtrl.text.trim(),
+      phoneNumber: _phoneCtrl.text.trim(),
       startTime: _formatTimeOfDay(_startTime),
       endTime: _formatTimeOfDay(_endTime),
     );

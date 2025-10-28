@@ -194,8 +194,14 @@ class _ListReturnsScreenState extends State<ListReturnsScreen> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/كشف-العودات.xlsx');
       await file.writeAsBytes(bytes);
-      await Share.shareXFiles(files: [XFile(file.path)], text: 'كشف العودات المحفوظ');
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'كشف العودات المحفوظ',
+        ),
+      );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
       );
@@ -213,6 +219,7 @@ class _ListReturnsScreenState extends State<ListReturnsScreen> {
       final bytes = await ExportService.exportReturnsToExcel(_filteredReturns);
       await saveExcelFile(bytes, 'كشف-العودات.xlsx');
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء التنزيل: $e')),
       );
