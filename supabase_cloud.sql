@@ -270,7 +270,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   can_manage boolean;
   employee_uid uuid;
 BEGIN
@@ -324,7 +324,7 @@ CREATE OR REPLACE FUNCTION "public"."admin_create_owner_full"("p_clinic_name" "t
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   owner_uid uuid;
   account_id uuid;
 BEGIN
@@ -373,7 +373,7 @@ CREATE OR REPLACE FUNCTION "public"."admin_delete_clinic"("p_account_id" "uuid")
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   deleted_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -407,7 +407,7 @@ CREATE OR REPLACE FUNCTION "public"."admin_list_clinics"() RETURNS TABLE("id" "u
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
 BEGIN
   IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
     RAISE EXCEPTION 'forbidden' USING errcode = '42501';
@@ -431,7 +431,7 @@ CREATE OR REPLACE FUNCTION "public"."admin_set_clinic_frozen"("p_account_id" "uu
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   updated_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -467,7 +467,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   normalized_email text := lower(coalesce(target_email, ''));
   target_uid uuid;
   target_account uuid;
@@ -3023,6 +3023,8 @@ CREATE TABLE IF NOT EXISTS "public"."patients" (
     "doctor_input" numeric DEFAULT 0 NOT NULL,
     "tower_share" numeric DEFAULT 0 NOT NULL,
     "department_share" numeric DEFAULT 0 NOT NULL,
+    "doctor_review_pending" boolean DEFAULT false NOT NULL,
+    "doctor_reviewed_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "is_deleted" boolean DEFAULT false NOT NULL

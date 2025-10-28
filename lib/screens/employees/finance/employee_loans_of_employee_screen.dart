@@ -165,7 +165,7 @@ class _EmployeeLoansOfEmployeeScreenState
         transactionType: "Loan",
         operation: "delete",
         amount: 0.0,
-        employeeId: widget.empId.toString(),
+        employeeId: widget.empId,
         description: "تم حذف سلفة (ID: $loanId) للموظف ${widget.empId}",
       );
 

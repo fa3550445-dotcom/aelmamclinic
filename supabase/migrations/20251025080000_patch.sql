@@ -460,7 +460,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
 BEGIN
   IF NOT (fn_is_super_admin() = true OR caller_email = lower(super_admin_email)) THEN
     RAISE EXCEPTION 'forbidden' USING errcode = '42501';
@@ -488,7 +488,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   updated_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -526,7 +526,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   deleted_id uuid;
 BEGIN
   IF p_account_id IS NULL THEN
@@ -565,7 +565,7 @@ AS $$
 DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   owner_uid uuid;
   account_id uuid;
 BEGIN
@@ -620,7 +620,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   can_manage boolean;
   employee_uid uuid;
 BEGIN
@@ -678,7 +678,7 @@ DECLARE
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub', '')::uuid;
   caller_email text := lower(coalesce(claims->>'email', ''));
-  super_admin_email text := 'admin@elmam.com';
+  super_admin_email text := 'aelmam.app@gmail.com';
   normalized_email text := lower(coalesce(target_email, ''));
   target_uid uuid;
   target_account uuid;

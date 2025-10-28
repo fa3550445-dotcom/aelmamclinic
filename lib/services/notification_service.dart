@@ -59,6 +59,11 @@ class NotificationService {
   static const String _returnsChannelName = 'تذكير العودات';
   static const String _returnsChannelDesc = 'إشعارات تذكير بمواعيد العودات';
 
+  static const String _patientsChannelId = 'patients_channel_id';
+  static const String _patientsChannelName = 'تنبيهات المرضى';
+  static const String _patientsChannelDesc =
+      'إشعارات الحالات المرضية الجديدة للأطباء';
+
   bool _initialized = false;
   bool get isReady => _initialized;
 
@@ -159,6 +164,17 @@ class NotificationService {
               _returnsChannelId,
               _returnsChannelName,
               description: _returnsChannelDesc,
+              importance: Importance.high,
+              playSound: true,
+              enableVibration: true,
+            ),
+          );
+
+          await androidImpl?.createNotificationChannel(
+            const AndroidNotificationChannel(
+              _patientsChannelId,
+              _patientsChannelName,
+              description: _patientsChannelDesc,
               importance: Importance.high,
               playSound: true,
               enableVibration: true,
@@ -334,6 +350,60 @@ class NotificationService {
       payload: payload,
       threadKey: payload,
     );
+  }
+
+  Future<void> showPatientAssignmentNotification({
+    required int patientId,
+    required String patientName,
+  }) async {
+    if (!_supportedPlatform) {
+      debugPrint('🔕 showPatientAssignmentNotification skipped (unsupported platform).');
+      return;
+    }
+    if (!_initialized) {
+      await initialize();
+      if (!_initialized) {
+        debugPrint(
+            '⚠️ showPatientAssignmentNotification skipped: NotificationService not initialized.');
+        return;
+      }
+    }
+
+    final android = AndroidNotificationDetails(
+      _patientsChannelId,
+      _patientsChannelName,
+      channelDescription: _patientsChannelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+      playSound: true,
+    );
+    const darwin = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    final details =
+        NotificationDetails(android: android, iOS: darwin, macOS: darwin);
+
+    final safeId = patientId.abs() % 1000000 + 100000;
+    final trimmedName = patientName.trim().isEmpty
+        ? 'مريض جديد'
+        : patientName.trim();
+    const title = 'حالة مرضية جديدة';
+    final body = 'تم إضافة المريض $trimmedName إلى حسابك الطبي.';
+
+    try {
+      await _flnp.show(
+        safeId,
+        title,
+        body,
+        details,
+        payload: 'patient:$patientId',
+      );
+    } catch (e) {
+      debugPrint('❌ showPatientAssignmentNotification error: $e');
+    }
   }
 
   Future<void> scheduleNotification({

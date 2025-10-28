@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS public.patients (
   doctor_input numeric NOT NULL DEFAULT 0,
   tower_share numeric NOT NULL DEFAULT 0,
   department_share numeric NOT NULL DEFAULT 0,
+  doctor_review_pending boolean NOT NULL DEFAULT false,
+  doctor_reviewed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   is_deleted boolean NOT NULL DEFAULT false

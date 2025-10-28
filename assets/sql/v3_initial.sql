@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS patients (
   doctorInput REAL DEFAULT 0,
   towerShare REAL DEFAULT 0,
   departmentShare REAL DEFAULT 0,
+  doctorReviewPending INTEGER NOT NULL DEFAULT 0,
+  doctorReviewedAt TEXT,
   isDeleted INTEGER NOT NULL DEFAULT 0,
   deletedAt TEXT,
   FOREIGN KEY (doctorId) REFERENCES doctors(id)

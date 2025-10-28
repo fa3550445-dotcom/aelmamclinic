@@ -56,6 +56,8 @@ import 'screens/repository/alerts/view_alerts_screen.dart';
 // للدردشة
 import 'screens/chat/chat_room_screen.dart';
 import 'models/chat_models.dart';
+import 'models/patient.dart';
+import 'screens/patients/view_patient_screen.dart';
 
 /*──────── الثيم/الثوابت ────────*/
 import 'core/theme.dart';
@@ -122,6 +124,38 @@ void main() {
         _navKey,
         chatRouteName: ChatRoomLoader.routeName,
       );
+      NotificationService.setOnNotificationTap((payload, response) async {
+        if (payload != null && payload.startsWith('patient:')) {
+          final parts = payload.split(':');
+          final id = parts.length > 1 ? int.tryParse(parts[1]) : null;
+          if (id != null) {
+            try {
+              final patient = await DBService.instance.getPatientById(id);
+              final navigator = _navKey.currentState;
+              if (patient != null && navigator != null) {
+                navigator.push(
+                  MaterialPageRoute(
+                    builder: (_) => ViewPatientScreen(patient: patient),
+                  ),
+                );
+              }
+            } catch (e) {
+              debugPrint('⚠️ فشل فتح المريض من الإشعار: $e');
+            }
+          }
+          return;
+        }
+
+        if (payload != null && payload.isNotEmpty &&
+            _navKey.currentState != null) {
+          try {
+            _navKey.currentState!
+                .pushNamed(ChatRoomLoader.routeName, arguments: payload);
+          } catch (e) {
+            debugPrint('⚠️ navigation on tap failed: $e');
+          }
+        }
+      });
 
       // اختبار إشعار في وضع التطوير
       if (kDebugMode) {
