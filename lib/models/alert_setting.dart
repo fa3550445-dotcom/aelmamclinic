@@ -1,4 +1,7 @@
 // lib/models/alert_setting.dart
+import 'package:aelmamclinic/domain/alerts/models/alert_settings.dart'
+    as alerts_domain;
+
 import 'item.dart';
 
 /// إعداد تنبيه قرب النفاد.
@@ -92,7 +95,7 @@ class AlertSetting {
       'is_enabled': isEnabled ? 1 : 0,
       'last_triggered': lastTriggered?.toIso8601String(),
       'notify_time': notifyTime?.toIso8601String(),
-      'item_uuid': itemUuid,
+      alerts_domain.AlertSettingsFields.itemUuid: itemUuid,
       'created_at': createdAt.toIso8601String(),
     };
     if (id != null && id! > 0) {
@@ -110,7 +113,9 @@ class AlertSetting {
     lastTriggered:
     _toDateN(map['last_triggered'] ?? map['lastTriggered']),
     notifyTime: _toDateN(map['notify_time'] ?? map['notifyTime']),
-    itemUuid: _toStrN(map['item_uuid'] ?? map['itemUuid']),
+    itemUuid: _toStrN(
+        map[alerts_domain.AlertSettingsFields.itemUuid] ??
+            map[alerts_domain.AlertSettingsFields.itemUuidCamel]),
     createdAt:
     _toDateN(map['created_at'] ?? map['createdAt']) ?? DateTime.now(),
   );

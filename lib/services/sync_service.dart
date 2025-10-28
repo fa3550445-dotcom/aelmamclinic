@@ -8,6 +8,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:postgrest/postgrest.dart' show PostgrestException;
 import 'package:uuid/enums.dart';
 import 'package:uuid/uuid.dart';
+import 'package:aelmamclinic/data/sync/alert_settings_sync_service.dart';
 import 'package:aelmamclinic/services/db_service.dart';
 
 /// كلاس مساعد اختياري لتحويل الحقول عند الدفع/السحب.
@@ -466,91 +467,8 @@ class SyncService {
     ),
 
     'alert_settings': EntityMapper(
-      toCloudMap: (local) {
-        final out = <String, dynamic>{}..addAll(local);
-
-        DateTime? parseDate(dynamic v) {
-          if (v == null) return null;
-          if (v is DateTime) return v.toUtc();
-          final s = v.toString().trim();
-          if (s.isEmpty) return null;
-          return DateTime.tryParse(s)?.toUtc();
-        }
-
-        final notify = parseDate(out['notify_time'] ?? out['notifyTime']);
-        if (notify != null) {
-          out['notify_time'] = notify.toIso8601String();
-        } else if (out.containsKey('notify_time') &&
-            out['notify_time'] is! String) {
-          out['notify_time'] = null;
-        }
-        out.remove('notifyTime');
-
-        final last = parseDate(out['last_triggered'] ?? out['lastTriggered']);
-        if (last != null) {
-          out['last_triggered'] = last.toIso8601String();
-        }
-        out.remove('lastTriggered');
-
-        final dynamic rawUuid =
-            out.containsKey('item_uuid') ? out['item_uuid'] : out['itemUuid'];
-        if (rawUuid is String) {
-          final trimmed = rawUuid.trim();
-          out['item_uuid'] = trimmed.isEmpty ? null : trimmed;
-        } else if (rawUuid == null && out.containsKey('item_uuid')) {
-          out['item_uuid'] = null;
-        }
-        out.remove('itemUuid');
-
-        return out;
-      },
-      fromCloudMap: (remote, allowedCols) {
-        final out = <String, dynamic>{}..addAll(remote);
-
-        DateTime? parseDate(dynamic v) {
-          if (v == null) return null;
-          if (v is DateTime) return v.toUtc();
-          final s = v.toString().trim();
-          if (s.isEmpty) return null;
-          return DateTime.tryParse(s)?.toUtc();
-        }
-
-        void normalizeDate(String snakeKey) {
-          if (!out.containsKey(snakeKey)) return;
-          final parsed = parseDate(out[snakeKey]);
-          if (parsed != null) {
-            out[snakeKey] = parsed.toIso8601String();
-          }
-        }
-
-        normalizeDate('notify_time');
-        normalizeDate('last_triggered');
-
-        bool looksLikeUuid(String s) {
-          const uuidPattern = r'^[0-9a-fA-F-]{32,36}$';
-          if (!RegExp(uuidPattern).hasMatch(s)) return false;
-          return s.contains('-');
-        }
-
-        String? normalizeUuid(dynamic v) {
-          if (v == null) return null;
-          final s = v.toString().trim();
-          if (s.isEmpty) return null;
-          return looksLikeUuid(s) ? s : null;
-        }
-
-        final normalizedUuid = normalizeUuid(
-          out['item_uuid'] ?? out['itemUuid'] ?? out['item_id'],
-        );
-        if (normalizedUuid != null) {
-          out['item_uuid'] = normalizedUuid;
-          if (allowedCols.contains('itemUuid')) {
-            out['itemUuid'] = normalizedUuid;
-          }
-        }
-
-        return out;
-      },
+      toCloudMap: AlertSettingsSyncService.toCloudMap,
+      fromCloudMap: AlertSettingsSyncService.fromCloudMap,
     ),
 
     // doctors: تحويل HH:mm إلى timestamptz متوافق عند الدفع، والعكس عند السحب.
