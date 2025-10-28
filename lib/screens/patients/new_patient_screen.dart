@@ -403,18 +403,23 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
       linked = await DBService.instance.getDoctorByUserUid(uid);
     }
 
-    final result = (linked != null && linked.id != null)
-        ? docs.where((d) => d.id == linked!.id).toList()
-        : docs;
+    final List<Doctor> result;
+    if (linked != null && linked.id != null) {
+      final linkedDoctor = linked!;
+      result = docs.where((d) => d.id == linkedDoctor.id).toList();
+    } else {
+      result = docs;
+    }
 
     _cachedDoctors = result;
     _linkedDoctor = linked;
 
     if (linked != null && linked.id != null && mounted) {
+      final linkedDoctor = linked!;
+      final selectedName = 'د/${linkedDoctor.name}';
       setState(() {
         if (_selectedDoctorId == null) {
-          final selectedName = 'د/${linked.name}';
-          _selectedDoctorId = linked!.id;
+          _selectedDoctorId = linkedDoctor.id!;
           _selectedDoctorName = selectedName;
           _doctorCtrl.text = selectedName;
         }

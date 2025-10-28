@@ -181,7 +181,7 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
     final dir = await getTemporaryDirectory();
     final file = await PrescriptionPdfService.saveTempFile(bytes, dir);
 
-    await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'قائمة الوصفات');
+    await Share.shareXFiles(files: [XFile(file.path)], text: 'قائمة الوصفات');
   }
 
   /*──────────────── الواجهة ────────────────*/

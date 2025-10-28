@@ -104,7 +104,7 @@ class _ListEmployeesScreenState extends State<ListEmployeesScreen> {
       final filePath = '${dir.path}/قائمة-الموظفين.xlsx';
       final file = File(filePath);
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.shareXFiles(files: [XFile(file.path)],
+      await Share.shareXFiles(files: [XFile(file.path)],
           text: 'قائمة الموظفين المحفوظة');
     } catch (e) {
       if (!mounted) return;

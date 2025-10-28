@@ -87,7 +87,7 @@ class _ListDoctorsScreenState extends State<ListDoctorsScreen> {
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/قائمة-الأطباء.xlsx');
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.shareXFiles(files: [XFile(file.path)], text: 'قائمة الأطباء');
+      await Share.shareXFiles(files: [XFile(file.path)], text: 'قائمة الأطباء');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء المشاركة: $e')),
