@@ -2163,7 +2163,7 @@ class SyncService {
         final dynamic rawLocalId = raw['local_id'];
         final int? rawLocalInt =
             rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
-        int localId = rawLocalInt ?? 0;
+        final int sourceLocalId = rawLocalInt ?? 0;
 
         final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
         final String remoteDeviceId =
@@ -2171,7 +2171,6 @@ class SyncService {
 
         final String? remoteUpdatedAt =
             (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
-        final String remoteUuid = (raw['id'] ?? '').toString();
 
         int? localId = await _findLocalRowIdByTriple(
           table: localTable,
@@ -2189,11 +2188,13 @@ class SyncService {
           }
         }
 
-        final String remoteId = (raw['id'] ?? '').toString();
-        if (remoteId.isNotEmpty && localId > 0) {
+        final int resolvedLocalId = localId ?? sourceLocalId;
+
+        final String remoteId = remoteUuid ?? '';
+        if (remoteId.isNotEmpty && resolvedLocalId > 0) {
           await _cacheRemoteMapping(
             remoteTable,
-            localPk: localId,
+            localPk: resolvedLocalId,
             remoteId: remoteId,
             remoteDeviceId: remoteDeviceId,
             remoteLocalId: rawLocalInt,
@@ -2226,15 +2227,15 @@ class SyncService {
           filtered[updCol] = remoteUpdatedAt;
         }
 
-        await _upsertLocalNonDestructive(localTable, filtered, id: localId);
+        await _upsertLocalNonDestructive(localTable, filtered, id: resolvedLocalId);
 
         if (remoteUuid != null && remoteUuid.isNotEmpty) {
           final int syncLocal = (rawLocalId is num)
               ? rawLocalId.toInt()
-              : int.tryParse('$rawLocalId') ?? localId;
+              : int.tryParse('$rawLocalId') ?? resolvedLocalId;
           await _saveUuidMapping(
             table: remoteTable,
-            recordId: localId,
+            recordId: resolvedLocalId,
             uuid: remoteUuid,
             device: _normalizeDeviceId(remoteDeviceId),
             local: syncLocal,
@@ -2382,7 +2383,7 @@ class SyncService {
         final dynamic rawLocalId = raw['local_id'];
         final int? rawLocalInt =
             rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
-        int localId = rawLocalInt ?? 0;
+        final int sourceLocalId = rawLocalInt ?? 0;
 
         final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
         final String remoteDeviceId =
@@ -2390,7 +2391,6 @@ class SyncService {
 
         final String? remoteUpdatedAt =
             (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
-        final String remoteUuid = (raw['id'] ?? '').toString();
 
         int? localId = await _findLocalRowIdByTriple(
           table: localTable,
@@ -2408,11 +2408,13 @@ class SyncService {
           }
         }
 
-        final String remoteId = (raw['id'] ?? '').toString();
-        if (remoteId.isNotEmpty && localId > 0) {
+        final int resolvedLocalId = localId ?? sourceLocalId;
+
+        final String remoteId = remoteUuid ?? '';
+        if (remoteId.isNotEmpty && resolvedLocalId > 0) {
           await _cacheRemoteMapping(
             remoteTable,
-            localPk: localId,
+            localPk: resolvedLocalId,
             remoteId: remoteId,
             remoteDeviceId: remoteDeviceId,
             remoteLocalId: rawLocalInt,
@@ -2471,15 +2473,15 @@ class SyncService {
           filtered[updCol] = remoteUpdatedAt;
         }
 
-        await _upsertLocalNonDestructive(localTable, filtered, id: localId);
+        await _upsertLocalNonDestructive(localTable, filtered, id: resolvedLocalId);
 
         if (remoteUuid != null && remoteUuid.isNotEmpty) {
           final int syncLocal = (rawLocalId is num)
               ? rawLocalId.toInt()
-              : int.tryParse('$rawLocalId') ?? localId;
+              : int.tryParse('$rawLocalId') ?? resolvedLocalId;
           await _saveUuidMapping(
             table: remoteTable,
-            recordId: localId,
+            recordId: resolvedLocalId,
             uuid: remoteUuid,
             device: _normalizeDeviceId(remoteDeviceId),
             local: syncLocal,
@@ -2604,7 +2606,7 @@ class SyncService {
     final dynamic rawLocalId = raw['local_id'];
     final int? rawLocalInt =
         rawLocalId is num ? rawLocalId.toInt() : int.tryParse(rawLocalId.toString());
-    int localId = rawLocalInt ?? 0;
+    final int sourceLocalId = rawLocalInt ?? 0;
 
     final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
     final String remoteDeviceId =
@@ -2612,7 +2614,6 @@ class SyncService {
 
     final String? remoteUpdatedAt =
         (raw['updated_at'] ?? '').toString().isNotEmpty ? raw['updated_at'].toString() : null;
-    final String remoteUuid = (raw['id'] ?? '').toString();
 
     int? localId = await _findLocalRowIdByTriple(
       table: localTable,
@@ -2630,11 +2631,13 @@ class SyncService {
       }
     }
 
-    final String remoteId = (raw['id'] ?? '').toString();
-    if (remoteId.isNotEmpty && localId > 0) {
+    final int resolvedLocalId = localId ?? sourceLocalId;
+
+    final String remoteId = remoteUuid ?? '';
+    if (remoteId.isNotEmpty && resolvedLocalId > 0) {
       await _cacheRemoteMapping(
         remoteTable,
-        localPk: localId,
+        localPk: resolvedLocalId,
         remoteId: remoteId,
         remoteDeviceId: remoteDeviceId,
         remoteLocalId: rawLocalInt,
@@ -2695,15 +2698,15 @@ class SyncService {
       filtered[updCol] = remoteUpdatedAt;
     }
 
-    await _upsertLocalNonDestructive(localTable, filtered, id: localId);
+    await _upsertLocalNonDestructive(localTable, filtered, id: resolvedLocalId);
 
     if (remoteUuid != null && remoteUuid.isNotEmpty) {
       final int syncLocal = (rawLocalId is num)
           ? rawLocalId.toInt()
-          : int.tryParse('$rawLocalId') ?? localId;
+          : int.tryParse('$rawLocalId') ?? resolvedLocalId;
       await _saveUuidMapping(
         table: remoteTable,
-        recordId: localId,
+        recordId: resolvedLocalId,
         uuid: remoteUuid,
         device: _normalizeDeviceId(remoteDeviceId),
         local: syncLocal,
@@ -2736,7 +2739,6 @@ class SyncService {
     final String remoteDeviceIdRaw = (raw['device_id'] ?? '').toString().trim();
     final String remoteDeviceId =
         remoteDeviceIdRaw.isEmpty ? _safeDeviceId : remoteDeviceIdRaw;
-    final String remoteUuid = (raw['id'] ?? '').toString();
 
     int? localId = await _findLocalRowIdByTriple(
       table: localTable,
@@ -2754,7 +2756,9 @@ class SyncService {
       }
     }
 
-    if (localId == null) return;
+    final int resolvedLocalId = localId ?? sourceLocalId;
+
+    if (resolvedLocalId <= 0) return;
 
     // لو الجدول يدعم الحذف المنطقي محليًا، علِّمه محذوفًا، وإلا احذف فعليًا
     if (allowedCols.contains('isDeleted')) {
@@ -2765,7 +2769,7 @@ class SyncService {
           if (allowedCols.contains('deletedAt')) 'deletedAt': DateTime.now().toIso8601String(),
         },
         where: 'id = ?',
-        whereArgs: [localId],
+        whereArgs: [resolvedLocalId],
       );
     } else if (allowedCols.contains('is_deleted')) {
       await _db.update(
@@ -2775,22 +2779,22 @@ class SyncService {
           if (allowedCols.contains('deleted_at')) 'deleted_at': DateTime.now().toIso8601String(),
         },
         where: 'id = ?',
-        whereArgs: [localId],
+        whereArgs: [resolvedLocalId],
       );
     } else {
-      await _db.delete(localTable, where: 'id = ?', whereArgs: [localId]);
+      await _db.delete(localTable, where: 'id = ?', whereArgs: [resolvedLocalId]);
     }
 
     if (remoteUuid != null && remoteUuid.isNotEmpty) {
       await _deleteUuidMapping(
         table: localTable,
-        recordId: localId,
+        recordId: resolvedLocalId,
         uuid: remoteUuid,
       );
     } else {
       await _deleteUuidMapping(
         table: localTable,
-        recordId: localId,
+        recordId: resolvedLocalId,
       );
     }
   }
