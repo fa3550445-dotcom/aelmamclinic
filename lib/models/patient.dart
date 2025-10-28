@@ -30,7 +30,9 @@ class Patient {
     doctorShare REAL DEFAULT 0,
     doctorInput REAL DEFAULT 0,
     towerShare REAL DEFAULT 0,
-    departmentShare REAL DEFAULT 0
+    departmentShare REAL DEFAULT 0,
+    doctorReviewPending INTEGER NOT NULL DEFAULT 0,
+    doctorReviewedAt TEXT
   );
   ''';
 
@@ -188,6 +190,8 @@ class Patient {
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient.fromMap(json);
 
+  factory Patient.fromSupabase(Map<String, dynamic> map) => Patient.fromMap(map);
+
   /*──────────── إلى Map (لـ SQLite؛ SyncService سيحوّل للسحابة) ────────────*/
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -252,6 +256,8 @@ class Patient {
   }..removeWhere((k, v) => v == null);
 
   /*──────────── JSON عام — نُعيد خريطة السحابة افتراضيًا ────────────*/
+  Map<String, dynamic> toSupabase() => toCloudMap();
+
   Map<String, dynamic> toJson() => toCloudMap();
 
   Patient copyWith({
