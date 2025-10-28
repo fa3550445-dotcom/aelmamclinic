@@ -276,7 +276,7 @@ class _EmployeeDiscountCreateScreenState
         transactionType: "Discount",
         operation: "create",
         amount: discount,
-        employeeId: widget.empId.toString(),
+        employeeId: widget.empId,
         description:
             "تم إنشاء خصم للموظف رقم ${widget.empId}، مبلغ: ${discount.toStringAsFixed(2)}",
       );

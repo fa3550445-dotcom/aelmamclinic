@@ -509,7 +509,7 @@ class _CreateSalaryPaymentScreenState extends State<CreateSalaryPaymentScreen> {
       transactionType: "Salary",
       operation: "create",
       amount: 0.0,
-      employeeId: empId.toString(),
+      employeeId: empId,
       description: "تم صرف الراتب للموظف رقم $empId",
     );
   }

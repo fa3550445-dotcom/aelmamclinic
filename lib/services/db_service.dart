@@ -201,7 +201,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 29, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
+      version: 30, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -297,7 +297,7 @@ class DBService {
     try {
       final cols = await db.rawQuery("PRAGMA table_info(alert_settings)");
       bool has(String name) => cols.any((c) =>
-      ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
+          ((c['name'] ?? '') as String).toLowerCase() == name.toLowerCase());
 
       // الأعمدة (camel + snake)
       Future<void> _ensureColumn(String name, String ddl) async {
@@ -371,6 +371,85 @@ class DBService {
       ''');
     } catch (e) {
       print('ensureAlertSettingsColumns: $e');
+    }
+  }
+
+  Future<void> _relaxFinancialLogsEmployeeId(Database db) async {
+    try {
+      final info = await db.rawQuery('PRAGMA table_info(financial_logs)');
+      Map<String, Object?>? employeeCol;
+      for (final row in info) {
+        final name = (row['name'] ?? '').toString();
+        if (name.toLowerCase() == 'employee_id') {
+          employeeCol = row;
+          break;
+        }
+      }
+
+      if (employeeCol == null) return;
+      final notNullFlag = int.tryParse('${employeeCol['notnull'] ?? 0}') ?? 0;
+      if (notNullFlag == 0) return;
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS financial_logs_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          transaction_type     TEXT NOT NULL,
+          operation            TEXT NOT NULL DEFAULT 'create',
+          amount               REAL NOT NULL,
+          employee_id          TEXT,
+          description          TEXT,
+          modification_details TEXT,
+          timestamp            TEXT NOT NULL,
+          isDeleted            INTEGER NOT NULL DEFAULT 0,
+          deletedAt            TEXT,
+          account_id           TEXT,
+          device_id            TEXT,
+          local_id             INTEGER,
+          updated_at           TEXT
+        );
+      ''');
+
+      final availableCols = info
+          .map((row) => (row['name'] ?? '').toString())
+          .where((name) => name.isNotEmpty)
+          .toSet();
+
+      const desiredCols = <String>[
+        'id',
+        'transaction_type',
+        'operation',
+        'amount',
+        'employee_id',
+        'description',
+        'modification_details',
+        'timestamp',
+        'isDeleted',
+        'deletedAt',
+        'account_id',
+        'device_id',
+        'local_id',
+        'updated_at',
+      ];
+
+      final copyCols =
+          desiredCols.where((col) => availableCols.contains(col)).toList();
+
+      if (copyCols.isNotEmpty) {
+        final cols = copyCols.join(', ');
+        await db.execute('''
+          INSERT INTO financial_logs_new ($cols)
+          SELECT $cols FROM financial_logs;
+        ''');
+      }
+
+      await db.execute('DROP TABLE financial_logs;');
+      await db
+          .execute('ALTER TABLE financial_logs_new RENAME TO financial_logs;');
+
+      await _ensureSoftDeleteColumns(db);
+      await _ensureSyncMetaColumns(db);
+    } catch (e) {
+      print('relaxFinancialLogsEmployeeId: $e');
     }
   }
 
@@ -764,7 +843,6 @@ class DBService {
     phoneNumber TEXT,
     startTime TEXT,
     endTime TEXT,
-    userUid TEXT,
     printCounter INTEGER DEFAULT 0
   );
 ''');
@@ -865,10 +943,16 @@ class DBService {
     transaction_type     TEXT NOT NULL,
     operation            TEXT NOT NULL DEFAULT 'create',
     amount               REAL NOT NULL,
-    employee_id          TEXT NOT NULL,
+    employee_id          TEXT,
     description          TEXT,
     modification_details TEXT,
-    timestamp            TEXT NOT NULL
+    timestamp            TEXT NOT NULL,
+    isDeleted            INTEGER NOT NULL DEFAULT 0,
+    deletedAt            TEXT,
+    account_id           TEXT,
+    device_id            TEXT,
+    local_id             INTEGER,
+    updated_at           TEXT
   );
 ''');
 
@@ -1035,11 +1119,19 @@ class DBService {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS financial_logs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          transaction_type TEXT NOT NULL,
-          amount           REAL NOT NULL,
-          employee_id      TEXT NOT NULL,
-          description      TEXT,
-          timestamp        TEXT NOT NULL
+          transaction_type     TEXT NOT NULL,
+          operation            TEXT NOT NULL DEFAULT 'create',
+          amount               REAL NOT NULL,
+          employee_id          TEXT,
+          description          TEXT,
+          modification_details TEXT,
+          timestamp            TEXT NOT NULL,
+          isDeleted            INTEGER NOT NULL DEFAULT 0,
+          deletedAt            TEXT,
+          account_id           TEXT,
+          device_id            TEXT,
+          local_id             INTEGER,
+          updated_at           TEXT
         );
       ''');
     }
@@ -1056,6 +1148,10 @@ class DBService {
       await _addColumnIfMissing(db, 'consumptions', 'itemId', 'TEXT');
       await _addColumnIfMissing(db, 'consumptions', 'quantity', 'INTEGER DEFAULT 0');
       await db.execute(Attachment.createTable);
+    }
+
+    if (oldVersion < 30) {
+      await _relaxFinancialLogsEmployeeId(db);
     }
 
     if (oldVersion < 21) {

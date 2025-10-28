@@ -16,7 +16,8 @@ class LoggingService {
   /// [transactionType]: نوع المعاملة الأساسي مثل "Salary"، "Discount"، "Loan"، "Consumption"، إلخ.
   /// [operation]: نوع العملية (مثلاً "create" لإنشاء معاملة جديدة، "update" لتعديلها، أو "delete" لحذفها).
   /// [amount]: مبلغ المعاملة.
-  /// [employeeId]: معرف الموظف كـ String (يمكن تعديله حسب تصميم نظامك).
+  /// [employeeId]: معرف الموظف المحلي (إن وجد). يمكن تركه فارغًا عند عدم ربط
+  /// المعاملة بموظف معيّن.
   /// [description]: وصف إضافي يوضح تفاصيل المعاملة.
   /// [modificationDetails]: تفاصيل إضافية في حال حدث تعديل (مثلاً القيمة القديمة والجديدة مع تاريخ التعديل).
   /// [dateTime]: توقيت المعاملة. إذا لم يُحدد يتم استخدام الوقت الحالي.
@@ -24,7 +25,7 @@ class LoggingService {
     required String transactionType,
     required String operation,
     required double amount,
-    required String employeeId,
+    int? employeeId,
     String? description,
     String? modificationDetails,
     DateTime? dateTime,
@@ -35,7 +36,7 @@ class LoggingService {
       'transaction_type': transactionType,
       'operation': operation,
       'amount': amount,
-      'employee_id': employeeId,
+      'employee_id': employeeId != null ? employeeId.toString() : null,
       'description': description ?? '',
       'modification_details': modificationDetails ?? '',
       'timestamp': timestamp.toIso8601String(),
