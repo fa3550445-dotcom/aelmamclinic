@@ -831,6 +831,7 @@ class _NewPatientScreenState extends State<NewPatientScreen> {
         doctorShare: docShareSum,
         towerShare: towerShareSum,
         doctorInput: docInputSum,
+        doctorReviewPending: _selectedDoctorId != null,
       );
 
       // 1) Insert patient

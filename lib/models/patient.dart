@@ -61,6 +61,8 @@ class Patient {
   final double doctorInput;     // مدخلات الطبيب المباشرة
   final double towerShare;      // حصة المركز/البرج
   final double departmentShare; // حصة القسم الفني
+  final bool doctorReviewPending; // يحتاج الطبيب إلى معاينة المريض
+  final DateTime? doctorReviewedAt; // آخر وقت أكّد فيه الطبيب المقابلة
 
   /*────────────────────── حقول مزامنة اختيارية (سحابة) ─────────────────────*/
   final String? accountId;  // Supabase → accounts.id
@@ -91,6 +93,8 @@ class Patient {
     this.doctorInput = 0.0,
     this.towerShare = 0.0,
     this.departmentShare = 0.0,
+    this.doctorReviewPending = false,
+    this.doctorReviewedAt,
     this.accountId,
     this.deviceId,
     this.localId,
@@ -113,6 +117,17 @@ class Patient {
   }
 
   static double _toDouble0(dynamic v) => _toDoubleN(v) ?? 0.0;
+
+  static bool _toBool(dynamic v) {
+    if (v is bool) return v;
+    if (v is num) return v != 0;
+    if (v is String) {
+      final s = v.trim().toLowerCase();
+      if (s.isEmpty) return false;
+      return s == '1' || s == 'true' || s == 't' || s == 'yes';
+    }
+    return false;
+  }
 
   static String? _toStrN(dynamic v) {
     if (v == null) return null;
@@ -159,6 +174,11 @@ class Patient {
     towerShare: _toDouble0(map['towerShare'] ?? map['tower_share']),
     departmentShare:
     _toDouble0(map['departmentShare'] ?? map['department_share']),
+    doctorReviewPending: _toBool(
+      map['doctorReviewPending'] ?? map['doctor_review_pending'],
+    ),
+    doctorReviewedAt:
+        _toDateN(map['doctorReviewedAt'] ?? map['doctor_reviewed_at']),
     // حقول المزامنة (camel + snake)
     accountId: _toStrN(map['accountId'] ?? map['account_id']),
     deviceId: _toStrN(map['deviceId'] ?? map['device_id']),
@@ -192,6 +212,8 @@ class Patient {
     'doctorInput': doctorInput,
     'towerShare': towerShare,
     'departmentShare': departmentShare,
+    'doctorReviewPending': doctorReviewPending ? 1 : 0,
+    'doctorReviewedAt': doctorReviewedAt?.toIso8601String(),
   };
 
   /*──────────── خريطة سحابية (snake_case) للمزامنة ────────────*/
@@ -221,6 +243,8 @@ class Patient {
     'doctor_input': doctorInput,
     'tower_share': towerShare,
     'department_share': departmentShare,
+    'doctor_review_pending': doctorReviewPending,
+    'doctor_reviewed_at': doctorReviewedAt?.toIso8601String(),
     // ملاحظة: `created_at` غير موجود في allow-list لكن لا يضر وجوده (سيُحذف)،
     // تركناه متاحًا إن رغبت الاعتماد عليه لاحقًا.
     'created_at': registerDate.toIso8601String(),
@@ -253,6 +277,8 @@ class Patient {
     double? doctorInput,
     double? towerShare,
     double? departmentShare,
+    bool? doctorReviewPending,
+    DateTime? doctorReviewedAt,
     String? accountId,
     String? deviceId,
     int? localId,
@@ -282,6 +308,9 @@ class Patient {
         doctorInput: doctorInput ?? this.doctorInput,
         towerShare: towerShare ?? this.towerShare,
         departmentShare: departmentShare ?? this.departmentShare,
+        doctorReviewPending:
+            doctorReviewPending ?? this.doctorReviewPending,
+        doctorReviewedAt: doctorReviewedAt ?? this.doctorReviewedAt,
         accountId: accountId ?? this.accountId,
         deviceId: deviceId ?? this.deviceId,
         localId: localId ?? this.localId,
@@ -292,7 +321,8 @@ class Patient {
   String toString() =>
       'Patient(id:$id, name:$name, age:$age, diagnosis:$diagnosis, paid:$paidAmount, '
           'remaining:$remaining, registerDate:$registerDate, accountId:$accountId, '
-          'deviceId:$deviceId, localId:$localId, updatedAt:$updatedAt)';
+          'deviceId:$deviceId, localId:$localId, updatedAt:$updatedAt, '
+          'doctorReviewPending:$doctorReviewPending, doctorReviewedAt:$doctorReviewedAt)';
 
   @override
   bool operator ==(Object other) =>
@@ -321,6 +351,8 @@ class Patient {
               doctorInput == other.doctorInput &&
               towerShare == other.towerShare &&
               departmentShare == other.departmentShare &&
+              doctorReviewPending == other.doctorReviewPending &&
+              doctorReviewedAt == other.doctorReviewedAt &&
               accountId == other.accountId &&
               deviceId == other.deviceId &&
               localId == other.localId &&
@@ -350,6 +382,8 @@ class Patient {
     doctorInput,
     towerShare,
     departmentShare,
+    doctorReviewPending,
+    doctorReviewedAt,
     accountId,
     deviceId,
     localId,

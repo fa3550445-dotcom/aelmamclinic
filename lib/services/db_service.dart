@@ -130,6 +130,15 @@ class DBService {
     }
   }
 
+  /// بث تغيير دون جدولة دفع (للعمليات القادمة من المزامنة).
+  void emitPassiveChange(String table) {
+    try {
+      if (!_changeController.isClosed) {
+        _changeController.add(table);
+      }
+    } catch (_) {}
+  }
+
   /// جدولة دفع متأخر (Debounce) لجدول واحد
   void _schedulePush(String table) {
     _pushDebouncers[table]?.cancel();
@@ -201,7 +210,7 @@ class DBService {
 
     return openDatabase(
       dbPath,
-      version: 30, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
+      version: 31, // ↑ رفع النسخة لتطبيق أعمدة المزامنة + ربط الحسابات
       onConfigure: (db) async {
         // ✅ على أندرويد: بعض أوامر PRAGMA يجب تنفيذها بـ rawQuery
         await db.rawQuery('PRAGMA foreign_keys = ON');
@@ -747,7 +756,9 @@ class DBService {
     doctorShare REAL DEFAULT 0,
     doctorInput REAL DEFAULT 0,
     towerShare REAL DEFAULT 0,
-    departmentShare REAL DEFAULT 0
+    departmentShare REAL DEFAULT 0,
+    doctorReviewPending INTEGER NOT NULL DEFAULT 0,
+    doctorReviewedAt TEXT
   );
 ''');
 
@@ -1152,6 +1163,27 @@ class DBService {
 
     if (oldVersion < 30) {
       await _relaxFinancialLogsEmployeeId(db);
+    }
+
+    if (oldVersion < 31) {
+      await _addColumnIfMissing(
+        db,
+        'patients',
+        'doctorReviewPending',
+        'INTEGER NOT NULL DEFAULT 0',
+      );
+      await _addColumnIfMissing(
+        db,
+        'patients',
+        'doctorReviewedAt',
+        'TEXT',
+      );
+      await db.rawUpdate(
+        'UPDATE patients SET doctorReviewPending = 0 WHERE doctorReviewPending IS NULL',
+      );
+      await db.rawUpdate(
+        'UPDATE patients SET doctorReviewedAt = NULL WHERE doctorReviewPending = 0',
+      );
     }
 
     if (oldVersion < 21) {
@@ -1597,6 +1629,10 @@ class DBService {
 
   Future<List<Patient>> getAllPatients({int? doctorId}) =>
       patients.getAllPatients(doctorId: doctorId);
+
+  Future<Patient?> getPatientById(int id) => patients.getPatientById(id);
+
+  Future<int> markPatientReviewed(int id) => patients.markPatientReviewed(id);
 
   Future<int> updatePatient(Patient p, List<PatientService> newServices) => patients.updatePatient(p, newServices);
 

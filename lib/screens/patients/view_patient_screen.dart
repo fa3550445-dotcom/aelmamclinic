@@ -37,6 +37,9 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
   late final double _doctorInput;
   late Future<List<PatientService>> _servicesFuture;
   late Future<List<Attachment>> _attachmentsFuture;
+  bool _reviewPending = false;
+  DateTime? _doctorReviewedAt;
+  bool _markingReview = false;
 
   final _dateOnly = DateFormat('yyyy-MM-dd');
 
@@ -70,6 +73,31 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
 
     _doctorShare = p.doctorShare;
     _doctorInput = p.doctorInput;
+    _reviewPending = p.doctorReviewPending;
+    _doctorReviewedAt = p.doctorReviewedAt;
+  }
+
+  Future<void> _markPatientReviewed() async {
+    if (_markingReview || widget.patient.id == null) return;
+    setState(() => _markingReview = true);
+    try {
+      await DBService.instance.markPatientReviewed(widget.patient.id!);
+      if (!mounted) return;
+      setState(() {
+        _reviewPending = false;
+        _doctorReviewedAt = DateTime.now();
+        _markingReview = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تسجيل مقابلة المريض.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر تحديث الحالة: $e')),
+      );
+      setState(() => _markingReview = false);
+    }
   }
 
   // تحويل كود نوع الخدمة إلى نص عربي
@@ -97,6 +125,17 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
       return '$d • $t';
     }
     return d; // لو الوقت مفقود بسبب المزامنة (DATE فقط)، نعرض التاريخ وحده
+  }
+
+  String? _formatDoctorReviewedAt() {
+    final dt = _doctorReviewedAt;
+    if (dt == null) return null;
+    final date = _dateOnly.format(dt);
+    if (_hasRealTime(dt)) {
+      final time = TimeOfDay.fromDateTime(dt).format(context);
+      return '$date • $time';
+    }
+    return date;
   }
 
   Future<void> _openAttachment(Attachment a) async {
@@ -559,6 +598,16 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (_reviewPending && hasId)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: FilledButton.icon(
+                      onPressed:
+                          _markingReview ? null : () => _markPatientReviewed(),
+                      icon: const Icon(Icons.verified),
+                      label: const Text('تم مقابلة المريض'),
+                    ),
+                  ),
                 _SectionHeader(title: 'Registration', color: scheme.primary),
                 NeuCard(
                   padding:
@@ -598,6 +647,14 @@ class _ViewPatientScreenState extends State<ViewPatientScreen> {
                             icon: Icons.local_hospital,
                             label: 'الطبيب',
                             value: widget.patient.doctorName!.trim()),
+                      ],
+                      if (_doctorReviewedAt != null) ...[
+                        const Divider(height: 12),
+                        _InfoTile(
+                          icon: Icons.verified_user,
+                          label: 'آخر تأكيد للطبيب',
+                          value: _formatDoctorReviewedAt() ?? '—',
+                        ),
                       ],
                     ],
                   ),

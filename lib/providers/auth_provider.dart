@@ -22,6 +22,7 @@ import 'package:aelmamclinic/core/features.dart'; // FeatureKeys.chat
 import 'package:aelmamclinic/services/auth_supabase_service.dart';
 import 'package:aelmamclinic/services/db_service.dart';
 import 'package:aelmamclinic/services/device_id_service.dart';
+import 'package:aelmamclinic/services/notification_service.dart';
 
 /// مفاتيح التخزين المحلي
 const _kUid = 'auth.uid';
@@ -76,6 +77,10 @@ class AuthProvider extends ChangeNotifier {
 
   // === إدارة تدفّق المصادقة ===
   StreamSubscription<AuthState>? _authSub;
+  StreamSubscription<String>? _patientAlertSub;
+  Timer? _patientAlertDebounce;
+  Set<int> _pendingPatientAlerts = <int>{};
+  int? _patientAlertDoctorId;
 
   /*──────── Getters ────────*/
   bool get isLoggedIn => currentUser != null;
@@ -97,6 +102,7 @@ class AuthProvider extends ChangeNotifier {
         // هذه الإشارة تأتي بعد signOut — نظّف الحالة المحلية فقط.
         currentUser = null;
         _resetPermissionsInMemory();
+        await _stopDoctorPatientAlerts();
         await _clearStorage();
         notifyListeners();
         return;
@@ -546,6 +552,79 @@ Future<void> _persistPermissions() async {
     await sp.remove(_kCanDelete);
   }
 
+  Future<void> _restartDoctorPatientAlerts() async {
+    await _stopDoctorPatientAlerts();
+    if (!isLoggedIn) return;
+    final userUid = uid;
+    if (userUid == null || userUid.isEmpty) return;
+    final doctor = await DBService.instance.getDoctorByUserUid(userUid);
+    final doctorId = doctor?.id;
+    if (doctorId == null) return;
+    _patientAlertDoctorId = doctorId;
+    _pendingPatientAlerts = <int>{};
+    await _scanDoctorPatientAlerts(initial: true);
+    _patientAlertSub = DBService.instance.changes.listen((table) {
+      if (table == 'patients') {
+        _schedulePatientAlertScan();
+      }
+    });
+  }
+
+  void _schedulePatientAlertScan() {
+    _patientAlertDebounce?.cancel();
+    _patientAlertDebounce = Timer(const Duration(milliseconds: 250), () {
+      unawaited(_scanDoctorPatientAlerts(initial: false));
+    });
+  }
+
+  Future<void> _scanDoctorPatientAlerts({required bool initial}) async {
+    final doctorId = _patientAlertDoctorId;
+    if (doctorId == null) return;
+    final db = await DBService.instance.database;
+    final rows = await db.query(
+      'patients',
+      columns: const ['id', 'name'],
+      where:
+          'ifnull(isDeleted,0)=0 AND ifnull(doctorReviewPending,0)=1 AND doctorId = ?',
+      whereArgs: [doctorId],
+    );
+    final current = <int, String>{};
+    for (final row in rows) {
+      final rawId = row['id'];
+      final id = rawId is num ? rawId.toInt() : int.tryParse('${rawId ?? ''}');
+      if (id == null) continue;
+      final name = (row['name'] as String?) ?? '';
+      current[id] = name;
+    }
+
+    final currentIds = current.keys.toSet();
+    if (!initial) {
+      final newIds = currentIds.difference(_pendingPatientAlerts);
+      for (final id in newIds) {
+        final label = current[id]?.trim();
+        final patientName = (label == null || label.isEmpty) ? 'مريض جديد' : label;
+        try {
+          await NotificationService().showPatientAssignmentNotification(
+            patientId: id,
+            patientName: patientName,
+          );
+        } catch (e) {
+          dev.log('showPatientAssignmentNotification failed', error: e);
+        }
+      }
+    }
+    _pendingPatientAlerts = currentIds;
+  }
+
+  Future<void> _stopDoctorPatientAlerts() async {
+    await _patientAlertSub?.cancel();
+    _patientAlertSub = null;
+    _patientAlertDebounce?.cancel();
+    _patientAlertDebounce = null;
+    _pendingPatientAlerts = <int>{};
+    _patientAlertDoctorId = null;
+  }
+
   bool _bootstrapBusy = false;
   Future<void> bootstrapSync({
     bool pull = true,
@@ -555,7 +634,10 @@ Future<void> _persistPermissions() async {
     bool wipeLocalFirst = false,
   }) async {
     if (_bootstrapBusy) return;
-    if (!isLoggedIn || isSuperAdmin) return;
+    if (!isLoggedIn || isSuperAdmin) {
+      await _stopDoctorPatientAlerts();
+      return;
+    }
     _bootstrapBusy = true;
     try {
       await _auth.bootstrapSyncForCurrentUser(
@@ -565,7 +647,9 @@ Future<void> _persistPermissions() async {
         debounce: debounce,
         wipeLocalFirst: wipeLocalFirst,
       );
+      await _restartDoctorPatientAlerts();
     } catch (e, st) {
+      await _stopDoctorPatientAlerts();
       dev.log('AuthProvider.bootstrapSync failed', error: e, stackTrace: st);
     } finally {
       _bootstrapBusy = false;
@@ -584,6 +668,8 @@ Future<void> _persistPermissions() async {
   @override
   void dispose() {
     _authSub?.cancel();
+    _patientAlertSub?.cancel();
+    _patientAlertDebounce?.cancel();
     super.dispose();
   }
 }

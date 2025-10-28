@@ -8,6 +8,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:postgrest/postgrest.dart' show PostgrestException;
 import 'package:uuid/enums.dart';
 import 'package:uuid/uuid.dart';
+import 'package:aelmamclinic/services/db_service.dart';
 
 /// كلاس مساعد اختياري لتحويل الحقول عند الدفع/السحب.
 /// ضع أي من الدالتين إن كنت تحتاج مسار تحويل مخصص لهذا الجدول.
@@ -222,6 +223,8 @@ class SyncService {
       'doctor_input',
       'tower_share',
       'department_share',
+      'doctor_review_pending',
+      'doctor_reviewed_at',
     },
     'returns': {
       'date',
@@ -344,6 +347,7 @@ class SyncService {
     'alert_settings': {'is_enabled'},
     'employees_salaries': {'is_paid'},
     'employees': {'is_doctor'},
+    'patients': {'doctor_review_pending'},
   };
 
   /// خريطة مفاتيح FK لكل جدول (snake_case → parentLocalTable).
@@ -2385,6 +2389,8 @@ class SyncService {
             local: syncLocal,
           );
         }
+
+        DBService.instance.emitPassiveChange(localTable);
       }
 
       await _clampAutoincrement(localTable);
@@ -2634,6 +2640,8 @@ class SyncService {
             local: syncLocal,
           );
         }
+
+        DBService.instance.emitPassiveChange(localTable);
       }
 
       await _clampAutoincrement(
@@ -2866,6 +2874,8 @@ class SyncService {
 
     await _clampAutoincrement(
         localTable); // ← منع قفزة AUTOINCREMENT بعد Realtime upsert
+
+    DBService.instance.emitPassiveChange(localTable);
   }
 
   Future<void> _applyRealtimeDelete(
@@ -3249,8 +3259,11 @@ class SyncService {
 
   Future<void> pushFinancialLogs() =>
       _pushTable('financial_logs', 'financial_logs');
-  Future<void> pullFinancialLogs() =>
-      _pullTable('financial_logs', 'financial_logs');
+  Future<void> pullFinancialLogs() => _pullTableRemapFKs(
+        'financial_logs',
+        'financial_logs',
+        fkParentTables: _fkMap['financial_logs']!,
+      );
 
   Future<void> pushPatientServices() =>
       _pushTable('patient_services', 'patient_services');
