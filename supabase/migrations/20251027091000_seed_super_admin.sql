@@ -2,5 +2,5 @@
 -- Seed default super admin email.
 
 INSERT INTO public.super_admins(email)
-VALUES ('admin@elmam.com')
+VALUES ('aelmam.app@gmail.com')
 ON CONFLICT (email) DO NOTHING;

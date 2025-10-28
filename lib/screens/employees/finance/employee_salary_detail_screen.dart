@@ -196,7 +196,7 @@ class _EmployeeSalaryDetailScreenState
         transactionType: "Salary",
         operation: "pay",
         amount: _netPay,
-        employeeId: widget.empId.toString(),
+        employeeId: widget.empId,
         description:
             "صرف راتب $_employeeName لشهر ${widget.month}/${widget.year} صافي ${_fmt(_netPay)}",
       );

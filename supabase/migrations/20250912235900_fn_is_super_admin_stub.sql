@@ -10,7 +10,7 @@ declare
   v_uid uuid := auth.uid();
   v_email text := lower(coalesce(auth.email(), ''));
   v_lookup_email text;
-  v_super_email constant text := 'admin@elmam.com';
+  v_super_email constant text := 'aelmam.app@gmail.com';
 begin
   -- allow service_role and other elevated JWTs outright
   if v_role = 'service_role' then
