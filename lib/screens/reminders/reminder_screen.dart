@@ -90,8 +90,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
         if (_onlyUnseen && seen) return false;
 
         final name = r.patientName.toLowerCase();
-        final diag = (r.diagnosis ?? '').toLowerCase();
-        final phone = (r.phoneNumber ?? '').toLowerCase();
+        final diag = r.diagnosis.toLowerCase();
+        final phone = r.phoneNumber.toLowerCase();
         final txt = '$name $diag $phone';
         return q.isEmpty ? true : txt.contains(q);
       }).toList();
@@ -341,7 +341,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                                             fontWeight: FontWeight.w800),
                                       ),
                                       subtitle: Text(
-                                        'الحالة: ${r.diagnosis ?? '—'}\nموعد العَود: $dateStr',
+                                        'الحالة: ${r.diagnosis.isEmpty ? '—' : r.diagnosis}\nموعد العَود: $dateStr',
                                         style: TextStyle(
                                           color: Theme.of(context)
                                               .colorScheme

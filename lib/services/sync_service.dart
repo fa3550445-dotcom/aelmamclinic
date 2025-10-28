@@ -2188,7 +2188,7 @@ class SyncService {
           }
         }
 
-        final int resolvedLocalId = localId ?? sourceLocalId;
+        final int resolvedLocalId = localId!;
 
         final String remoteId = remoteUuid ?? '';
         if (remoteId.isNotEmpty && resolvedLocalId > 0) {
@@ -2408,7 +2408,7 @@ class SyncService {
           }
         }
 
-        final int resolvedLocalId = localId ?? sourceLocalId;
+        final int resolvedLocalId = localId!;
 
         final String remoteId = remoteUuid ?? '';
         if (remoteId.isNotEmpty && resolvedLocalId > 0) {
@@ -2631,7 +2631,7 @@ class SyncService {
       }
     }
 
-    final int resolvedLocalId = localId ?? sourceLocalId;
+    final int resolvedLocalId = localId!;
 
     final String remoteId = remoteUuid ?? '';
     if (remoteId.isNotEmpty && resolvedLocalId > 0) {
@@ -2756,7 +2756,7 @@ class SyncService {
       }
     }
 
-    final int resolvedLocalId = localId ?? sourceLocalId;
+    final int resolvedLocalId = localId!;
 
     if (resolvedLocalId <= 0) return;
 
