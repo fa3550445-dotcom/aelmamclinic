@@ -475,6 +475,10 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                   final diagnosis = (p.diagnosis).toString().trim().isEmpty
                       ? '—'
                       : p.diagnosis;
+                  final needsAttention = p.doctorReviewPending;
+                  final pendingLabel = needsAttention
+                      ? ' • بانتظار مقابلة الطبيب'
+                      : '';
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -512,12 +516,39 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                         leading: CircleAvatar(
                           radius: 22,
                           backgroundColor: kPrimaryColor.withValues(alpha: .10),
-                          child: Text(
-                            _avatarText(p.name),
-                            style: const TextStyle(
-                              color: kPrimaryColor,
-                              fontWeight: FontWeight.w900,
-                            ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  _avatarText(p.name),
+                                  style: const TextStyle(
+                                    color: kPrimaryColor,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                              if (needsAttention)
+                                Positioned(
+                                  top: -2,
+                                  left: -2,
+                                  child: Container(
+                                    width: 14,
+                                    height: 14,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surface,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         title: Text(
@@ -527,7 +558,7 @@ class _ListPatientsScreenState extends State<ListPatientsScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          '$diagnosis  •  خدمات: $svcSummary  •  الإجمالي: ${totalCost.toStringAsFixed(2)}',
+                          '$diagnosis  •  خدمات: $svcSummary  •  الإجمالي: ${totalCost.toStringAsFixed(2)}$pendingLabel',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

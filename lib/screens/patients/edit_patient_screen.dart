@@ -921,6 +921,19 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     // تطبيع الهاتف قبل الحفظ
     final normalizedPhone = Formatters.normalizePhone(_phoneCtrl.text.trim());
 
+    final oldDoctorId = widget.patient.doctorId;
+    final newDoctorId = _selectedDoctorId;
+    bool reviewPending = widget.patient.doctorReviewPending;
+    DateTime? reviewedAt = widget.patient.doctorReviewedAt;
+
+    if (newDoctorId == null) {
+      reviewPending = false;
+      reviewedAt = null;
+    } else if (oldDoctorId != newDoctorId) {
+      reviewPending = true;
+      reviewedAt = null;
+    }
+
     final updated = widget.patient.copyWith(
       name: _nameCtrl.text.trim(),
       age: int.tryParse(_ageCtrl.text) ?? widget.patient.age,
@@ -940,6 +953,8 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
       doctorShare: docShareSum,
       towerShare: towerShareSum,
       doctorInput: docInputSum,
+      doctorReviewPending: reviewPending,
+      doctorReviewedAt: reviewedAt,
     );
 
     final db = await DBService.instance.database;

@@ -3023,6 +3023,8 @@ CREATE TABLE IF NOT EXISTS "public"."patients" (
     "doctor_input" numeric DEFAULT 0 NOT NULL,
     "tower_share" numeric DEFAULT 0 NOT NULL,
     "department_share" numeric DEFAULT 0 NOT NULL,
+    "doctor_review_pending" boolean DEFAULT false NOT NULL,
+    "doctor_reviewed_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "is_deleted" boolean DEFAULT false NOT NULL
