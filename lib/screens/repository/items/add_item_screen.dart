@@ -130,6 +130,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ),
     );
     if (ok == true) {
+      if (!mounted) return;
       final name = ctrl.text.trim();
       final repo = context.read<RepositoryProvider>();
       await repo.addType(name);
@@ -153,6 +154,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     try {
       final bytes = await File(result.files.single.path!).readAsBytes();
+      if (!mounted) return;
       final excel = xls.Excel.decodeBytes(bytes);
 
       final repo = context.read<RepositoryProvider>();

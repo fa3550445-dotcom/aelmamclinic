@@ -181,16 +181,20 @@ class _MessageActionsSheet extends StatelessWidget {
     final timeLabel = time.formatMessageTimestamp(message.createdAt);
 
     // نص فعلي قابل للنسخ (للنسخ المحلي fallback)
-    final rawCopyText = (message.body ?? message.text).trim();
+    final bodyText = message.body;
+    final rawCopyText =
+        bodyText != null ? bodyText.trim() : message.text.trim();
 
     // رابط أول مرفق (للرسائل الصورية) — يُستخدم كنسخ fallback عند عدم وجود نص
     String? firstAttachmentUrl;
+    bool hasAttachmentUrl = false;
     try {
       final atts = message.attachments;
       if (atts.isNotEmpty) {
-        final u = atts.first.url;
-        if (u != null && u.trim().isNotEmpty) {
-          firstAttachmentUrl = u.trim();
+        final u = atts.first.url.trim();
+        if (u.isNotEmpty) {
+          firstAttachmentUrl = u;
+          hasAttachmentUrl = true;
         }
       }
     } catch (_) {
@@ -205,7 +209,7 @@ class _MessageActionsSheet extends StatelessWidget {
     final allowCopy = canCopy ??
         (((onCopy != null) ||
             (_isText && rawCopyText.isNotEmpty) ||
-            (_isImage && (firstAttachmentUrl?.isNotEmpty ?? false))) &&
+            (_isImage && hasAttachmentUrl)) &&
             !_isDeleted);
 
     // تعديل: نصي + ملكي + داخل المهلة + لديك onEdit
@@ -312,7 +316,7 @@ class _MessageActionsSheet extends StatelessWidget {
             }
             // النسخ المحلي الافتراضي (body ثم text، أو رابط أول مرفق للصور)
             final txt =
-            rawCopyText.isNotEmpty ? rawCopyText : (firstAttachmentUrl ?? '');
+                rawCopyText.isNotEmpty ? rawCopyText : (firstAttachmentUrl ?? '');
             if (txt.isNotEmpty) {
               await Clipboard.setData(ClipboardData(text: txt));
               if (context.mounted) {
