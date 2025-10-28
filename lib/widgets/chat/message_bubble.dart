@@ -236,7 +236,14 @@ class MessageBubble extends StatelessWidget {
 
 // ---------- Helpers ----------
 
-  String _bodyOf(ChatMessage m) => (m.body ?? m.text).trim();
+  String _bodyOf(ChatMessage m) {
+    final body = m.body;
+    if (body != null) {
+      final trimmed = body.trim();
+      if (trimmed.isNotEmpty) return trimmed;
+    }
+    return m.text.trim();
+  }
 
   String _replySnippetOf(ChatMessage m) => (m.replyToSnippet ?? '').trim();
 
@@ -745,8 +752,6 @@ class _ReactionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final myUid = Supabase.instance.client.auth.currentUser?.id ?? '';
-    final scheme = Theme.of(context).colorScheme;
-
     final stream = externalStream ?? ChatService.instance.watchReactions(messageId);
 
     return StreamBuilder<List<ChatReaction>>(
