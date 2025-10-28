@@ -1,7 +1,7 @@
 // supabase/functions/admin__list_employees/index.ts
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "jsr:@supabase/functions-js";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -15,14 +15,37 @@ const SERVICE_ROLE_KEY =
 if (!SERVICE_ROLE_KEY) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY / SERVICE_ROLE_KEY env");
 const SUPER_ADMIN_EMAIL = (Deno.env.get("SUPER_ADMIN_EMAIL") ?? "aelmam.app@gmail.com").toLowerCase();
 
-function json(body: unknown, status = 200) {
+type RpcEmployeeRow = {
+  user_uid: string;
+  email: string | null;
+  role: string | null;
+  disabled: boolean | null;
+  created_at: string | null;
+};
+
+type AccountUserRow = {
+  user_uid: string;
+  role: string | null;
+  disabled: boolean | null;
+  created_at: string | null;
+};
+
+type Employee = {
+  uid: string;
+  email: string;
+  role: string;
+  disabled: boolean;
+  created_at: string | null;
+};
+
+function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
   });
 }
 
-serve(async (req) => {
+serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -30,7 +53,7 @@ serve(async (req) => {
       return json({ ok: false, message: "Method not allowed" }, 405);
     }
 
-    const { account_id } = await req.json();
+    const { account_id } = (await req.json()) as { account_id?: string };
     if (!account_id) return json({ ok: false, message: "missing account_id" }, 400);
 
     // مصادقة المستدعي
@@ -58,18 +81,19 @@ serve(async (req) => {
     if (!allowed) return json({ ok: false, message: "forbidden" }, 403);
 
     // الأفضل: عبر RPC (يحترم RLS ويُعيد البريد)
-    const { data: viaRpc, error: rpcErr } = await authed.rpc("list_employees_with_email", {
-      p_account: account_id,
-    });
+    const { data: rpcData, error: rpcErr } = await authed.rpc<RpcEmployeeRow[]>(
+      "list_employees_with_email",
+      { p_account: account_id },
+    );
 
-    if (!rpcErr && Array.isArray(viaRpc)) {
+    if (!rpcErr && Array.isArray(rpcData)) {
       // توحيد المخرجات
-      const out = viaRpc.map((r: any) => ({
-        uid: r.user_uid,
-        email: r.email ?? "",
-        role: r.role ?? "",
-        disabled: !!r.disabled,
-        created_at: r.created_at ?? null,
+      const out: Employee[] = rpcData.map((row): Employee => ({
+        uid: row.user_uid,
+        email: row.email ?? "",
+        role: row.role ?? "",
+        disabled: Boolean(row.disabled),
+        created_at: row.created_at ?? null,
       }));
       // ترتيب بسيط
       out.sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()));
@@ -80,7 +104,7 @@ serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
     const { data: rows, error } = await admin
       .from("account_users")
-      .select("user_uid, role, disabled, created_at")
+      .select<AccountUserRow>("user_uid, role, disabled, created_at")
       .eq("account_id", account_id);
 
     if (error) throw error;
@@ -91,15 +115,15 @@ serve(async (req) => {
       if (u?.id && u?.email) emails.set(u.id, String(u.email));
     }
 
-    const out = (rows ?? [])
-      .map((r: any) => ({
-        uid: r.user_uid,
-        email: emails.get(r.user_uid) ?? "",
-        role: r.role ?? "",
-        disabled: !!r.disabled,
-        created_at: r.created_at ?? null,
-      }))
-      .filter((x) => x.uid);
+    const out: Employee[] = (rows ?? [])
+      .filter((row): row is AccountUserRow & { user_uid: string } => typeof row.user_uid === "string")
+      .map((row) => ({
+        uid: row.user_uid,
+        email: emails.get(row.user_uid) ?? "",
+        role: row.role ?? "",
+        disabled: Boolean(row.disabled),
+        created_at: row.created_at ?? null,
+      }));
 
     out.sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()));
     return json(out, 200);

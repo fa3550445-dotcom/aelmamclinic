@@ -96,7 +96,7 @@ declare
   v_uid uuid := auth.uid();
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
   v_allowed text[];
   v_can_create boolean;
   v_can_update boolean;
@@ -177,7 +177,7 @@ as $$
 declare
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
   v_owner_uid uuid;
   v_account uuid;
 begin
@@ -228,7 +228,7 @@ as $$
 declare
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
   v_uid uuid;
 begin
   if not v_is_super then
@@ -283,7 +283,7 @@ as $$
 declare
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
 begin
   if not v_is_super then
     raise exception 'forbidden' using errcode = '42501';
@@ -313,7 +313,7 @@ as $$
 declare
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
 begin
   if p_account_id is null then
     raise exception 'account_id is required';
@@ -352,7 +352,7 @@ as $$
 declare
   v_is_super boolean := coalesce(fn_is_super_admin(), false)
     or lower(coalesce(auth.jwt()->>'role', '')) = 'superadmin'
-    or lower(coalesce(auth.jwt()->>'email', '')) = 'aelmam.app@gmail.com';
+    or lower(coalesce(auth.jwt()->>'email', '')) = 'admin@elmam.com';
 begin
   if p_account_id is null then
     raise exception 'account_id is required';

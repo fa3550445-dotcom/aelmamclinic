@@ -1,7 +1,7 @@
 // supabase/functions/admin__freeze_clinic/index.ts
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "jsr:@supabase/functions-js";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -15,14 +15,14 @@ const SERVICE_ROLE_KEY =
 if (!SERVICE_ROLE_KEY) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY / SERVICE_ROLE_KEY env");
 const SUPER_ADMIN_EMAIL = (Deno.env.get("SUPER_ADMIN_EMAIL") ?? "aelmam.app@gmail.com").toLowerCase();
 
-function json(body: unknown, status = 200) {
+function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
   });
 }
 
-serve(async (req) => {
+serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -30,7 +30,12 @@ serve(async (req) => {
       return json({ ok: false, message: "Method not allowed" }, 405);
     }
 
-    const body = await req.json();
+    const body = (await req.json()) as {
+      account_id?: string;
+      clinicId?: string;
+      frozen?: unknown;
+      isFrozen?: unknown;
+    };
     const target: string | undefined = body.account_id ?? body.clinicId;
     const value: boolean | undefined =
       typeof body.frozen === "boolean" ? body.frozen :

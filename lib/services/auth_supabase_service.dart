@@ -80,11 +80,11 @@ class FeaturePermissions {
   }
 
   static FeaturePermissions defaultsAllAllowed() => const FeaturePermissions(
-    allowedFeatures: <String>{},
-    canCreate: true,
-    canUpdate: true,
-    canDelete: true,
-  );
+        allowedFeatures: <String>{},
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      );
 
   factory FeaturePermissions.fromRpcPayload(dynamic payload) {
     Map<String, dynamic>? row;
@@ -96,7 +96,8 @@ class FeaturePermissions {
     if (row == null) return FeaturePermissions.defaultsAllAllowed();
 
     final list =
-        (row['allowed_features'] as List?)?.map((e) => '$e').toList() ?? const <String>[];
+        (row['allowed_features'] as List?)?.map((e) => '$e').toList() ??
+            const <String>[];
     return FeaturePermissions(
       allowedFeatures: Set<String>.from(list),
       canCreate: (row['can_create'] as bool?) ?? true,
@@ -135,20 +136,24 @@ class AuditLogEntry {
   });
 
   factory AuditLogEntry.fromJson(Map<String, dynamic> m) => AuditLogEntry(
-    id: (m['id'] as num).toInt(),
-    accountId: m['account_id'] as String,
-    actorUid: m['actor_uid'] as String?,
-    actorEmail: m['actor_email'] as String?,
-    tableName: m['table_name'] as String,
-    op: m['op'] as String,
-    rowPk: m['row_pk']?.toString(),
-    beforeRow:
-    m['before_row'] is Map ? Map<String, dynamic>.from(m['before_row'] as Map) : null,
-    afterRow:
-    m['after_row'] is Map ? Map<String, dynamic>.from(m['after_row'] as Map) : null,
-    diff: m['diff'] is Map ? Map<String, dynamic>.from(m['diff'] as Map) : null,
-    createdAt: DateTime.parse(m['created_at'] as String),
-  );
+        id: (m['id'] as num).toInt(),
+        accountId: m['account_id'] as String,
+        actorUid: m['actor_uid'] as String?,
+        actorEmail: m['actor_email'] as String?,
+        tableName: m['table_name'] as String,
+        op: m['op'] as String,
+        rowPk: m['row_pk']?.toString(),
+        beforeRow: m['before_row'] is Map
+            ? Map<String, dynamic>.from(m['before_row'] as Map)
+            : null,
+        afterRow: m['after_row'] is Map
+            ? Map<String, dynamic>.from(m['after_row'] as Map)
+            : null,
+        diff: m['diff'] is Map
+            ? Map<String, dynamic>.from(m['diff'] as Map)
+            : null,
+        createdAt: DateTime.parse(m['created_at'] as String),
+      );
 }
 
 class AccountPolicyException implements Exception {
@@ -176,7 +181,7 @@ class AuthSupabaseService {
   final SupabaseClient _client = Supabase.instance.client;
 
   /// بريد السوبر أدمن (يُستخدم في عدة أماكن)
-  static const String superAdminEmail = 'aelmam.app@gmail.com';
+  static const String superAdminEmail = 'admin@elmam.com';
 
   SupabaseClient get client => _client;
 
@@ -277,96 +282,97 @@ class AuthSupabaseService {
     _guardAccountsChannel = _client
         .channel('guards:accounts:$accountId')
         .onPostgresChanges(
-      event: PostgresChangeEvent.update,
-      schema: 'public',
-      table: 'accounts',
-      filter: PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: 'id',
-        value: accountId,
-      ),
-      callback: (payload) {
-        try {
-          final newRec = payload.newRecord ?? const <String, dynamic>{};
-          final id = (newRec['id'] ?? '').toString();
-          final frozen = (newRec['frozen'] == true);
-          if (id == accountId && frozen) {
-            _forceLogout('account frozen');
-          }
-        } catch (e) {
-          dev.log('accounts guard callback err: $e');
-        }
-      },
-    )
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'accounts',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: accountId,
+          ),
+          callback: (payload) {
+            try {
+              final newRec = payload.newRecord ?? const <String, dynamic>{};
+              final id = (newRec['id'] ?? '').toString();
+              final frozen = (newRec['frozen'] == true);
+              if (id == accountId && frozen) {
+                _forceLogout('account frozen');
+              }
+            } catch (e) {
+              dev.log('accounts guard callback err: $e');
+            }
+          },
+        )
         .subscribe();
 
     // مراقبة تعطيل الموظف ضمن الحساب
     _guardAccountUsersChannel = _client
         .channel('guards:account_users:$accountId')
         .onPostgresChanges(
-      event: PostgresChangeEvent.update,
-      schema: 'public',
-      table: 'account_users',
-      filter: PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: 'account_id',
-        value: accountId,
-      ),
-      callback: (payload) {
-        try {
-          final newRec = payload.newRecord ?? const <String, dynamic>{};
-          final acc = (newRec['account_id'] ?? '').toString();
-          final uid = (newRec['user_uid'] ?? '').toString();
-          final disabled = (newRec['disabled'] == true);
-          if (acc == accountId && uid == userUid && disabled) {
-            _forceLogout('employee disabled');
-          }
-        } catch (e) {
-          dev.log('account_users guard callback err: $e');
-        }
-      },
-    )
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'account_users',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'account_id',
+            value: accountId,
+          ),
+          callback: (payload) {
+            try {
+              final newRec = payload.newRecord ?? const <String, dynamic>{};
+              final acc = (newRec['account_id'] ?? '').toString();
+              final uid = (newRec['user_uid'] ?? '').toString();
+              final disabled = (newRec['disabled'] == true);
+              if (acc == accountId && uid == userUid && disabled) {
+                _forceLogout('employee disabled');
+              }
+            } catch (e) {
+              dev.log('account_users guard callback err: $e');
+            }
+          },
+        )
         .subscribe();
 
     // راقب clinics.frozen أيضًا (لبعض البيئات)
     _guardClinicsChannel = _client
         .channel('guards:clinics:$accountId')
         .onPostgresChanges(
-      event: PostgresChangeEvent.update,
-      schema: 'public',
-      table: Clinic.table, // عادة "clinics"
-      filter: PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: 'id',
-        value: accountId,
-      ),
-      callback: (payload) {
-        try {
-          final m = payload.newRecord ?? const <String, dynamic>{};
-          final id = (m['id'] ?? '').toString();
-          final frozen = (m['frozen'] == true);
-          if (id == accountId && frozen) {
-            _forceLogout('clinic frozen');
-          }
-        } catch (e) {
-          dev.log('clinics guard callback err: $e');
-        }
-      },
-    )
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: Clinic.table, // عادة "clinics"
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: accountId,
+          ),
+          callback: (payload) {
+            try {
+              final m = payload.newRecord ?? const <String, dynamic>{};
+              final id = (m['id'] ?? '').toString();
+              final frozen = (m['frozen'] == true);
+              if (id == accountId && frozen) {
+                _forceLogout('clinic frozen');
+              }
+            } catch (e) {
+              dev.log('clinics guard callback err: $e');
+            }
+          },
+        )
         .subscribe();
   }
 
   // يضمن وجود sync_identity ثم يحدّثها بالقيم الحالية
   Future<void> _upsertSyncIdentity(
-      dynamic db, {
-        required String accountId,
-        required String deviceId,
-      }) async {
+    dynamic db, {
+    required String accountId,
+    required String deviceId,
+  }) async {
     try {
-      await db.execute('CREATE TABLE IF NOT EXISTS sync_identity(account_id TEXT, device_id TEXT)');
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS sync_identity(account_id TEXT, device_id TEXT)');
       await db.rawInsert(
         'INSERT INTO sync_identity(account_id, device_id) '
-            'SELECT ?, ? WHERE NOT EXISTS(SELECT 1 FROM sync_identity)',
+        'SELECT ?, ? WHERE NOT EXISTS(SELECT 1 FROM sync_identity)',
         [accountId, deviceId],
       );
       await db.rawUpdate(
@@ -386,7 +392,8 @@ class AuthSupabaseService {
         ['sync_identity'],
       );
       if (rows is List && rows.isNotEmpty) {
-        final r = await db.rawQuery('SELECT account_id FROM sync_identity LIMIT 1');
+        final r =
+            await db.rawQuery('SELECT account_id FROM sync_identity LIMIT 1');
         if (r is List && r.isNotEmpty) {
           final v = r.first['account_id']?.toString();
           return (v != null && v.isNotEmpty) ? v : null;
@@ -435,9 +442,9 @@ class AuthSupabaseService {
   // ─────────────────── Helpers: Functions/RPC ───────────────────
 
   Future<Map<String, dynamic>> _invokeFunction(
-      String name, {
-        required Map<String, dynamic> body,
-      }) async {
+    String name, {
+    required Map<String, dynamic> body,
+  }) async {
     final resp = await _client.functions.invoke(
       name,
       body: body,
@@ -477,13 +484,17 @@ class AuthSupabaseService {
             error: e, stackTrace: st);
       }
     }
-    throw lastErr ?? Exception('No callable function found for ${names.join(", ")}');
+    throw lastErr ??
+        Exception('No callable function found for ${names.join(", ")}');
   }
 
   Future<String?> _resolveAccountIdForUid(String uid) async {
     try {
-      final prof =
-      await _client.from('profiles').select('account_id, role').eq('id', uid).maybeSingle();
+      final prof = await _client
+          .from('profiles')
+          .select('account_id, role')
+          .eq('id', uid)
+          .maybeSingle();
       final pAcc = prof?['account_id'] as String?;
       if (pAcc != null && pAcc.isNotEmpty) return pAcc;
     } catch (e) {
@@ -571,8 +582,8 @@ class AuthSupabaseService {
 
   bool get isSuperAdmin {
     final email = _client.auth.currentUser?.email?.toLowerCase();
-    final metaRole =
-    (_client.auth.currentUser?.appMetadata['role'] as String?)?.toLowerCase();
+    final metaRole = (_client.auth.currentUser?.appMetadata['role'] as String?)
+        ?.toLowerCase();
     return email == superAdminEmail.toLowerCase() || metaRole == 'superadmin';
   }
 
@@ -639,8 +650,11 @@ class AuthSupabaseService {
     }
 
     try {
-      final prof =
-      await _client.from('profiles').select('account_id, role').eq('id', user.id).maybeSingle();
+      final prof = await _client
+          .from('profiles')
+          .select('account_id, role')
+          .eq('id', user.id)
+          .maybeSingle();
       final pAcc = (prof?['account_id'] as String?)?.trim();
       if (pAcc != null && pAcc.isNotEmpty) {
         final role = (prof?['role'] as String?) ?? 'employee';
@@ -731,9 +745,10 @@ class AuthSupabaseService {
     try {
       final lastAcc = await _readLastSyncedAccountId(db);
       final accountChangedBetweenLaunches =
-      (lastAcc != null && lastAcc.isNotEmpty && lastAcc != acc.id);
+          (lastAcc != null && lastAcc.isNotEmpty && lastAcc != acc.id);
       if (accountChangedBetweenLaunches) {
-        dev.log('Detected account change since last launch → clearing local tables.');
+        dev.log(
+            'Detected account change since last launch → clearing local tables.');
         await DBService.instance.clearAllLocalTables();
       }
     } catch (e) {
@@ -741,7 +756,8 @@ class AuthSupabaseService {
     }
 
     if (_sync != null) {
-      final accountChanged = (_boundAccountId != null && _boundAccountId != acc.id);
+      final accountChanged =
+          (_boundAccountId != null && _boundAccountId != acc.id);
       if (wipeLocalFirst && accountChanged) {
         await DBService.instance.clearAllLocalTables();
       }
@@ -754,7 +770,8 @@ class AuthSupabaseService {
     try {
       await DBParityV3().run(db, accountId: acc.id, verbose: enableLogs);
     } catch (e, st) {
-      dev.log('DBParityV3.run failed (continue anyway)', error: e, stackTrace: st);
+      dev.log('DBParityV3.run failed (continue anyway)',
+          error: e, stackTrace: st);
     }
 
     _debounce = debounce;
@@ -820,7 +837,8 @@ class AuthSupabaseService {
     String? ownerRole,
   }) async {
     if (!isSuperAdmin) {
-      dev.log('registerOwner called by non-super admin. This may fail due to RLS.');
+      dev.log(
+          'registerOwner called by non-super admin. This may fail due to RLS.');
     }
 
     try {
@@ -869,7 +887,8 @@ class AuthSupabaseService {
       if (ok) {
         return;
       }
-      dev.log('registerOwner: function returned non-ok, using RPC old. data=$data');
+      dev.log(
+          'registerOwner: function returned non-ok, using RPC old. data=$data');
     } catch (e) {
       dev.log('registerOwner: function(s) failed. Will use old RPC. err=$e');
     }
@@ -897,7 +916,8 @@ class AuthSupabaseService {
       }
       return;
     } catch (rpcErr, st) {
-      dev.log('registerOwner RPC fallback failed', error: rpcErr, stackTrace: st);
+      dev.log('registerOwner RPC fallback failed',
+          error: rpcErr, stackTrace: st);
       rethrow;
     }
   }
@@ -915,7 +935,8 @@ class AuthSupabaseService {
     required String password,
   }) async {
     if (!isSuperAdmin) {
-      dev.log('registerEmployee called by non-super admin. This may fail due to RLS.');
+      dev.log(
+          'registerEmployee called by non-super admin. This may fail due to RLS.');
     }
 
     try {
@@ -970,8 +991,8 @@ class AuthSupabaseService {
     required String email,
     required String password,
   }) async {
-    final res =
-    await _client.auth.admin.createUser(AdminUserAttributes(email: email, password: password));
+    final res = await _client.auth.admin
+        .createUser(AdminUserAttributes(email: email, password: password));
     final userId = res.user!.id;
 
     await _client.from('profiles').insert({
@@ -1014,7 +1035,8 @@ class AuthSupabaseService {
               .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
               .toList();
         } catch (e2, st2) {
-          dev.log('super-admin direct select failed', error: e2, stackTrace: st2);
+          dev.log('super-admin direct select failed',
+              error: e2, stackTrace: st2);
           return [];
         }
       }
@@ -1092,10 +1114,14 @@ class AuthSupabaseService {
 
     // تحديث مباشر مرن
     try {
-      await _client.from('accounts').update({'frozen': freeze}).eq('id', clinicId);
+      await _client
+          .from('accounts')
+          .update({'frozen': freeze}).eq('id', clinicId);
       return;
     } catch (_) {}
-    await _client.from(Clinic.table).update({'frozen': freeze}).eq('id', clinicId);
+    await _client
+        .from(Clinic.table)
+        .update({'frozen': freeze}).eq('id', clinicId);
     return;
   }
 
@@ -1157,8 +1183,10 @@ class AuthSupabaseService {
           'email': email,
           'role': role,
           'disabled': disabled,
-          'employeeId': (employeeId != null && employeeId.isNotEmpty) ? employeeId : null,
-          'doctorId': (doctorId != null && doctorId.isNotEmpty) ? doctorId : null,
+          'employeeId':
+              (employeeId != null && employeeId.isNotEmpty) ? employeeId : null,
+          'doctorId':
+              (doctorId != null && doctorId.isNotEmpty) ? doctorId : null,
           'employeeLinked': employeeId != null && employeeId.isNotEmpty,
           'doctorLinked': doctorId != null && doctorId.isNotEmpty,
         });
@@ -1178,11 +1206,14 @@ class AuthSupabaseService {
       } else if (res is Map && res['data'] is List) {
         return _mapRows(List<Map<String, dynamic>>.from(res['data'] as List));
       }
-      dev.log('list_employees_with_email returned unexpected payload; falling back...',
+      dev.log(
+          'list_employees_with_email returned unexpected payload; falling back...',
           error: res);
     } catch (e, st) {
-      dev.log('list_employees_with_email RPC failed, falling back to direct queries',
-          error: e, stackTrace: st);
+      dev.log(
+          'list_employees_with_email RPC failed, falling back to direct queries',
+          error: e,
+          stackTrace: st);
     }
 
     try {
@@ -1234,24 +1265,27 @@ class AuthSupabaseService {
         }
       }
 
-      final mapped = list.map((row) {
-        final uid = (row['user_uid']?.toString() ?? '').trim();
-        final email = (row['email']?.toString() ?? '').trim();
-        final role = (row['role']?.toString() ?? 'employee').trim();
-        final disabled = (row['disabled'] as bool?) ?? false;
-        final employeeId = employeesByUid[uid];
-        final doctorId = doctorsByUid[uid];
-        return {
-          'userUid': uid,
-          'email': email,
-          'role': role.isEmpty ? 'employee' : role,
-          'disabled': disabled,
-          'employeeId': employeeId,
-          'doctorId': doctorId,
-          'employeeLinked': employeeId != null,
-          'doctorLinked': doctorId != null,
-        };
-      }).where((row) => (row['userUid'] as String).isNotEmpty).toList();
+      final mapped = list
+          .map((row) {
+            final uid = (row['user_uid']?.toString() ?? '').trim();
+            final email = (row['email']?.toString() ?? '').trim();
+            final role = (row['role']?.toString() ?? 'employee').trim();
+            final disabled = (row['disabled'] as bool?) ?? false;
+            final employeeId = employeesByUid[uid];
+            final doctorId = doctorsByUid[uid];
+            return {
+              'userUid': uid,
+              'email': email,
+              'role': role.isEmpty ? 'employee' : role,
+              'disabled': disabled,
+              'employeeId': employeeId,
+              'doctorId': doctorId,
+              'employeeLinked': employeeId != null,
+              'doctorLinked': doctorId != null,
+            };
+          })
+          .where((row) => (row['userUid'] as String).isNotEmpty)
+          .toList();
 
       mapped.sort((a, b) => (a['email'] as String)
           .toLowerCase()
@@ -1259,7 +1293,8 @@ class AuthSupabaseService {
 
       return mapped;
     } catch (e, st) {
-      dev.log('Direct employee account lookup failed', error: e, stackTrace: st);
+      dev.log('Direct employee account lookup failed',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -1310,13 +1345,15 @@ class AuthSupabaseService {
           if (summary.userUid.isEmpty) continue;
           dedup[summary.userUid] = summary;
         } else if (raw is Map) {
-          final summary = AccountUserSummary.fromMap(raw.cast<String, dynamic>());
+          final summary =
+              AccountUserSummary.fromMap(raw.cast<String, dynamic>());
           if (summary.userUid.isEmpty) continue;
           dedup[summary.userUid] = summary;
         }
       }
       final result = dedup.values.toList();
-      result.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+      result.sort(
+          (a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
       if (!includeDisabled) {
         return result.where((e) => !e.disabled).toList();
       }
@@ -1325,13 +1362,16 @@ class AuthSupabaseService {
 
     // 1) RPC SECURITY DEFINER
     try {
-      final res = await _client.rpc('list_employees_with_email', params: {'p_account': accountId});
+      final res = await _client
+          .rpc('list_employees_with_email', params: {'p_account': accountId});
       if (res is List) {
         return mapRows(res);
       }
-      dev.log('list_employees_with_email returned non-list payload; falling back...');
+      dev.log(
+          'list_employees_with_email returned non-list payload; falling back...');
     } catch (e, st) {
-      dev.log('list_employees_with_email RPC failed, trying edge...', error: e, stackTrace: st);
+      dev.log('list_employees_with_email RPC failed, trying edge...',
+          error: e, stackTrace: st);
     }
 
     // 2) Edge Function fallback
@@ -1344,9 +1384,11 @@ class AuthSupabaseService {
       if (data is List) {
         return mapRows(data.map((e) => Map<String, dynamic>.from(e)).toList());
       }
-      dev.log('admin__list_employees returned non-list payload; falling back to profiles...');
+      dev.log(
+          'admin__list_employees returned non-list payload; falling back to profiles...');
     } catch (e, st) {
-      dev.log('admin__list_employees failed, falling back to profiles...', error: e, stackTrace: st);
+      dev.log('admin__list_employees failed, falling back to profiles...',
+          error: e, stackTrace: st);
     }
 
     // 3) profiles fallback
@@ -1366,8 +1408,11 @@ class AuthSupabaseService {
                 ))
             .where((e) => e.userUid.isNotEmpty)
             .toList();
-        mapped.sort((a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
-        return includeDisabled ? mapped : mapped.where((e) => !e.disabled).toList();
+        mapped.sort(
+            (a, b) => a.email.toLowerCase().compareTo(b.email.toLowerCase()));
+        return includeDisabled
+            ? mapped
+            : mapped.where((e) => !e.disabled).toList();
       }
     } catch (e, st) {
       dev.log('profiles fallback failed', error: e, stackTrace: st);
@@ -1414,8 +1459,11 @@ class AuthSupabaseService {
     String? role;
 
     try {
-      final prof =
-      await _client.from('profiles').select('account_id, role').eq('id', user.id).maybeSingle();
+      final prof = await _client
+          .from('profiles')
+          .select('account_id, role')
+          .eq('id', user.id)
+          .maybeSingle();
       accountId = (prof?['account_id'] as String?) ?? accountId;
       role = (prof?['role'] as String?) ?? role;
     } catch (e) {
@@ -1441,8 +1489,8 @@ class AuthSupabaseService {
 
     role ??= _client.auth.currentUser?.appMetadata['role'] as String?;
     final emailLower = (user.email ?? '').toLowerCase();
-    final isSuper =
-        emailLower == superAdminEmail.toLowerCase() || (role?.toLowerCase() == 'superadmin');
+    final isSuper = emailLower == superAdminEmail.toLowerCase() ||
+        (role?.toLowerCase() == 'superadmin');
 
     return {
       'uid': user.id,
@@ -1501,7 +1549,8 @@ class AuthSupabaseService {
       if (row == null) return FeaturePermissions.defaultsAllAllowed();
 
       final list =
-          (row['allowed_features'] as List?)?.map((e) => '$e').toList() ?? const <String>[];
+          (row['allowed_features'] as List?)?.map((e) => '$e').toList() ??
+              const <String>[];
       return FeaturePermissions(
         allowedFeatures: Set<String>.from(list),
         canCreate: (row['can_create'] as bool?) ?? true,
@@ -1509,7 +1558,8 @@ class AuthSupabaseService {
         canDelete: (row['can_delete'] as bool?) ?? true,
       );
     } catch (e, st) {
-      dev.log('fetchFeaturePermissionsForUser failed', error: e, stackTrace: st);
+      dev.log('fetchFeaturePermissionsForUser failed',
+          error: e, stackTrace: st);
       return FeaturePermissions.defaultsAllAllowed();
     }
   }
@@ -1523,14 +1573,18 @@ class AuthSupabaseService {
     required bool canDelete,
   }) async {
     try {
-      await _client.from('account_feature_permissions').upsert({
-        'account_id': accountId,
-        'user_uid': userUid,
-        'allowed_features': allowedFeatures.toList(),
-        'can_create': canCreate,
-        'can_update': canUpdate,
-        'can_delete': canDelete,
-      }, onConflict: 'account_id,user_uid').select().maybeSingle();
+      await _client
+          .from('account_feature_permissions')
+          .upsert({
+            'account_id': accountId,
+            'user_uid': userUid,
+            'allowed_features': allowedFeatures.toList(),
+            'can_create': canCreate,
+            'can_update': canUpdate,
+            'can_delete': canDelete,
+          }, onConflict: 'account_id,user_uid')
+          .select()
+          .maybeSingle();
       return;
     } catch (e, st) {
       dev.log('upsertFeaturePermissions failed', error: e, stackTrace: st);
@@ -1569,8 +1623,10 @@ class AuthSupabaseService {
     int offset = 0,
     bool withCount = false,
   }) async {
-    dynamic q =
-    _client.from('audit_logs').select('*').order('created_at', ascending: false);
+    dynamic q = _client
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', ascending: false);
 
     q = q.eq('account_id', accountId);
 
@@ -1630,8 +1686,10 @@ class AuthSupabaseService {
     required String accountId,
   }) async {
     try {
-      final rows =
-      await _client.from('audit_logs').select('actor_uid, actor_email').eq('account_id', accountId);
+      final rows = await _client
+          .from('audit_logs')
+          .select('actor_uid, actor_email')
+          .eq('account_id', accountId);
 
       final Map<String, String> m = {};
       for (final r in rows as List) {

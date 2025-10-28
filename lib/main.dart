@@ -101,7 +101,8 @@ void main() {
       if (Platform.isWindows) {
         try {
           open.overrideForAll(
-              () => DynamicLibrary.open(r'C:\sqlite\sqlite3.dll'));
+            () => DynamicLibrary.open(r'C:\sqlite\sqlite3.dll'),
+          );
         } catch (_) {}
       }
       sqfliteFfiInit();
@@ -146,7 +147,8 @@ void main() {
           return;
         }
 
-        if (payload != null && payload.isNotEmpty &&
+        if (payload != null &&
+            payload.isNotEmpty &&
             _navKey.currentState != null) {
           try {
             _navKey.currentState!
@@ -211,10 +213,12 @@ void main() {
             ),
           ),
           ChangeNotifierProvider(
-              create: (_) => AppointmentProvider()..loadAppointments()),
+            create: (_) => AppointmentProvider()..loadAppointments(),
+          ),
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(
-              create: (_) => RepositoryProvider()..bootstrap()),
+            create: (_) => RepositoryProvider()..bootstrap(),
+          ),
           // ChatProvider يعتمد على AuthProvider
           ChangeNotifierProxyProvider<AuthProvider, ChatProvider>(
             create: (_) => ChatProvider(),
@@ -282,8 +286,11 @@ Future<void> _checkTimeTampering() async {
 // تسجيل الأخطاء في ملف
 Future<void> _logCrash(String error, String stack) async {
   try {
-    dev.log('App crash captured',
-        error: error, stackTrace: StackTrace.fromString(stack));
+    dev.log(
+      'App crash captured',
+      error: error,
+      stackTrace: StackTrace.fromString(stack),
+    );
     final String filePath = await _crashLogFilePath();
     final file = File(filePath);
     await file.create(recursive: true);
@@ -429,8 +436,10 @@ class _AppInitializerState extends State<AppInitializer> {
     _wasActivated = initialActivated;
   }
 
-  void _maybeNavigateOnActivation(
-      {required bool activated, required bool loggedIn}) {
+  void _maybeNavigateOnActivation({
+    required bool activated,
+    required bool loggedIn,
+  }) {
     if (!_didNavigateToLogin && !_wasActivated && activated && !loggedIn) {
       _didNavigateToLogin = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
