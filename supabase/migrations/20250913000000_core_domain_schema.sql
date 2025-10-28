@@ -37,20 +37,25 @@ CREATE INDEX IF NOT EXISTS account_users_account_idx ON public.account_users(acc
 CREATE INDEX IF NOT EXISTS account_users_user_idx ON public.account_users(user_uid);
 CREATE INDEX IF NOT EXISTS account_users_role_idx ON public.account_users(role);
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
-  user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_uid uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   allowed_features text[] NOT NULL DEFAULT ARRAY[]::text[],
   can_create boolean NOT NULL DEFAULT true,
   can_update boolean NOT NULL DEFAULT true,
   can_delete boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (account_id, user_uid)
+  CONSTRAINT account_feature_permissions_account_user_unique
+    UNIQUE (account_id, user_uid)
 );
 CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
   ON public.account_feature_permissions(account_id);
 CREATE INDEX IF NOT EXISTS account_feature_permissions_user_idx
   ON public.account_feature_permissions(user_uid);
+CREATE UNIQUE INDEX IF NOT EXISTS account_feature_permissions_default_idx
+  ON public.account_feature_permissions(account_id)
+  WHERE user_uid IS NULL;
 -- الجداول التشغيلية ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.patients (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -361,18 +366,25 @@ CREATE TABLE IF NOT EXISTS public.patient_services (
 );
 -- صلاحيات الميزات لكل موظف ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.account_feature_permissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
-  user_uid uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_uid uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   allowed_features text[] NOT NULL DEFAULT ARRAY[]::text[],
   can_create boolean NOT NULL DEFAULT true,
   can_update boolean NOT NULL DEFAULT true,
   can_delete boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (account_id, user_uid)
+  CONSTRAINT account_feature_permissions_account_user_unique
+    UNIQUE (account_id, user_uid)
 );
 CREATE INDEX IF NOT EXISTS account_feature_permissions_account_idx
   ON public.account_feature_permissions(account_id);
+CREATE INDEX IF NOT EXISTS account_feature_permissions_user_idx
+  ON public.account_feature_permissions(user_uid);
+CREATE UNIQUE INDEX IF NOT EXISTS account_feature_permissions_default_idx
+  ON public.account_feature_permissions(account_id)
+  WHERE user_uid IS NULL;
 -- جدول سجلات التدقيق ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
