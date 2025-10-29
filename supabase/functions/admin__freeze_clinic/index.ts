@@ -1,7 +1,7 @@
 // supabase/functions/admin__freeze_clinic/index.ts
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "jsr:@supabase/functions-js";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",

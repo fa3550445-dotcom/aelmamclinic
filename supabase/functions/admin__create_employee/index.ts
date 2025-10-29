@@ -12,6 +12,25 @@ const ADMIN_INTERNAL_TOKEN = Deno.env.get("ADMIN_INTERNAL_TOKEN") ?? "";
 
 const service = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+async function fetchUserByEmail(email: string) {
+  try {
+    const { data, error } = await service.auth.admin.listUsers({
+      page: 1,
+      perPage: 200,
+      filter: `email.eq.${email}`,
+    });
+    if (error) {
+      console.error("[admin__create_employee] listUsers error", error);
+      return null;
+    }
+    const lower = email.toLowerCase();
+    return data?.users?.find((u) => (u.email ?? "").toLowerCase() === lower) ?? null;
+  } catch (err) {
+    console.error("[admin__create_employee] listUsers threw", err);
+    return null;
+  }
+}
+
 async function isInternal(req: Request) {
   const h1 = req.headers.get("x-admin-internal-token");
   const h2 = req.headers.get("x-admin-internal");
@@ -45,15 +64,35 @@ Deno.serve(async (req) => {
 
     // ensure user
     let uid: string;
-    const { data } = await service.auth.admin.getUserByEmail(email);
-    if (data?.user) {
-      uid = data.user.id;
+    const existing = await fetchUserByEmail(email);
+    if (existing?.id) {
+      uid = existing.id;
     } else {
       const { data: created, error } = await service.auth.admin.createUser({
-        email, password, email_confirm: true,
+        email,
+        password,
+        email_confirm: true,
       });
-      if (error || !created?.user) return json({ error: "failed to create user" }, 500);
-      uid = created.user.id;
+      if (error) {
+        const msg = (error.message ?? "").toLowerCase();
+        const already =
+          msg.includes("already registered") ||
+          msg.includes("already exists") ||
+          msg.includes("user with email");
+        if (!already) {
+          console.error("[admin__create_employee] createUser failed", error);
+          return json({ error: "failed to create user", detail: error.message }, 500);
+        }
+        const reused = await fetchUserByEmail(email);
+        if (!reused?.id) {
+          return json({ error: "failed to resolve existing user" }, 500);
+        }
+        uid = reused.id;
+      } else if (created?.user?.id) {
+        uid = created.user.id;
+      } else {
+        return json({ error: "failed to create user" }, 500);
+      }
     }
 
     // prefer your SECURITY DEFINER function

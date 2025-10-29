@@ -95,6 +95,7 @@ serve(async (req) => {
       const msg = cuerr.message?.toLowerCase() ?? "";
       const already =
         msg.includes("already registered") ||
+        msg.includes("already been registered") ||
         msg.includes("user already exists") ||
         msg.includes("duplicate");
       if (!already) {
@@ -104,11 +105,10 @@ serve(async (req) => {
 
     // 6) نادِ الـ RPC المسؤول عن bootstrap
     //   ملاحظة: تعتمد على أسماء المعاملات في الدالة في DB (clinic_name, owner_email).
-    const rpcClient = hasBearer ? adminClient.withHeaders({ Authorization: auth }) : adminClient;
-
-    const { data: rpc, error: rerr } = await rpcClient.rpc(
-      "admin_bootstrap_clinic_for_email",
-      { clinic_name, owner_email },
+    const rpcTarget = hasBearer ? userClient : adminClient;
+    const { data: rpc, error: rerr } = await rpcTarget.rpc(
+      "admin_bootstrap_clinic",
+      { clinic_name, owner_email, owner_role: "owner" },
     );
 
     if (rerr) {
@@ -116,7 +116,7 @@ serve(async (req) => {
     }
 
     console.log(
-      "[admin__create_clinic_owner] rpc admin_bootstrap_clinic_for_email succeeded",
+      "[admin__create_clinic_owner] rpc admin_bootstrap_clinic succeeded",
       { clinic_name, owner_email, usedBearer: hasBearer },
     );
 

@@ -64,7 +64,7 @@ declare
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
   caller_email text := lower(coalesce(claims->>'email',''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   can_manage boolean;
 begin
   -- تحقق الصلاحيات: (owner/admin) على الحساب أو سوبر أدمن بالبريد
@@ -118,7 +118,7 @@ declare
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
   caller_email text := lower(coalesce(claims->>'email',''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   can_manage boolean;
 begin
   select exists (
@@ -169,7 +169,7 @@ declare
   claims jsonb := coalesce(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb);
   caller_uid uuid := nullif(claims->>'sub','')::uuid;
   caller_email text := lower(coalesce(claims->>'email',''));
-  super_admin_email text := 'aelmam.app@gmail.com';
+  super_admin_email text := 'admin@elmam.com';
   can_manage boolean;
 begin
   select exists (
