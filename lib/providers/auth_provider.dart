@@ -12,6 +12,7 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +24,7 @@ import 'package:aelmamclinic/services/auth_supabase_service.dart';
 import 'package:aelmamclinic/services/db_service.dart';
 import 'package:aelmamclinic/services/device_id_service.dart';
 import 'package:aelmamclinic/services/notification_service.dart';
+import 'package:aelmamclinic/utils/logger.dart';
 
 /// مفاتيح التخزين المحلي
 const _kUid = 'auth.uid';
@@ -39,6 +41,55 @@ const _kAllowedFeatures = 'auth.allowedFeatures'; // CSV
 const _kCanCreate = 'auth.canCreate';
 const _kCanUpdate = 'auth.canUpdate';
 const _kCanDelete = 'auth.canDelete';
+
+const bool _kEnableAuthDiagLogs = bool.fromEnvironment(
+  'AUTH_DIAGNOSTIC_LOGS',
+  defaultValue: !kReleaseMode,
+);
+
+const String _kAuthDiagTag = 'AUTH_DIAG';
+
+void _authDiag(String message, {Map<String, Object?>? context}) {
+  if (!_kEnableAuthDiagLogs) return;
+  log.d(
+    context == null || context.isEmpty
+        ? message
+        : '$message | ctx=${context.toString()}',
+    tag: _kAuthDiagTag,
+  );
+}
+
+void _authDiagWarn(
+  String message, {
+  Map<String, Object?>? context,
+  StackTrace? stackTrace,
+}) {
+  if (!_kEnableAuthDiagLogs) return;
+  log.w(
+    context == null || context.isEmpty
+        ? message
+        : '$message | ctx=${context.toString()}',
+    tag: _kAuthDiagTag,
+    st: stackTrace,
+  );
+}
+
+void _authDiagError(
+  String message, {
+  Map<String, Object?>? context,
+  Object? error,
+  StackTrace? stackTrace,
+}) {
+  if (!_kEnableAuthDiagLogs) return;
+  log.e(
+    context == null || context.isEmpty
+        ? message
+        : '$message | ctx=${context.toString()}',
+    tag: _kAuthDiagTag,
+    error: error,
+    st: stackTrace,
+  );
+}
 
 /// نتيجة تحقق حراسة الحساب بعد المزامنة من الشبكة.
 enum AuthAccountGuardResult {
@@ -367,28 +418,68 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> _networkRefreshAndMark() async {
+    final startCtx = <String, Object?>{
+      'uid': currentUser?['uid'],
+      'hasAccount': ((currentUser?['accountId'] ?? '').toString().isNotEmpty),
+    };
+    _authDiag('_networkRefreshAndMark:start', context: startCtx);
     bool success = false;
     try {
-      await _refreshUser();      // يجلب من RPCs/fallbacks
+      _authDiag('_networkRefreshAndMark:refreshUser');
+      await _refreshUser(); // يجلب من RPCs/fallbacks
+      _authDiag(
+        '_networkRefreshAndMark:afterRefresh',
+        context: {
+          'uid': currentUser?['uid'],
+          'accountId': currentUser?['accountId'],
+          'role': currentUser?['role'],
+        },
+      );
       if ((currentUser?['accountId'] ?? '').toString().isEmpty) {
         try {
           final acc = await _auth.resolveAccountId();
           if (acc != null && acc.isNotEmpty) {
             currentUser ??= {};
             currentUser!['accountId'] = acc;
+            _authDiag(
+              '_networkRefreshAndMark:resolvedAccountId',
+              context: {'source': 'resolveAccountId', 'accountId': acc},
+            );
           }
         } catch (_) {}
       }
       success = ((currentUser?['accountId'] ?? '').toString().isNotEmpty);
     } catch (e, st) {
       dev.log('_networkRefreshAndMark failed', error: e, stackTrace: st);
+      _authDiagError(
+        '_networkRefreshAndMark:error',
+        context: {
+          'uid': currentUser?['uid'],
+          'accountId': currentUser?['accountId'],
+        },
+        error: e,
+        stackTrace: st,
+      );
     }
 
     await _persistUser();
+    _authDiag('_networkRefreshAndMark:persisted', context: {
+      'uid': currentUser?['uid'],
+      'accountId': currentUser?['accountId'],
+      'success': success,
+    });
 
     if (success) {
       final sp = await SharedPreferences.getInstance();
       await sp.setString(_kLastNetCheckAt, DateTime.now().toIso8601String());
+      _authDiag('_networkRefreshAndMark:success', context: {
+        'accountId': currentUser?['accountId'],
+        'role': currentUser?['role'],
+      });
+    } else {
+      _authDiagWarn('_networkRefreshAndMark:missingAccountId', context: {
+        'uid': currentUser?['uid'],
+      });
     }
     return success;
   }
@@ -476,20 +567,36 @@ class AuthProvider extends ChangeNotifier {
   /// يتأكد أن الحساب الفعّال قابل للكتابة (غير مجمّد/غير معطّل) وإلا يخرج.
   Future<AuthAccountGuardResult> _ensureActiveAccountOrSignOut() async {
     if (!isLoggedIn) {
+      _authDiag('_ensureActiveAccountOrSignOut:signedOutEarly');
       return AuthAccountGuardResult.signedOut;
     }
     if (isSuperAdmin) {
+      _authDiag('_ensureActiveAccountOrSignOut:superAdminBypass', context: {
+        'uid': uid,
+      });
       return AuthAccountGuardResult.ok; // السوبر أدمن خارج نطاق الحسابات
     }
+    _authDiag('_ensureActiveAccountOrSignOut:start', context: {
+      'uid': uid,
+      'accountId': accountId,
+    });
     const maxAttempts = 3;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
+        _authDiag('_ensureActiveAccountOrSignOut:attempt', context: {
+          'attempt': attempt,
+          'max': maxAttempts,
+        });
         final aa = await _auth.resolveActiveAccountOrThrow();
         currentUser ??= {};
         currentUser!['accountId'] = aa.id;
         currentUser!['role'] = aa.role.toLowerCase();
         currentUser!['disabled'] = false;
         await _persistUser();
+        _authDiag('_ensureActiveAccountOrSignOut:ok', context: {
+          'accountId': aa.id,
+          'role': aa.role,
+        });
         return AuthAccountGuardResult.ok;
       } catch (e, st) {
         if (_isTransientNetworkError(e)) {
@@ -497,8 +604,22 @@ class AuthProvider extends ChangeNotifier {
           dev.log(
             'Transient error while validating active account (attempt $attempt/$maxAttempts): $e',
           );
+          _authDiagWarn(
+            '_ensureActiveAccountOrSignOut:transientError',
+            context: {
+              'attempt': attempt,
+              'max': maxAttempts,
+              'error': e.runtimeType.toString(),
+            },
+            stackTrace: st,
+          );
           if (attempt >= maxAttempts) {
             dev.log('Keeping session after transient failure to validate account.');
+            _authDiagWarn('_ensureActiveAccountOrSignOut:transientGivingUp',
+                context: {
+                  'attempt': attempt,
+                  'error': e.runtimeType.toString(),
+                });
             return AuthAccountGuardResult.transientFailure;
           }
           await Future.delayed(delay);
@@ -522,10 +643,22 @@ class AuthProvider extends ChangeNotifier {
         currentUser ??= {};
         currentUser!['disabled'] = true;
         await _persistUser();
+        _authDiagError(
+          '_ensureActiveAccountOrSignOut:failure',
+          context: {
+            'result': result.name,
+            'attempt': attempt,
+          },
+          error: e,
+          stackTrace: st,
+        );
         await signOut();
         return result;
       }
     }
+    _authDiagWarn('_ensureActiveAccountOrSignOut:unknownOutcome', context: {
+      'uid': uid,
+    });
     return AuthAccountGuardResult.unknown;
   }
 
