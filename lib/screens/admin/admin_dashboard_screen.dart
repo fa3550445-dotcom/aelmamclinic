@@ -93,6 +93,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  void _showProvisioningOutcome({
+    required String successMessage,
+    required ProvisioningResult result,
+  }) {
+    final lines = <String>[successMessage];
+    final details = <String>[];
+    final accountId = result.accountId;
+    final userUid = result.userUid;
+    final role = result.role;
+    if (accountId != null && accountId.isNotEmpty) {
+      details.add('الحساب: $accountId');
+    }
+    if (userUid != null && userUid.isNotEmpty) {
+      details.add('المستخدم: $userUid');
+    }
+    if (role.isNotEmpty) {
+      details.add('الدور: $role');
+    }
+    if (details.isNotEmpty) {
+      lines.add(details.join(' • '));
+    }
+    if (result.warnings.isNotEmpty) {
+      lines.addAll(result.warnings.map((w) => '⚠️ $w'));
+    }
+    _snack(lines.join('\n'));
+  }
+
   // ---------- Data ----------
   Future<void> _fetchClinics() async {
     try {
@@ -141,13 +168,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     FocusScope.of(context).unfocus();
     setState(() => _busy = true);
     try {
-      await _authService.createClinicAccount(
+      final result = await _authService.createClinicAccount(
         clinicName: name,
         ownerEmail: email,
         ownerPassword: pass,
       );
-
-      _snack('✅ تم إنشاء العيادة وحساب المالك');
+      _showProvisioningOutcome(
+        successMessage: '✅ تم إنشاء العيادة وحساب المالك',
+        result: result,
+      );
       _clinicNameCtrl.clear();
       _ownerEmailCtrl.clear();
       _ownerPassCtrl.clear();
@@ -187,12 +216,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     FocusScope.of(context).unfocus();
     setState(() => _busy = true);
     try {
-      await _authService.createEmployeeAccount(
+      final result = await _authService.createEmployeeAccount(
         clinicId: _selectedClinic!.id,
         email: email,
         password: pass,
       );
-      _snack('✅ تم إنشاء حساب الموظف');
+      _showProvisioningOutcome(
+        successMessage: '✅ تم إنشاء حساب الموظف',
+        result: result,
+      );
       _staffEmailCtrl.clear();
       _staffPassCtrl.clear();
     } catch (e) {
