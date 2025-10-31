@@ -383,6 +383,10 @@ class ChatService {
         .ilike('email', email.toLowerCase())
         .maybeSingle();
 
+    if (targetRow == null) {
+      throw 'لا يوجد مستخدم بالبريد: $email';
+    }
+
     final otherUid = targetRow['user_uid'].toString();
     final otherEmail = (targetRow['email']?.toString() ?? email).toLowerCase();
 
@@ -498,7 +502,6 @@ class ChatService {
       'updated_at': nowIso,
     });
 
-    final rows = <Map<String, dynamic>>[
     final participantRows = <Map<String, dynamic>>[
       {
         'conversation_id': convId,
