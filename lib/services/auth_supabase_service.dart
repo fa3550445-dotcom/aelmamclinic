@@ -194,7 +194,7 @@ class AuthSupabaseService {
   // 🔒 قنوات Realtime للحراسة (تجميد الحساب/تعطيل الموظف)
   RealtimeChannel? _guardAccountsChannel;
   RealtimeChannel? _guardAccountUsersChannel;
-  RealtimeChannel? _guardClinicsChannel; // لمخططات قديمة تحفظ frozen في clinics
+  RealtimeChannel? _guardClinicsChannel; // قد لا تعمل على View في بيئات معينة
 
   // مستمع تغيّر حالة المصادقة (اختياري)
   StreamSubscription<AuthState>? _authListener;
@@ -334,7 +334,7 @@ class AuthSupabaseService {
         )
         .subscribe();
 
-    // راقب clinics.frozen أيضًا (لبعض البيئات)
+    // ملاحظة: Realtime على View قد لا يعمل في كل البيئات. الإبقاء لأجل توافق المخططات القديمة.
     _guardClinicsChannel = _client
         .channel('guards:clinics:$accountId')
         .onPostgresChanges(
@@ -1018,6 +1018,27 @@ class AuthSupabaseService {
 
   // ─────────────────── إدارة العيادات / القراءة ───────────────────
 
+  // Fallback داخلي لقراءة العيادات من accounts إذا تعثر الـ View.
+  Future<List<Clinic>> _selectClinicsViaAccounts({
+    List<String>? ids,
+    bool newestFirst = true,
+  }) async {
+    try {
+      dynamic q =
+          _client.from('accounts').select('id, name, frozen, created_at');
+      if (ids != null && ids.isNotEmpty) {
+        q = q.inFilter('id', ids);
+      }
+      final rows = await q.order('created_at', ascending: !newestFirst);
+      return (rows as List)
+          .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
+          .toList();
+    } catch (e, st) {
+      dev.log('_selectClinicsViaAccounts failed', error: e, stackTrace: st);
+      return const <Clinic>[];
+    }
+  }
+
   Future<List<Clinic>> fetchClinics() async {
     final user = _client.auth.currentUser;
     if (user == null) return [];
@@ -1030,8 +1051,9 @@ class AuthSupabaseService {
             .toList();
         return rows;
       } catch (e, st) {
-        dev.log('admin_list_clinics RPC failed, fallback to direct select',
+        dev.log('admin_list_clinics RPC failed, fallback to direct selects',
             error: e, stackTrace: st);
+        // 1) جرب View clinics
         try {
           final rows = await _client
               .from(Clinic.table)
@@ -1041,9 +1063,12 @@ class AuthSupabaseService {
               .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
               .toList();
         } catch (e2, st2) {
-          dev.log('super-admin direct select failed',
-              error: e2, stackTrace: st2);
-          return [];
+          dev.log(
+              'super-admin clinics view select failed, fallback to accounts',
+              error: e2,
+              stackTrace: st2);
+          // 2) Fallback إلى accounts
+          return _selectClinicsViaAccounts();
         }
       }
     }
@@ -1063,26 +1088,33 @@ class AuthSupabaseService {
 
     if (accountIds.isEmpty) return [];
 
-    if (accountIds.length == 1) {
+    // جرّب View clinics ثم ارجع إلى accounts عند الفشل
+    try {
+      if (accountIds.length == 1) {
+        final rows = await _client
+            .from(Clinic.table)
+            .select('id, name, frozen, created_at')
+            .eq('id', accountIds.first)
+            .order('created_at', ascending: false);
+        return (rows as List)
+            .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
+            .toList();
+      }
+
       final rows = await _client
           .from(Clinic.table)
           .select('id, name, frozen, created_at')
-          .eq('id', accountIds.first)
+          .inFilter('id', accountIds)
           .order('created_at', ascending: false);
+
       return (rows as List)
           .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
           .toList();
+    } catch (e, st) {
+      dev.log('clinics view failed, fallback to accounts',
+          error: e, stackTrace: st);
+      return _selectClinicsViaAccounts(ids: accountIds);
     }
-
-    final rows = await _client
-        .from(Clinic.table)
-        .select('id, name, frozen, created_at')
-        .inFilter('id', accountIds)
-        .order('created_at', ascending: false);
-
-    return (rows as List)
-        .map<Clinic>((r) => Clinic.fromJson(Map<String, dynamic>.from(r)))
-        .toList();
   }
 
   // ─────────────────── إدارة العيادات / تجميد وحذف ───────────────────
