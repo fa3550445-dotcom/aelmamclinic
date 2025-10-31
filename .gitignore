@@ -115,3 +115,5 @@ linux/flutter/ephemeral/
 *.exe
 *.env*
 **/supabase/.temp/
+
+supabase/.env.production

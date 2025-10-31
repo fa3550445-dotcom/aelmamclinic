@@ -1,0 +1,26 @@
+PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic> flutter run --dart-define=SUPABASE_URL="https://wiypiofuyrayywciovoo.supabase.co" --dart-define=SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeXBpb2Z1eXJheXl3Y2lvdm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NjczOTcsImV4cCI6MjA3MDE0MzM5N30.TwveOqJJfM3eDVwsxaL76YkyVAAzZxeMVxGzLT8EC3E"
+Connected devices:
+Windows (desktop) • windows • windows-x64    • Microsoft Windows [Version 10.0.22631.6060]
+Chrome (web)      • chrome  • web-javascript • Google Chrome 141.0.7390.108
+Edge (web)        • edge    • web-javascript • Microsoft Edge 141.0.3537.71
+[1]: Windows (windows)
+[2]: Chrome (chrome)
+[3]: Edge (edge)
+Please choose one (or "q" to quit): 1
+Launching lib\main.dart on Windows in debug mode...
+lib/models/chat_models.dart(833,11): error G90CBB506: The name of a constructor must match the name of the enclosing class. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(501,40): error G297C951C: Can't find ']' to match '['. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/providers/chat_provider.dart(508,7): error G4121A47C: The setter '_aliasByUser' isn't defined for the type 'ChatProvider'. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/providers/chat_provider.dart(942,39): error G75B77105: Member not found: 'ChatMessage.optimisticText'. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/models/chat_models.dart(746,22): error G311314CC: Method not found: '_parseDeliveryReceipts'. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/models/chat_models.dart(834,24): error G44692867: A value of type 'ChatConversation' can't be returned from a function with return type 'ChatMessage'. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(386,31): error GAE84FB86: Operator '[]' cannot be called on 'Map<String, dynamic>?' because it is potentially null. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(387,34): error GAE84FB86: Operator '[]' cannot be called on 'Map<String, dynamic>?' because it is potentially null. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(389,34): error GAE84FB86: Operator '[]' cannot be called on 'Map<String, dynamic>?' because it is potentially null. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(399,32): error GAE84FB86: Operator '[]' cannot be called on 'Map<String, dynamic>?' because it is potentially null. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(502,5): error G25387D61: Expected an identifier, but got 'final'. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+lib/services/chat_service.dart(501,40): error G67247B7E: Expected ';' after this. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(254,5): error MSB8066: Custom build for 'C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\CMakeFiles\51ec0a8c4ec45fe1abb587995b8bbbfd\flutter_windows.dll.rule;C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\CMakeFiles\fd9fdf1f1c57c450e67bbf2b9ea27be2\flutter_assemble.rule;C:\Users\zidan\AndroidStudioProjects\aelmamclinic\windows\flutter\CMakeLists.txt' exited with code 1. [C:\Users\zidan\AndroidStudioProjects\aelmamclinic\build\windows\x64\flutter\flutter_assemble.vcxproj]
+Building Windows application...                                    90.6s
+Error: Build process failed.
+PS C:\Users\zidan\AndroidStudioProjects\aelmamclinic>

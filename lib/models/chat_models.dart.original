@@ -94,7 +94,7 @@ extension ChatConversationTypeX on ChatConversationType {
 }
 
 /// ─────────── Message Kind / Status ───────────
-enum ChatMessageKind { text, image, file, system }
+enum ChatMessageKind { text, image, file }
 
 extension ChatMessageKindX on ChatMessageKind {
   String get dbValue {
@@ -103,8 +103,6 @@ extension ChatMessageKindX on ChatMessageKind {
         return 'image';
       case ChatMessageKind.file:
         return 'file';
-      case ChatMessageKind.system:
-        return 'system';
       case ChatMessageKind.text:
         return 'text';
     }
@@ -116,8 +114,6 @@ extension ChatMessageKindX on ChatMessageKind {
         return ChatMessageKind.image;
       case 'file':
         return ChatMessageKind.file;
-      case 'system':
-        return ChatMessageKind.system;
       case 'text':
       default:
         return ChatMessageKind.text;
@@ -523,28 +519,6 @@ class ConversationListItem {
       ConversationListItem.fromMap(jsonDecode(source));
 }
 
-/// ─────────── Delivery Receipt ───────────
-
-class ChatDeliveryReceipt {
-  final String userUid;
-  final DateTime deliveredAt;
-
-  const ChatDeliveryReceipt({
-    required this.userUid,
-    required this.deliveredAt,
-  });
-
-  Map<String, dynamic> toMap() => {
-        'user_uid': userUid,
-        'delivered_at': _fmtDate(deliveredAt),
-      };
-
-  factory ChatDeliveryReceipt.fromMap(Map<String, dynamic> map) => ChatDeliveryReceipt(
-        userUid: map['user_uid']?.toString() ?? '',
-        deliveredAt: _parseDate(map['delivered_at']) ?? DateTime.now().toUtc(),
-      );
-}
-
 /// ─────────── Message ───────────
 
 class ChatMessage {
@@ -578,7 +552,6 @@ class ChatMessage {
   final String? accountId; // uuid
   final String? deviceId; // text
   final int? localSeq; // BIGINT: عمود DB local_id (غير localId النصّي أعلاه)
-  final List<ChatDeliveryReceipt> deliveryReceipts;
 
   const ChatMessage({
     required this.id,
@@ -601,7 +574,6 @@ class ChatMessage {
     this.accountId,
     this.deviceId,
     this.localSeq,
-    this.deliveryReceipts = const <ChatDeliveryReceipt>[],
   });
 
   // توافق مع الواجهات
@@ -638,7 +610,6 @@ class ChatMessage {
     String? accountId,
     String? deviceId,
     int? localSeq,
-    List<ChatDeliveryReceipt>? deliveryReceipts,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -661,7 +632,6 @@ class ChatMessage {
       accountId: accountId ?? this.accountId,
       deviceId: deviceId ?? this.deviceId,
       localSeq: localSeq ?? this.localSeq,
-      deliveryReceipts: deliveryReceipts ?? this.deliveryReceipts,
     );
   }
 
@@ -694,8 +664,6 @@ class ChatMessage {
 
       // الحقل المحلي التفاؤلي لديك:
       if (localId != null) 'local_id_client': localId,
-      if (deliveryReceipts.isNotEmpty)
-        'delivery_receipts': deliveryReceipts.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -722,8 +690,6 @@ class ChatMessage {
 
       // تمرير الـ attachments كـ payload لفنكشن إدراج مركّبة إن وُجدت
       if (attachments.isNotEmpty) 'attachments': attachments.map((e) => e.toMap()).toList(),
-      if (deliveryReceipts.isNotEmpty)
-        'delivery_receipts': deliveryReceipts.map((e) => e.toMap()).toList(),
     };
 
     map.removeWhere((k, v) => v == null);
@@ -731,23 +697,22 @@ class ChatMessage {
   }
 
   factory ChatMessage.fromMap(Map<String, dynamic> map, {String? currentUid}) {
-    // ???????? (Storage ?? inline)
+    // المرفقات
     List<ChatAttachment> atts = const [];
     final rawAtt = map['attachments'];
     if (rawAtt is List) {
       atts =
           rawAtt.whereType<Map<String, dynamic>>().map(ChatAttachment.fromMap).toList();
     } else if (map['image_url'] != null) {
+      // توافق مع حقل image_url المفرد
       atts = [
         ChatAttachment(type: ChatAttachmentType.image, url: map['image_url'].toString()),
       ];
     }
 
-    final receipts = _parseDeliveryReceipts(map['delivery_receipts']);
     final senderUid = map['sender_uid']?.toString() ?? '';
-    final myUid = (currentUid ?? '').trim();
 
-    // ???? ?????: ?? DB ?? ?????? ????
+    // حالة واجهة: من DB أو اشتقاق بسيط
     ChatMessageStatus status;
     final statusRaw = map['status']?.toString();
     if (statusRaw != null && statusRaw.isNotEmpty) {
@@ -761,39 +726,28 @@ class ChatMessage {
     } else if (map['sent_at'] != null || _isTruthy(map['sent'])) {
       status = ChatMessageStatus.sent;
     } else {
-      status = (myUid.isNotEmpty && senderUid == myUid)
+      // افتراضي معقول
+      status = ((currentUid ?? '').isNotEmpty && senderUid == currentUid)
           ? ChatMessageStatus.sent
           : ChatMessageStatus.delivered;
     }
 
-    if (myUid.isNotEmpty && senderUid == myUid) {
-      final hasExternalReceipt = receipts.any((r) => r.userUid != myUid);
-      if (hasExternalReceipt &&
-          status != ChatMessageStatus.read &&
-          status != ChatMessageStatus.failed) {
-        if (status == ChatMessageStatus.sending || status == ChatMessageStatus.sent) {
-          status = ChatMessageStatus.delivered;
-        }
-      }
-    }
-
+    // ✅ النص: نعطي أولوية لـ body (لأن التعديل يحدث على body)
     final body = (map['body'] ?? map['text'])?.toString();
 
+    // نوع الرسالة (إن لم يأتِ، فحسب المرفقات)
     final kindRaw = map['kind']?.toString();
-    final ChatMessageKind kind;
-    if (kindRaw != null && kindRaw.trim().isNotEmpty) {
-      kind = ChatMessageKindX.fromDb(kindRaw);
-    } else if (atts.isNotEmpty) {
-      kind = ChatMessageKind.image;
-    } else {
-      kind = ChatMessageKind.text;
-    }
+    final ChatMessageKind kind = (kindRaw == null || kindRaw.trim().isEmpty)
+        ? (atts.isNotEmpty ? ChatMessageKind.image : ChatMessageKind.text)
+        : ChatMessageKindX.fromDb(kindRaw);
 
-    final localIdClient = map['local_id_client']?.toString();
+    // local_id قد يكون BIGINT (DB) أو local-id نصّي محلي
+    final localIdClient = map['local_id_client']?.toString(); // إن أعدناه من الكلاينت
     final localIdStr =
-        map['local_id'] != null && map['local_id'] is String ? map['local_id'] as String : null;
-    final localSeq = _toInt(map['local_id']);
+    map['local_id'] != null && map['local_id'] is String ? map['local_id'] as String : null;
+    final localSeq = _toInt(map['local_id']); // BIGINT في DB
 
+    // mentions (اختياري)
     List<String>? mentions;
     if (map['mentions'] is List) {
       mentions = (map['mentions'] as List)
@@ -818,22 +772,161 @@ class ChatMessage {
       editedAt: _parseDate(map['edited_at']),
       deletedAt: _parseDate(map['deleted_at']),
       status: status,
-      localId: localIdClient ?? localIdStr,
+      localId: localIdClient ?? localIdStr, // نعيد أي قيمة نصية كما هي
       replyToMessageId: map['reply_to_message_id']?.toString(),
       replyToSnippet: map['reply_to_snippet']?.toString(),
       mentions: mentions,
+
+      // triplet
       accountId: map['account_id']?.toString(),
       deviceId: map['device_id']?.toString(),
       localSeq: localSeq,
-      deliveryReceipts: receipts,
     );
   }
 
   String toJson() => jsonEncode(toMap());
-  factory ChatConversation.fromJson(String source) =>
-      ChatConversation.fromMap(jsonDecode(source));
+  factory ChatMessage.fromJson(String source, {String? currentUid}) =>
+      ChatMessage.fromMap(jsonDecode(source), currentUid: currentUid);
+
+  /// منشئ تفاؤلي لرسالة نصية
+  static ChatMessage optimisticText({
+    required String conversationId,
+    required String senderUid,
+    required String text,
+    String? senderEmail,
+    String? accountId,
+    String? deviceId,
+    int? localSeq,
+    String? replyToMessageId,
+    String? replyToSnippet,
+    List<String>? mentions,
+  }) {
+    final id = _randId(prefix: 'local');
+    return ChatMessage(
+      id: id,
+      localId: id, // المفتاح النصّي المحلي للاقتران
+      conversationId: conversationId,
+      senderUid: senderUid,
+      senderEmail: senderEmail,
+      kind: ChatMessageKind.text,
+      body: text,
+      createdAt: DateTime.now().toUtc(),
+      status: ChatMessageStatus.sending,
+      // reply/mentions
+      replyToMessageId: replyToMessageId,
+      replyToSnippet: replyToSnippet,
+      mentions: mentions?.map(_lc).toList(),
+      // triplet (اختياري)
+      accountId: accountId,
+      deviceId: deviceId,
+      localSeq: localSeq,
+    );
+  }
+
+  /// منشئ تفاؤلي لرسالة صور/ملفات (يمكن إبقاء المرفقات فارغة حتى رفعها)
+  static ChatMessage optimisticImages({
+    required String conversationId,
+    required String senderUid,
+    required List<File> files, // placeholder لتوليد بيانات أولية إن رغبت
+    String? senderEmail,
+    String? caption,
+    String? accountId,
+    String? deviceId,
+    int? localSeq,
+    String? replyToMessageId,
+    String? replyToSnippet,
+    List<String>? mentions,
+  }) {
+    final id = _randId(prefix: 'local');
+    return ChatMessage(
+      id: id,
+      localId: id,
+      conversationId: conversationId,
+      senderUid: senderUid,
+      senderEmail: senderEmail,
+      kind: ChatMessageKind.image,
+      body: (caption ?? '').trim().isEmpty ? null : caption!.trim(),
+      attachments: const [], // سنملؤها بعد الرفع
+      createdAt: DateTime.now().toUtc(),
+      status: ChatMessageStatus.sending,
+      // reply/mentions
+      replyToMessageId: replyToMessageId,
+      replyToSnippet: replyToSnippet,
+      mentions: mentions?.map(_lc).toList(),
+      // triplet
+      accountId: accountId,
+      deviceId: deviceId,
+      localSeq: localSeq,
+    );
+  }
 }
 
-/// ─────────── ConversationListItem (Overview) ───────────
-/// عنصر لقائمة المحادثات: يجمع المحادثة + آخر رسالة + عنوان عرض + شارات إضافية.
-/// مرن في fromMap ليتحمّل مخططات مختلفة من السيرفر.
+/// ─────────── Participant (مطلوب في ChatProvider) ───────────
+
+class ChatParticipant {
+  final String conversationId;
+  final String userUid;
+  final String email;
+  final DateTime? joinedAt;
+
+  const ChatParticipant({
+    required this.conversationId,
+    required this.userUid,
+    required this.email,
+    this.joinedAt,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'conversation_id': conversationId,
+    'user_uid': userUid,
+    'email': email,
+    if (joinedAt != null) 'joined_at': _fmtDate(joinedAt),
+  };
+
+  factory ChatParticipant.fromMap(Map<String, dynamic> m) => ChatParticipant(
+    conversationId: m['conversation_id']?.toString() ?? '',
+    userUid: m['user_uid']?.toString() ?? '',
+    email: (m['email']?.toString() ?? '').toLowerCase(),
+    joinedAt: _parseDate(m['joined_at']),
+  );
+}
+
+/// ─────────── Read State (اختياري) ───────────
+class ChatReadState {
+  final String conversationId;
+  final String userUid;
+  final String? lastReadMessageId;
+  final DateTime? lastReadAt;
+
+  const ChatReadState({
+    required this.conversationId,
+    required this.userUid,
+    this.lastReadMessageId,
+    this.lastReadAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'conversation_id': conversationId,
+      'user_uid': userUid,
+      'last_read_message_id': lastReadMessageId,
+      'last_read_at': _fmtDate(lastReadAt),
+    };
+  }
+
+  factory ChatReadState.fromMap(Map<String, dynamic> map) {
+    return ChatReadState(
+      conversationId: map['conversation_id']?.toString() ?? '',
+      userUid: map['user_uid']?.toString() ?? '',
+      lastReadMessageId: map['last_read_message_id']?.toString(),
+      lastReadAt: _parseDate(map['last_read_at']),
+    );
+  }
+}
+
+/// DM key helper to produce a consistent identifier for direct conversations.
+String dmKey(String emailA, String emailB) {
+  final a = _lc(emailA);
+  final b = _lc(emailB);
+  return (a.compareTo(b) <= 0) ? '$a|$b' : '$b|$a';
+}

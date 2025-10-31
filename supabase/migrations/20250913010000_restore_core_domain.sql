@@ -510,7 +510,8 @@ DECLARE
   ];
 BEGIN
   FOR tbl IN SELECT unnest(managed_tables) LOOP
-    EXECUTE format('DROP TRIGGER IF EXISTS %I_set_updated_at ON public.%I', tbl, tbl);
+    IF to_regclass('public.'||tbl) IS NULL THEN CONTINUE; END IF;EXECUTE format('DROP TRIGGER IF EXISTS %I_set_updated_at ON public.%I', tbl, tbl);
     EXECUTE format('CREATE TRIGGER %I_set_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at()', tbl, tbl);
   END LOOP;
 END $$;
+

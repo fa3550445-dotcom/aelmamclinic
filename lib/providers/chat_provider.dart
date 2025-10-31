@@ -1,4 +1,3 @@
-      final aliasByUser = await _chat.fetchAliasMap();
 // lib/providers/chat_provider.dart
 //
 // مزوّد حالة الدردشة مع كاش محلي وتكامل Realtime عبر ChatRealtimeNotifier.
@@ -143,6 +142,7 @@ class ChatProvider extends ChangeNotifier {
     }
     busy = true;
     _safeNotify();
+    try {
       final accId = accountId ?? await fetchAccountIdForCurrentUser();
 
       // بدء Realtime الموحّد
@@ -432,11 +432,6 @@ class ChatProvider extends ChangeNotifier {
           final nick = (other.nickname ?? '').trim();
           tmpDisplay[cid] = nick.isNotEmpty
               ? nick
-              : ((other.email?.isNotEmpty == true) ? other.email! : '???? ????');
-        }
-            tmpDisplay[cid] = alias.trim();
-            continue;
-              ? nick
               : ((other.email?.isNotEmpty == true) ? other.email! : 'بدون بريد');
         }
       }
@@ -589,7 +584,6 @@ class ChatProvider extends ChangeNotifier {
   Future<void> acceptGroupInvitation(String invitationId) async {
     if (invitationId.isEmpty) return;
     await _chat.acceptGroupInvitation(invitationId);
-    await refreshInvitations();
     await refreshConversations();
   }
 
@@ -600,7 +594,6 @@ class ChatProvider extends ChangeNotifier {
     if (invitationId.isEmpty) return;
     await _chat.declineGroupInvitation(invitationId, note: note);
     await refreshInvitations();
-  }
   }
 
   // --------------------------------------------------------------------------
@@ -1603,6 +1596,7 @@ class ChatProvider extends ChangeNotifier {
     try { _rtPartSub?.cancel(); _rtPartSub = null; } catch (_) {}
     try { _rtMsgSub?.cancel(); _rtMsgSub = null; } catch (_) {}
 
+    _aliasByUser.clear();
     super.dispose();
   }
 } // ← أغلق صنف ChatProvider هنا فقط

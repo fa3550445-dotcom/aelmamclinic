@@ -522,10 +522,6 @@ class ChatService {
           .from('chat_group_invitations')
           .upsert(invites, onConflict: 'conversation_id,invitee_uid');
     }
-      await _sb
-          .from('chat_group_invitations')
-    }
-    }
 
     return ChatConversation.fromMap({
       'id': convId,

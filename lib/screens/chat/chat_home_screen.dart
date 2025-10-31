@@ -215,6 +215,88 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
     );
   }
 
+  Future<void> _onAcceptInvitation(ChatGroupInvitation invitation) async {
+    if (_processingInvitationId != null) return;
+    setState(() => _processingInvitationId = invitation.id);
+    final chat = context.read<ChatProvider>();
+    try {
+      await chat.acceptGroupInvitation(invitation.id);
+      if (!mounted) return;
+      await _openConversation(invitation.conversationId);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تعذر قبول الدعوة: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingInvitationId = null);
+    }
+  }
+
+  Future<void> _onDeclineInvitation(ChatGroupInvitation invitation) async {
+    if (_processingInvitationId != null) return;
+    setState(() => _processingInvitationId = invitation.id);
+    try {
+      await context.read<ChatProvider>().declineGroupInvitation(invitation.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم رفض الدعوة')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تعذر رفض الدعوة: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingInvitationId = null);
+    }
+  }
+
+  Future<void> _showAliasDialog(ChatConversation conversation) async {
+    final chat = context.read<ChatProvider>();
+    final initial = chat.aliasForConversation(conversation.id) ?? '';
+    final controller = TextEditingController(text: initial);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => Directionality(
+        textDirection: ui.TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('تحديد اسم بديل'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'اكتب الاسم الذي تريد إظهاره',
+            ),
+            textDirection: ui.TextDirection.rtl,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+              child: const Text('حفظ'),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+    if (result == null) return;
+    final trimmed = result.trim();
+    if (trimmed == initial.trim()) return;
+    await chat.updateConversationAlias(conversationId: conversation.id, alias: trimmed);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(trimmed.isEmpty ? 'تم إزالة الاسم البديل' : 'تم تحديث الاسم البديل')),
+    );
+  }
+
   Future<void> _openConversation(String conversationId) async {
     final chat = context.read<ChatProvider>();
     await chat.openConversation(conversationId);
@@ -235,6 +317,10 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
 
   Future<void> _showConversationActions(
       BuildContext context, ChatConversation conversation) async {
+    final chat = context.read<ChatProvider>();
+    final isDirect = !conversation.isGroup;
+    final alias = isDirect ? chat.aliasForConversation(conversation.id) : null;
+
     await showModalBottomSheet<void>(
       context: context,
       builder: (_) => Directionality(
@@ -251,12 +337,24 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
                   _openConversation(conversation.id);
                 },
               ),
+              if (isDirect)
+                ListTile(
+                  leading: const Icon(Icons.edit_rounded),
+                  title: const Text('تعديل الاسم البديل'),
+                  subtitle: (alias != null && alias.isNotEmpty)
+                      ? Text('الاسم الحالي: $alias')
+                      : const Text('سيظهر البريد الأصلي إذا تُرك الحقل فارغاً'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showAliasDialog(conversation);
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.mark_email_read_rounded),
                 title: const Text('تعيين كمقروء'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await context.read<ChatProvider>().markConversationRead(conversation.id);
+                  await chat.markConversationRead(conversation.id);
                 },
               ),
             ],
