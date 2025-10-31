@@ -1,3 +1,17 @@
+-- fix: ensure clean create by dropping old version (arg defaults cause 42P13)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'admin_create_employee_full'
+      AND p.proargtypes = ARRAY['uuid'::regtype,'text'::regtype,'text'::regtype]::oidvector
+  ) THEN
+    DROP FUNCTION public.admin_create_employee_full(uuid, text, text);
+  END IF;
+END$$;
 -- 20250913040000_restore_admin_bootstrap.sql
 -- Restores the SECURITY DEFINER helper used by admin flows and edge functions
 -- to bootstrap a clinic and attach the owner user.
@@ -128,3 +142,5 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_create_employee_full(uuid, text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_create_employee_full(uuid, text, text) TO authenticated;
+
+

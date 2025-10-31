@@ -23,15 +23,16 @@ import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:aelmamclinic/core/constants.dart';
+import 'package:aelmamclinic/models/chat_invitation.dart';
 import 'package:aelmamclinic/models/chat_models.dart'
     show
-    ChatAttachment,
-    ChatConversation,
-    ChatMessage,
-    ChatMessageKind,
-    ChatMessageKindX,
-    ChatMessageStatus,
-    ConversationListItem;
+        ChatAttachment,
+        ChatConversation,
+        ChatMessage,
+        ChatMessageKind,
+        ChatMessageKindX,
+        ChatMessageStatus,
+        ConversationListItem;
 import 'package:aelmamclinic/models/chat_reaction.dart';
 import 'package:aelmamclinic/utils/device_id.dart';
 import 'package:aelmamclinic/utils/local_seq.dart';
@@ -373,36 +374,20 @@ class ChatService {
       throw 'لا يوجد مستخدم مسجّل الدخول.';
     }
     final me = await _myAccountRow();
-    final isSuper = (me.role?.toLowerCase() == 'superadmin');
-    final myAcc = me.accountId;
+    final myRole = (me.role?.toLowerCase() ?? '');
+    final myAcc = (me.accountId ?? '').trim();
 
-    Map<String, dynamic>? targetRow;
-    if (!isSuper) {
-      if (myAcc == null || myAcc.isEmpty) {
-        throw 'تعذّر تحديد الحساب الحالي.';
-      }
-      targetRow = await _sb
-          .from(_tblAccUsers)
-          .select('user_uid, email, account_id, role')
-          .eq('account_id', myAcc)
-          .ilike('email', email.toLowerCase())
-          .maybeSingle();
-    } else {
-      targetRow = await _sb
-          .from(_tblAccUsers)
-          .select('user_uid, email, account_id, role')
-          .ilike('email', email.toLowerCase())
-          .maybeSingle();
-    }
-
-    if (targetRow == null) throw 'لا يوجد مستخدم بهذا البريد.';
+    final targetRow = await _sb
+        .from(_tblAccUsers)
+        .select('user_uid, email, account_id, role')
+        .ilike('email', email.toLowerCase())
+        .maybeSingle();
 
     final otherUid = targetRow['user_uid'].toString();
     final otherEmail = (targetRow['email']?.toString() ?? email).toLowerCase();
 
     final targetRole = (targetRow['role']?.toString() ?? '').toLowerCase();
-    final myRole = (me.role?.toLowerCase() ?? '');
-    if (targetRole == 'superadmin' && myRole != 'owner') {
+    if (targetRole == 'superadmin' && myRole != 'superadmin') {
       throw 'غير مسموح للموظفين مراسلة السوبر أدمن مباشرة.';
     }
     if (otherUid == u.id) throw 'لا يمكنك مراسلة نفسك.';
@@ -410,13 +395,11 @@ class ChatService {
     final existing = await findExistingDMByUids(uidA: u.id, uidB: otherUid);
     if (existing != null) return existing;
 
-    final convAccountId =
-        (!isSuper ? myAcc : (targetRow['account_id']?.toString() ?? myAcc)) ??
-            '';
-    if (convAccountId.isEmpty) {
-      throw 'تعذّر تحديد الحساب المرتبط بالمحادثة.';
+    String? convAccountId;
+    final otherAcc = (targetRow['account_id']?.toString() ?? '').trim();
+    if (otherAcc.isNotEmpty && myAcc.isNotEmpty && otherAcc == myAcc) {
+      convAccountId = myAcc;
     }
-
     final convId = _uuidV4();
     final nowIso = DateTime.now().toUtc().toIso8601String();
 
@@ -483,19 +466,22 @@ class ChatService {
     final myAcc = (me.accountId ?? '').trim();
     if (myAcc.isEmpty) throw 'تعذّر تحديد الحساب الحالي.';
 
-    final members = <({String uid, String email})>[];
+    final members = <({String uid, String email, String accountId})>[];
     for (final e in memberEmails) {
       final row = await _sb
           .from(_tblAccUsers)
-          .select('user_uid, email')
+          .select('user_uid, email, account_id')
           .ilike('email', e.toLowerCase())
           .maybeSingle();
       if (row == null) throw 'لا يوجد مستخدم بالبريد: $e';
       final uid = row['user_uid'].toString();
       if (uid == u.id) continue;
       if (!members.any((m) => m.uid == uid)) {
-        members.add(
-            (uid: uid, email: (row['email']?.toString() ?? e).toLowerCase()));
+        members.add((
+          uid: uid,
+          email: (row['email']?.toString() ?? e).toLowerCase(),
+          accountId: (row['account_id']?.toString() ?? '').trim(),
+        ));
       }
     }
 
@@ -513,6 +499,7 @@ class ChatService {
     });
 
     final rows = <Map<String, dynamic>>[
+    final participantRows = <Map<String, dynamic>>[
       {
         'conversation_id': convId,
         'user_uid': u.id,
@@ -520,27 +507,24 @@ class ChatService {
         'joined_at': nowIso,
       },
     ];
-    for (final m in members) {
-      rows.add({
-        'conversation_id': convId,
-        'user_uid': m.uid,
-        'email': m.email,
-        'joined_at': nowIso,
-      });
+    await _sb.from(_tblParts).upsert(participantRows, onConflict: 'conversation_id,user_uid');
+    if (members.isNotEmpty) {
+      final invites = members
+          .map((m) => {
+                'conversation_id': convId,
+                'inviter_uid': u.id,
+                'invitee_uid': m.uid,
+                'invitee_email': m.email,
+                'created_at': nowIso,
+              })
+          .toList();
+      await _sb
+          .from('chat_group_invitations')
+          .upsert(invites, onConflict: 'conversation_id,invitee_uid');
     }
-
-    // ✅ upsert بدل insert لضمان المتانة
-    await _sb.from(_tblParts).upsert(rows, onConflict: 'conversation_id,user_uid');
-
-    final row = await _sb
-        .from(_tblConvs)
-        .select(
-        'id, is_group, title, account_id, created_by, created_at, updated_at, last_msg_at, last_msg_snippet')
-        .eq('id', convId)
-        .maybeSingle();
-
-    if (row != null) {
-      return ChatConversation.fromMap(row);
+      await _sb
+          .from('chat_group_invitations')
+    }
     }
 
     return ChatConversation.fromMap({
@@ -669,20 +653,27 @@ class ChatService {
         reply_to_message_id, reply_to_snippet, mentions,
         attachments:${_tblAtts}!$_relAttsByMsg (
           id, message_id, bucket, path, mime_type, size_bytes, width, height, created_at
+        ),
+        delivery_receipts:chat_delivery_receipts (
+          user_uid, delivered_at
         )
       ''').eq('conversation_id', conversationId).or('deleted.is.false,deleted.is.null').order('created_at', ascending: true).limit(limit);
 
       final list = <ChatMessage>[];
       for (final row in (data as List).whereType<Map<String, dynamic>>()) {
         final normalized = await _withHttpAttachments(row);
-        list.add(ChatMessage.fromMap(normalized));
+        list.add(ChatMessage.fromMap(
+          normalized,
+          currentUid: _sb.auth.currentUser?.id,
+        ));
       }
+      unawaited(_markDeliveredFor(list));
       return list;
     } catch (_) {
       final data = await _sb
           .from(_tblMsgs)
           .select(
-          'id, conversation_id, sender_uid, sender_email, kind, body, text, edited, deleted, created_at, edited_at, deleted_at, reply_to_message_id, reply_to_snippet, mentions, attachments')
+          'id, conversation_id, sender_uid, sender_email, kind, body, text, edited, deleted, created_at, edited_at, deleted_at, reply_to_message_id, reply_to_snippet, mentions, attachments, delivery_receipts:chat_delivery_receipts(user_uid, delivered_at)')
           .eq('conversation_id', conversationId)
           .or('deleted.is.false,deleted.is.null')
           .order('created_at', ascending: true)
@@ -691,8 +682,12 @@ class ChatService {
       final list = <ChatMessage>[];
       for (final row in (data as List).whereType<Map<String, dynamic>>()) {
         final normalized = await _withHttpAttachments(row);
-        list.add(ChatMessage.fromMap(normalized));
+        list.add(ChatMessage.fromMap(
+          normalized,
+          currentUid: _sb.auth.currentUser?.id,
+        ));
       }
+      unawaited(_markDeliveredFor(list));
       return list;
     }
   }
@@ -715,8 +710,12 @@ class ChatService {
       final list = <ChatMessage>[];
       for (final row in (data as List).whereType<Map<String, dynamic>>()) {
         final normalized = await _withHttpAttachments(row);
-        list.add(ChatMessage.fromMap(normalized));
+        list.add(ChatMessage.fromMap(
+          normalized,
+          currentUid: _sb.auth.currentUser?.id,
+        ));
       }
+      unawaited(_markDeliveredFor(list));
       return list;
     } catch (_) {
       final data = await _sb
@@ -732,10 +731,111 @@ class ChatService {
       final list = <ChatMessage>[];
       for (final row in (data as List).whereType<Map<String, dynamic>>()) {
         final normalized = await _withHttpAttachments(row);
-        list.add(ChatMessage.fromMap(normalized));
+        list.add(ChatMessage.fromMap(
+          normalized,
+          currentUid: _sb.auth.currentUser?.id,
+        ));
       }
+      unawaited(_markDeliveredFor(list));
       return list;
     }
+  }
+
+  Future<List<ChatGroupInvitation>> fetchMyGroupInvitations({
+    bool pendingOnly = true,
+  }) async {
+    final u = _sb.auth.currentUser;
+    if (u == null) return const [];
+    try {
+      final rows = await _sb
+          .from('v_chat_group_invitations_for_me')
+          .select()
+          .order('created_at', ascending: false);
+      final list = (rows as List)
+          .whereType<Map<String, dynamic>>()
+          .map(ChatGroupInvitation.fromMap)
+          .toList();
+      if (!pendingOnly) return list;
+      return list.where((inv) => inv.isPending).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> acceptGroupInvitation(String invitationId) async {
+    if (invitationId.isEmpty) return;
+    try {
+      await _sb.rpc('chat_accept_invitation', params: {
+        'p_invitation_id': invitationId,
+      });
+    } catch (_) {}
+  }
+
+  Future<void> declineGroupInvitation(
+    String invitationId, {
+    String? note,
+  }) async {
+    if (invitationId.isEmpty) return;
+    try {
+      await _sb.rpc('chat_decline_invitation', params: {
+        'p_invitation_id': invitationId,
+        'p_note': note,
+      });
+    } catch (_) {}
+  }
+
+  Future<Map<String, String>> fetchAliasMap() async {
+    final u = _sb.auth.currentUser;
+    if (u == null) return const {};
+    try {
+      final rows = await _sb
+          .from('chat_aliases')
+          .select('target_uid, alias')
+          .eq('owner_uid', u.id);
+      final map = <String, String>{};
+      for (final row in (rows as List).whereType<Map<String, dynamic>>()) {
+        final target = row['target_uid']?.toString();
+        final alias = row['alias']?.toString();
+        if (target != null && alias != null && alias.isNotEmpty) {
+          map[target] = alias;
+        }
+      }
+      return map;
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  Future<void> setAlias({
+    required String targetUid,
+    required String alias,
+  }) async {
+    final u = _sb.auth.currentUser;
+    if (u == null || targetUid.isEmpty) return;
+    final trimmed = alias.trim();
+    if (trimmed.isEmpty) {
+      await removeAlias(targetUid);
+      return;
+    }
+    try {
+      await _sb.from('chat_aliases').upsert({
+        'owner_uid': u.id,
+        'target_uid': targetUid,
+        'alias': trimmed,
+      }, onConflict: 'owner_uid,target_uid');
+    } catch (_) {}
+  }
+
+  Future<void> removeAlias(String targetUid) async {
+    final u = _sb.auth.currentUser;
+    if (u == null || targetUid.isEmpty) return;
+    try {
+      await _sb
+          .from('chat_aliases')
+          .delete()
+          .eq('owner_uid', u.id)
+          .eq('target_uid', targetUid);
+    } catch (_) {}
   }
 
   // ======= اشتراك مضبوط لكل محادثة =======
@@ -786,7 +886,10 @@ class ChatService {
             try {
               row = await _withHttpAttachments(row);
             } catch (_) {}
-            var msg = ChatMessage.fromMap(row);
+            var msg = ChatMessage.fromMap(
+              row,
+              currentUid: _sb.auth.currentUser?.id,
+            );
 
             if (msg.kind == ChatMessageKind.image && msg.attachments.isEmpty) {
               try {
@@ -806,6 +909,9 @@ class ChatService {
               } catch (_) {}
             }
             map[id] = msg;
+            if (ev == PostgresChangeEvent.insert) {
+              unawaited(_markDeliveredFor([msg]));
+            }
           }
           if (ev == PostgresChangeEvent.update &&
               newRow['deleted'] == true &&
@@ -847,6 +953,26 @@ class ChatService {
   List<ChatMessage> _sortedAsc(List<ChatMessage> list) {
     list.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return list;
+  }
+
+  Future<void> _markDeliveredFor(List<ChatMessage> messages) async {
+    final uid = _sb.auth.currentUser?.id;
+    if (uid == null || messages.isEmpty) return;
+
+    final ids = messages
+        .where((m) => m.senderUid != uid)
+        .map((m) => m.id)
+        .where((id) => id.isNotEmpty && !id.startsWith('local-'))
+        .toSet()
+        .toList();
+
+    if (ids.isEmpty) return;
+
+    try {
+      await _sb.rpc('chat_mark_delivered', params: {
+        'p_message_ids': ids,
+      });
+    } catch (_) {}
   }
 
   /// إرسال نص — يأخذ account_id من المحادثة
@@ -906,7 +1032,10 @@ class ChatService {
       snippet: _buildSnippet(kind: ChatMessageKind.text, body: body),
     );
 
-    var out = ChatMessage.fromMap(inserted);
+    var out = ChatMessage.fromMap(
+      inserted,
+      currentUid: _sb.auth.currentUser?.id,
+    );
     if (out.senderUid == u.id) {
       out = out.copyWith(status: ChatMessageStatus.sent);
     }
@@ -1073,7 +1202,10 @@ class ChatService {
           .select()
           .single();
 
-      var msg = ChatMessage.fromMap(inserted);
+      var msg = ChatMessage.fromMap(
+        inserted,
+        currentUid: _sb.auth.currentUser?.id,
+      );
       if (msg.senderUid == u.id) {
         msg = msg.copyWith(status: ChatMessageStatus.sent);
       }
@@ -1251,7 +1383,10 @@ class ChatService {
     final list = <ChatMessage>[];
     for (final r in (rows as List).whereType<Map<String, dynamic>>()) {
       final normalized = await _withHttpAttachments(r);
-      list.add(ChatMessage.fromMap(normalized));
+      list.add(ChatMessage.fromMap(
+        normalized,
+        currentUid: _sb.auth.currentUser?.id,
+      ));
     }
     return list;
   }
@@ -1566,4 +1701,3 @@ class _ChatParticipant {
     email: m['email']?.toString(),
   );
 }
-

@@ -139,7 +139,12 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
 
       final list = (rows as List)
           .whereType<Map<String, dynamic>>()
-          .map(ChatMessage.fromMap)
+          .map(
+            (row) => ChatMessage.fromMap(
+              row as Map<String, dynamic>,
+              currentUid: Supabase.instance.client.auth.currentUser?.id,
+            ),
+          )
           .toList();
 
       setState(() {
@@ -644,4 +649,3 @@ class _CenterMsg extends StatelessWidget {
     );
   }
 }
-

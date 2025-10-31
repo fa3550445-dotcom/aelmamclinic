@@ -1,3 +1,4 @@
+      final aliasByUser = await _chat.fetchAliasMap();
 // lib/providers/chat_provider.dart
 //
 // مزوّد حالة الدردشة مع كاش محلي وتكامل Realtime عبر ChatRealtimeNotifier.
@@ -16,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:aelmamclinic/local/chat_local_store.dart';
+import 'package:aelmamclinic/models/chat_invitation.dart';
 import 'package:aelmamclinic/models/chat_models.dart' as CM;
 import 'package:aelmamclinic/services/chat_service.dart';
 import 'package:aelmamclinic/services/chat_realtime_notifier.dart';
@@ -63,7 +65,11 @@ class ChatProvider extends ChangeNotifier {
   final List<CM.ChatConversation> _conversations = [];
   List<CM.ChatConversation> get conversations => List.unmodifiable(_conversations);
 
+  final List<ChatGroupInvitation> _invitations = [];
+  List<ChatGroupInvitation> get invitations => List.unmodifiable(_invitations);
+
   final Map<String, List<ChatParticipantLocal>> _participantsByConv = {};
+  final Map<String, String> _aliasByUser = {};
   final Map<String, String> _displayTitleByConv = {};
   String displayTitleOf(String conversationId) =>
       _displayTitleByConv[conversationId] ?? 'محادثة';
@@ -137,11 +143,6 @@ class ChatProvider extends ChangeNotifier {
     }
     busy = true;
     _safeNotify();
-    try {
-      await _primeMyEmail();
-      if (_disposed) return;
-
-      // حساب المستخدم (للفلترة في RealtimeHub عبر ChatRealtimeNotifier)
       final accId = accountId ?? await fetchAccountIdForCurrentUser();
 
       // بدء Realtime الموحّد
@@ -156,6 +157,7 @@ class ChatProvider extends ChangeNotifier {
 
       // تحميل القائمة والمشاركين مبدئياً
       await _loadMyConversationsAndParticipants();
+      await refreshInvitations();
       if (_disposed) return;
 
       // الاشتراك في التيارات الموحّدة
@@ -406,6 +408,7 @@ class ChatProvider extends ChangeNotifier {
       final serverList = byId.values.toList();
 
       // عنونة العرض
+      final aliasByUser = await _chat.fetchAliasMap();
       final tmpDisplay = <String, String>{};
       for (final c in serverList) {
         final cid = c.id.trim();
@@ -417,12 +420,22 @@ class ChatProvider extends ChangeNotifier {
         } else {
           final parts = tmpParticipantsByConv[cid] ?? const <ChatParticipantLocal>[];
           final other = parts.firstWhere(
-                (p) => p.userUid != currentUid,
+            (p) => p.userUid != currentUid,
             orElse: () =>
-            parts.isNotEmpty ? parts.first : ChatParticipantLocal.fallback(cid),
+                parts.isNotEmpty ? parts.first : ChatParticipantLocal.fallback(cid),
           );
+          final alias = aliasByUser[other.userUid];
+          if (alias != null && alias.trim().isNotEmpty) {
+            tmpDisplay[cid] = alias.trim();
+            continue;
+          }
           final nick = (other.nickname ?? '').trim();
           tmpDisplay[cid] = nick.isNotEmpty
+              ? nick
+              : ((other.email?.isNotEmpty == true) ? other.email! : '???? ????');
+        }
+            tmpDisplay[cid] = alias.trim();
+            continue;
               ? nick
               : ((other.email?.isNotEmpty == true) ? other.email! : 'بدون بريد');
         }
@@ -497,6 +510,7 @@ class ChatProvider extends ChangeNotifier {
 
       if (myRev != _listRev || _disposed) return;
 
+      _aliasByUser = aliasByUser;
       _participantsByConv
         ..clear()
         ..addAll(tmpParticipantsByConv);
@@ -518,7 +532,10 @@ class ChatProvider extends ChangeNotifier {
 
 
 
-  Future<void> refreshConversations() => _loadMyConversationsAndParticipants();
+  Future<void> refreshConversations() async {
+    await _loadMyConversationsAndParticipants();
+    await refreshInvitations();
+  }
 
   CM.ChatConversation? conversationById(String id) {
     try {
@@ -526,6 +543,64 @@ class ChatProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+  Future<void> refreshInvitations() async {
+    if (_disposed) return;
+    try {
+      final list = await _chat.fetchMyGroupInvitations();
+      if (_disposed) return;
+      _invitations
+        ..clear()
+        ..addAll(list);
+      _safeNotify();
+    } catch (_) {}
+  }
+
+  String? aliasForConversation(String conversationId) {
+    final participants = _participantsByConv[conversationId] ?? const <ChatParticipantLocal>[];
+    if (participants.isEmpty) return null;
+    final other = participants.firstWhere(
+      (p) => p.userUid != currentUid,
+      orElse: () => participants.first,
+    );
+    return _aliasByUser[other.userUid];
+  }
+
+  Future<void> updateConversationAlias({
+    required String conversationId,
+    required String alias,
+  }) async {
+    final participants = _participantsByConv[conversationId] ?? const <ChatParticipantLocal>[];
+    if (participants.isEmpty) return;
+    final other = participants.firstWhere(
+      (p) => p.userUid != currentUid,
+      orElse: () => participants.first,
+    );
+    if (other.userUid.isEmpty) return;
+    final trimmed = alias.trim();
+    if (trimmed.isEmpty) {
+      await _chat.removeAlias(other.userUid);
+    } else {
+      await _chat.setAlias(targetUid: other.userUid, alias: trimmed);
+    }
+    await _loadMyConversationsAndParticipants();
+  }
+
+  Future<void> acceptGroupInvitation(String invitationId) async {
+    if (invitationId.isEmpty) return;
+    await _chat.acceptGroupInvitation(invitationId);
+    await refreshInvitations();
+    await refreshConversations();
+  }
+
+  Future<void> declineGroupInvitation(
+    String invitationId, {
+    String? note,
+  }) async {
+    if (invitationId.isEmpty) return;
+    await _chat.declineGroupInvitation(invitationId, note: note);
+    await refreshInvitations();
+  }
   }
 
   // --------------------------------------------------------------------------
@@ -781,7 +856,12 @@ class ChatProvider extends ChangeNotifier {
     final list = <CM.ChatMessage>[];
     for (final r in (rows as List).whereType<Map<String, dynamic>>()) {
       final normalized = await _withHttpAttachments(r);
-      list.add(CM.ChatMessage.fromMap(normalized));
+      list.add(
+        CM.ChatMessage.fromMap(
+          normalized,
+          currentUid: currentUid,
+        ),
+      );
     }
     return list;
   }
@@ -1240,7 +1320,12 @@ class ChatProvider extends ChangeNotifier {
 
       final list = (rows as List)
           .whereType<Map<String, dynamic>>()
-          .map(CM.ChatMessage.fromMap)
+          .map(
+            (row) => CM.ChatMessage.fromMap(
+              row as Map<String, dynamic>,
+              currentUid: currentUid,
+            ),
+          )
           .toList();
 
       return list;

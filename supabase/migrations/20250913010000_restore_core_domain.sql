@@ -514,20 +514,3 @@ BEGIN
     EXECUTE format('CREATE TRIGGER %I_set_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at()', tbl, tbl);
   END LOOP;
 END $$;
-
-CREATE TABLE IF NOT EXISTS public.sync_uuid_mapping (
-  table_name text NOT NULL,
-  uuid text NOT NULL,
-  record_id integer,
-  account_id text,
-  device_id text,
-  local_sync_id integer,
-  inserted_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (table_name, uuid)
-);
-
-CREATE INDEX IF NOT EXISTS sync_uuid_mapping_table_uuid_idx
-  ON public.sync_uuid_mapping (table_name, uuid);
-
-CREATE INDEX IF NOT EXISTS sync_uuid_mapping_account_idx
-  ON public.sync_uuid_mapping (account_id);

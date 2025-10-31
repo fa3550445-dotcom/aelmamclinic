@@ -6,6 +6,7 @@
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:aelmamclinic/core/theme.dart';
+import 'package:aelmamclinic/models/chat_invitation.dart';
 import 'package:aelmamclinic/models/chat_models.dart';
 import 'package:aelmamclinic/providers/auth_provider.dart';
 import 'package:aelmamclinic/providers/chat_provider.dart';
@@ -27,6 +28,7 @@ class ChatHomeScreen extends StatefulWidget {
 class _ChatHomeScreenState extends State<ChatHomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   bool _unreadOnly = false;
+  String? _processingInvitationId;
 
   @override
   void initState() {
@@ -59,6 +61,7 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
   Widget build(BuildContext context) {
     final chat = context.watch<ChatProvider>();
     final convs = chat.conversations;
+    final invites = chat.invitations;
     final query = _searchCtrl.text.trim().toLowerCase();
 
     final filtered = convs.where((conv) {
@@ -125,6 +128,29 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
                   ],
                 ),
               ),
+              if (invites.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('دعوات المجموعات',
+                            style: Theme.of(context).textTheme.titleMedium),
+                      ),
+                      const SizedBox(height: 8),
+                      ...invites.map(
+                        (inv) => _InvitationCard(
+                          invitation: inv,
+                          busy: _processingInvitationId == inv.id,
+                          onAccept: () => _onAcceptInvitation(inv),
+                          onDecline: () => _onDeclineInvitation(inv),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Expanded(
                 child: RefreshIndicator(
                   color: kPrimaryColor,
@@ -297,5 +323,80 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
     } finally {
       emailCtrl.dispose();
     }
+  }
+}
+
+class _InvitationCard extends StatelessWidget {
+  final ChatGroupInvitation invitation;
+  final bool busy;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  const _InvitationCard({
+    required this.invitation,
+    required this.busy,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final title = (invitation.conversationTitle ?? '').trim().isEmpty
+        ? 'مجموعة بدون عنوان'
+        : invitation.conversationTitle!.trim();
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textDirection: ui.TextDirection.rtl,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'تمت دعوتك للانضمام إلى هذه المجموعة. يمكنك القبول أو الرفض الآن.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+              textDirection: ui.TextDirection.rtl,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton(
+                    onPressed: busy ? null : onAccept,
+                    child: busy
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('قبول'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: busy ? null : onDecline,
+                    child: const Text('رفض'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
