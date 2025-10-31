@@ -58,6 +58,59 @@ bool _isTruthy(dynamic v) {
   return s == 'true' || s == 't' || s == '1';
 }
 
+List<ChatDeliveryReceipt> _parseDeliveryReceipts(dynamic raw) {
+  if (raw == null) return const [];
+
+  List<ChatDeliveryReceipt> parseList(List<dynamic> list) {
+    final receipts = <ChatDeliveryReceipt>[];
+    for (final item in list) {
+      if (item == null) continue;
+      if (item is ChatDeliveryReceipt) {
+        receipts.add(item);
+        continue;
+      }
+      if (item is Map<String, dynamic>) {
+        receipts.add(ChatDeliveryReceipt.fromMap(item));
+        continue;
+      }
+      if (item is Map) {
+        receipts.add(ChatDeliveryReceipt.fromMap(
+            item.map((key, value) => MapEntry(key.toString(), value))));
+        continue;
+      }
+    }
+    return receipts;
+  }
+
+  if (raw is List) {
+    return parseList(raw);
+  }
+
+  if (raw is Map<String, dynamic>) {
+    // إمّا خريطة مفردة (user_uid/delivered_at) أو خريطة مُفهرسة بقيم متعددة.
+    if (raw.containsKey('user_uid') || raw.containsKey('delivered_at')) {
+      return [ChatDeliveryReceipt.fromMap(raw)];
+    }
+    final receipts = <ChatDeliveryReceipt>[];
+    for (final value in raw.values) {
+      if (value == null) continue;
+      if (value is List) {
+        receipts.addAll(parseList(value));
+      } else if (value is Map) {
+        receipts.addAll(parseList([value]));
+      }
+    }
+    return receipts;
+  }
+
+  if (raw is Map) {
+    return _parseDeliveryReceipts(
+        raw.map((key, value) => MapEntry(key.toString(), value)));
+  }
+
+  return const [];
+}
+
 /// ─────────── Conversation Type ───────────
 
 enum ChatConversationType { direct, group, announcement }
@@ -829,9 +882,81 @@ class ChatMessage {
     );
   }
 
+  /// تمثيل JSON للرسالة.
   String toJson() => jsonEncode(toMap());
-  factory ChatConversation.fromJson(String source) =>
-      ChatConversation.fromMap(jsonDecode(source));
+  factory ChatMessage.fromJson(String source, {String? currentUid}) =>
+      ChatMessage.fromMap(jsonDecode(source), currentUid: currentUid);
+
+  /// منشئ تفاؤلي لرسالة نصية (قبل تأكيد الخادم).
+  static ChatMessage optimisticText({
+    required String conversationId,
+    required String senderUid,
+    required String text,
+    String? senderEmail,
+    String? accountId,
+    String? deviceId,
+    int? localSeq,
+    String? replyToMessageId,
+    String? replyToSnippet,
+    List<String>? mentions,
+  }) {
+    final id = _randId(prefix: 'local');
+    return ChatMessage(
+      id: id,
+      localId: id,
+      conversationId: conversationId,
+      senderUid: senderUid,
+      senderEmail: senderEmail,
+      kind: ChatMessageKind.text,
+      body: text,
+      createdAt: DateTime.now().toUtc(),
+      status: ChatMessageStatus.sending,
+      replyToMessageId: replyToMessageId,
+      replyToSnippet: replyToSnippet,
+      mentions: mentions?.map(_lc).toList(),
+      accountId: accountId,
+      deviceId: deviceId,
+      localSeq: localSeq,
+    );
+  }
+
+  /// منشئ تفاؤلي لمجموعة صور (قبل الرفع/التخزين).
+  static ChatMessage optimisticImages({
+    required String conversationId,
+    required String senderUid,
+    required List<File> files,
+    String? senderEmail,
+    String? caption,
+    String? accountId,
+    String? deviceId,
+    int? localSeq,
+    String? replyToMessageId,
+    String? replyToSnippet,
+    List<String>? mentions,
+  }) {
+    final id = _randId(prefix: 'local');
+    // نحتفظ بقيمة الملفات لضمان التوافق مع الواجهة القديمة التي كانت تمررها.
+    // ignore: unnecessary_statements
+    files;
+    return ChatMessage(
+      id: id,
+      localId: id,
+      conversationId: conversationId,
+      senderUid: senderUid,
+      senderEmail: senderEmail,
+      kind: ChatMessageKind.image,
+      body: (caption ?? '').trim().isEmpty ? null : caption!.trim(),
+      attachments: const [],
+      createdAt: DateTime.now().toUtc(),
+      status: ChatMessageStatus.sending,
+      replyToMessageId: replyToMessageId,
+      replyToSnippet: replyToSnippet,
+      mentions: mentions?.map(_lc).toList(),
+      accountId: accountId,
+      deviceId: deviceId,
+      localSeq: localSeq,
+    );
+  }
 }
 
 /// ─────────── ConversationListItem (Overview) ───────────
