@@ -505,7 +505,9 @@ class ChatProvider extends ChangeNotifier {
 
       if (myRev != _listRev || _disposed) return;
 
-      _aliasByUser = aliasByUser;
+      _aliasByUser
+        ..clear()
+        ..addAll(aliasByUser);
       _participantsByConv
         ..clear()
         ..addAll(tmpParticipantsByConv);
