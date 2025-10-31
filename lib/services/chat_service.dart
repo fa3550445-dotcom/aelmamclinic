@@ -377,18 +377,27 @@ class ChatService {
     final myRole = (me.role?.toLowerCase() ?? '');
     final myAcc = (me.accountId ?? '').trim();
 
-    final targetRow = await _sb
+    final targetRowRaw = await _sb
         .from(_tblAccUsers)
         .select('user_uid, email, account_id, role')
         .ilike('email', email.toLowerCase())
         .maybeSingle();
 
-    if (targetRow == null) {
+    if (targetRowRaw == null) {
       throw 'لا يوجد مستخدم بالبريد: $email';
     }
 
-    final otherUid = targetRow['user_uid'].toString();
-    final otherEmail = (targetRow['email']?.toString() ?? email).toLowerCase();
+    final Map<String, dynamic> targetRow = targetRowRaw is Map<String, dynamic>
+        ? targetRowRaw
+        : Map<String, dynamic>.from(targetRowRaw as Map);
+
+    final otherUid = targetRow['user_uid']?.toString() ?? '';
+    if (otherUid.isEmpty) {
+      throw 'حدث خلل أثناء جلب المستخدم الهدف.';
+    }
+
+    final otherEmail =
+        (targetRow['email']?.toString() ?? email).toLowerCase();
 
     final targetRole = (targetRow['role']?.toString() ?? '').toLowerCase();
     if (targetRole == 'superadmin' && myRole != 'superadmin') {
@@ -541,7 +550,7 @@ class ChatService {
 
   Future<List<ConversationListItem>> fetchMyConversationsOverview() async {
     final u = _sb.auth.currentUser;
-    if (u == null) return const [];
+    if (u == null) return const <ConversationListItem>[];
 
     // (1) محادثات أنا مشارك فيها
     final myPartRows =
@@ -561,7 +570,7 @@ class ChatService {
         .toSet();
 
     final convIds = {...partConvIds, ...createdConvIds}.toList();
-    if (convIds.isEmpty) return const [];
+    if (convIds.isEmpty) return const <ConversationListItem>[];
 
     final convRows = await _sb
         .from(_tblConvs)
@@ -744,7 +753,7 @@ class ChatService {
     bool pendingOnly = true,
   }) async {
     final u = _sb.auth.currentUser;
-    if (u == null) return const [];
+    if (u == null) return const <ChatGroupInvitation>[];
     try {
       final rows = await _sb
           .from('v_chat_group_invitations_for_me')
@@ -757,7 +766,7 @@ class ChatService {
       if (!pendingOnly) return list;
       return list.where((inv) => inv.isPending).toList();
     } catch (_) {
-      return const [];
+      return const <ChatGroupInvitation>[];
     }
   }
 
@@ -1360,7 +1369,7 @@ class ChatService {
     int limit = 100,
   }) async {
     final q = query.trim();
-    if (q.isEmpty) return const [];
+    if (q.isEmpty) return const <ChatMessage>[];
 
     final esc = _escapeIlike(q);
 
@@ -1598,7 +1607,7 @@ class ChatService {
           .map(ChatReaction.fromMap)
           .toList();
     } catch (_) {
-      return const [];
+      return const <ChatReaction>[];
     }
   }
 

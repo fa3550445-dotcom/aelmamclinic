@@ -791,7 +791,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     shouldRebuild: (prev, next) => !identical(prev, next),
                     builder: (_, providerMsgs, __) {
                       // استخدم رسائل المزوّد إن توفّرت، وإلاّ اعرض التمهيد المحلي
-                      final msgs = providerMsgs.isNotEmpty ? providerMsgs : _bootLocal;
+                      final List<ChatMessage> msgs =
+                          providerMsgs.isNotEmpty ? providerMsgs : _bootLocal;
 
                       // حضّر Anchor unread مرّة واحدة
                       _maybePrepareUnreadAnchorOnce();
@@ -867,7 +868,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                       );
                                     }
 
-                                    final raw = msgs[index];
+                                    final ChatMessage raw = msgs[index];
                                     final mine = raw.senderUid == _currentUid;
 
                                     // ✅ delivered ↦ sent بصريًا للرسائل الصادرة
@@ -882,7 +883,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                       showDayDivider = true;
                                       dayLabel = _dayLabel(m.createdAt);
                                     } else {
-                                      final prevNewer = msgs[index + 1];
+                                      final ChatMessage prevNewer =
+                                          msgs[index + 1];
                                       if (prevNewer.createdAt.toLocal().day !=
                                           m.createdAt.toLocal().day ||
                                           prevNewer.createdAt.toLocal().month !=
