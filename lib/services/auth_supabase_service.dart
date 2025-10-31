@@ -108,6 +108,53 @@ class FeaturePermissions {
   }
 }
 
+/// نتيجة إنشاء مستخدم (مالك/موظف) عبر أدوات السوبر أدمن.
+class ProvisioningResult {
+  final String? accountId;
+  final String? userUid;
+  final String role;
+  final List<String> warnings;
+
+  const ProvisioningResult({
+    required this.accountId,
+    required this.userUid,
+    required this.role,
+    List<String>? warnings,
+  }) : warnings = warnings == null
+            ? const []
+            : List<String>.unmodifiable(warnings);
+
+  bool get hasWarnings => warnings.isNotEmpty;
+
+  ProvisioningResult copyWith({
+    String? accountId,
+    String? userUid,
+    String? role,
+    List<String>? warnings,
+  }) {
+    return ProvisioningResult(
+      accountId: accountId ?? this.accountId,
+      userUid: userUid ?? this.userUid,
+      role: role ?? this.role,
+      warnings: warnings ?? this.warnings,
+    );
+  }
+}
+
+class _ProvisioningSeed {
+  final bool ok;
+  final String? accountId;
+  final String? userUid;
+  final String? role;
+
+  const _ProvisioningSeed({
+    required this.ok,
+    this.accountId,
+    this.userUid,
+    this.role,
+  });
+}
+
 /// سجل تدقيق واحد (Audit Log) كما في جدول audit_logs.
 class AuditLogEntry {
   final int id;
@@ -489,6 +536,343 @@ class AuthSupabaseService {
         Exception('No callable function found for ${names.join(", ")}');
   }
 
+  String? _sanitizeString(dynamic value) {
+    if (value == null) return null;
+    final str = value.toString().trim();
+    if (str.isEmpty) return null;
+    if (str.toLowerCase() == 'null') return null;
+    return str;
+  }
+
+  bool? _boolFrom(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final str = value.toString().trim().toLowerCase();
+    if (str.isEmpty) return null;
+    switch (str) {
+      case 'true':
+      case 't':
+      case '1':
+      case 'yes':
+      case 'y':
+        return true;
+      case 'false':
+      case 'f':
+      case '0':
+      case 'no':
+      case 'n':
+        return false;
+    }
+    return null;
+  }
+
+  _ProvisioningSeed _extractProvisioningSeed(
+    dynamic payload, {
+    String? defaultAccountId,
+    String? defaultRole,
+  }) {
+    if (payload is Map) {
+      final map = Map<String, dynamic>.from(payload as Map);
+      bool ok = _boolFrom(map['ok']) ??
+          _boolFrom(map['success']) ??
+          _boolFrom(map['status']) ??
+          false;
+      final accountId =
+          _sanitizeString(map['account_id'] ?? map['accountId'] ?? defaultAccountId);
+      final userUid =
+          _sanitizeString(map['user_uid'] ?? map['userUid'] ?? map['uid']);
+      final role =
+          _sanitizeString(map['role'] ?? map['user_role'] ?? defaultRole);
+      if (!ok && (accountId != null || userUid != null)) {
+        ok = true;
+      }
+      return _ProvisioningSeed(
+        ok: ok,
+        accountId: accountId,
+        userUid: userUid,
+        role: role,
+      );
+    }
+
+    if (payload == null) {
+      return _ProvisioningSeed(
+        ok: false,
+        accountId: _sanitizeString(defaultAccountId),
+        userUid: null,
+        role: defaultRole,
+      );
+    }
+
+    if (payload is bool) {
+      return _ProvisioningSeed(
+        ok: payload,
+        accountId: _sanitizeString(defaultAccountId),
+        userUid: null,
+        role: defaultRole,
+      );
+    }
+
+    final strPayload = _sanitizeString(payload);
+    return _ProvisioningSeed(
+      ok: strPayload != null,
+      accountId: strPayload ?? _sanitizeString(defaultAccountId),
+      userUid: null,
+      role: defaultRole,
+    );
+  }
+
+  void _recordProvisioningWarning(
+    List<String> warnings,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    warnings.add(message);
+    dev.log('Provisioning warning: $message', error: error, stackTrace: stackTrace);
+  }
+
+  Future<ProvisioningResult> _finalizeProvisioning({
+    required String? accountId,
+    required String? userUid,
+    required String expectedRole,
+    required String email,
+    required String source,
+  }) async {
+    final warnings = <String>[];
+    String? finalAccountId = _sanitizeString(accountId);
+    String? finalUserUid = _sanitizeString(userUid);
+    String resolvedRole = _sanitizeString(expectedRole) ?? 'unknown';
+
+    if (finalUserUid == null) {
+      _recordProvisioningWarning(
+        warnings,
+        'لم نتلقَّ معرّف المستخدم من $source. سنحاول إيجاده من الاستعلامات.',
+      );
+    }
+
+    Map<String, dynamic>? profileRow;
+    if (finalUserUid != null) {
+      try {
+        final row = await _client
+            .from('profiles')
+            .select('id, account_id, role, disabled, email')
+            .eq('id', finalUserUid)
+            .maybeSingle();
+        if (row is Map) {
+          profileRow = Map<String, dynamic>.from(row);
+        } else if (row != null) {
+          _recordProvisioningWarning(
+            warnings,
+            'استعلام profiles بمعرف المستخدم أعاد نوعًا غير متوقع (${row.runtimeType}).',
+          );
+        }
+      } catch (e, st) {
+        _recordProvisioningWarning(
+          warnings,
+          'تعذّر قراءة صف profiles بواسطة المعرّف $finalUserUid.',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+
+    if (profileRow == null) {
+      try {
+        final row = await _client
+            .from('profiles')
+            .select('id, account_id, role, disabled, email')
+            .eq('email', email)
+            .order('created_at', ascending: false)
+            .limit(1)
+            .maybeSingle();
+        if (row is Map) {
+          profileRow = Map<String, dynamic>.from(row);
+          finalUserUid ??= _sanitizeString(profileRow['id']);
+        } else if (row != null) {
+          _recordProvisioningWarning(
+            warnings,
+            'استعلام profiles بالبريد أعاد نوعًا غير متوقع (${row.runtimeType}).',
+          );
+        } else {
+          _recordProvisioningWarning(
+            warnings,
+            'لم يتم العثور على صف في profiles للبريد $email.',
+          );
+        }
+      } catch (e, st) {
+        _recordProvisioningWarning(
+          warnings,
+          'تعذّر قراءة profiles بواسطة البريد $email.',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+
+    if (profileRow != null) {
+      final profRole = _sanitizeString(profileRow['role']);
+      if (profRole == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف profiles للمستخدم لا يحتوي على حقل role.',
+        );
+      } else {
+        if (resolvedRole != profRole) {
+          _recordProvisioningWarning(
+            warnings,
+            'الدور في profiles هو $profRole بدلاً من $resolvedRole.',
+          );
+        }
+        resolvedRole = profRole;
+      }
+
+      final profAccountId = _sanitizeString(profileRow['account_id']);
+      if (profAccountId == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف profiles للمستخدم لا يحتوي على account_id.',
+        );
+      } else {
+        if (finalAccountId != null && finalAccountId != profAccountId) {
+          _recordProvisioningWarning(
+            warnings,
+            'المعرّف account_id القادم من $source ($finalAccountId) لا يطابق ما في profiles ($profAccountId).',
+          );
+        }
+        finalAccountId ??= profAccountId;
+      }
+
+      final profDisabled = _boolFrom(profileRow['disabled']);
+      if (profDisabled == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف profiles لا يحتوي على حقل disabled يمكن الاعتماد عليه.',
+        );
+      } else if (profDisabled) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف profiles يشير إلى أن الحساب مُعطّل (disabled=true).',
+        );
+      }
+    }
+
+    Map<String, dynamic>? accountUserRow;
+    if (finalUserUid != null) {
+      try {
+        PostgrestFilterBuilder query = _client
+            .from('account_users')
+            .select('account_id, role, disabled')
+            .eq('user_uid', finalUserUid);
+        if (finalAccountId != null) {
+          query = query.eq('account_id', finalAccountId);
+        }
+        final row = await query
+            .order('created_at', ascending: false)
+            .limit(1)
+            .maybeSingle();
+        if (row is Map) {
+          accountUserRow = Map<String, dynamic>.from(row);
+        } else if (row == null) {
+          _recordProvisioningWarning(
+            warnings,
+            'لم يتم العثور على صف في account_users للمستخدم $finalUserUid.',
+          );
+        } else {
+          _recordProvisioningWarning(
+            warnings,
+            'استعلام account_users أعاد نوعًا غير متوقع (${row.runtimeType}).',
+          );
+        }
+      } catch (e, st) {
+        _recordProvisioningWarning(
+          warnings,
+          'تعذّر قراءة account_users للمستخدم $finalUserUid.',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    } else {
+      _recordProvisioningWarning(
+        warnings,
+        'لا يمكن التحقق من account_users بدون معرف المستخدم.',
+      );
+    }
+
+    if (accountUserRow != null) {
+      final auAccount = _sanitizeString(accountUserRow['account_id']);
+      if (auAccount == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف account_users لا يحتوي على account_id.',
+        );
+      } else {
+        if (finalAccountId != null && finalAccountId != auAccount) {
+          _recordProvisioningWarning(
+            warnings,
+            'القيمة account_id في account_users ($auAccount) تختلف عن $finalAccountId.',
+          );
+        }
+        finalAccountId ??= auAccount;
+      }
+
+      final auRole = _sanitizeString(accountUserRow['role']);
+      if (auRole == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف account_users لا يحتوي على role.',
+        );
+      } else {
+        if (resolvedRole != auRole) {
+          _recordProvisioningWarning(
+            warnings,
+            'الدور في account_users هو $auRole بدلاً من $resolvedRole.',
+          );
+        }
+        resolvedRole = auRole;
+      }
+
+      final auDisabled = _boolFrom(accountUserRow['disabled']);
+      if (auDisabled == null) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف account_users لا يحتوي على حالة disabled واضحة.',
+        );
+      } else if (auDisabled) {
+        _recordProvisioningWarning(
+          warnings,
+          'صف account_users يشير إلى أن المستخدم مُعطّل (disabled=true).',
+        );
+      }
+    }
+
+    if (finalAccountId == null) {
+      _recordProvisioningWarning(
+        warnings,
+        'لم نتمكن من تحديد account_id بعد الانتهاء من خطوات التحقق.',
+      );
+    }
+
+    if (resolvedRole.isEmpty) {
+      resolvedRole = _sanitizeString(expectedRole) ?? 'unknown';
+      _recordProvisioningWarning(
+        warnings,
+        'لم نتمكن من تأكيد الدور من الجداول، لذا تم استخدام الدور المتوقع ($resolvedRole).',
+      );
+    }
+
+    dev.log(
+      'Provisioning finalized ($source): account=$finalAccountId user=$finalUserUid role=$resolvedRole warnings=${warnings.length}',
+    );
+
+    return ProvisioningResult(
+      accountId: finalAccountId,
+      userUid: finalUserUid,
+      role: resolvedRole,
+      warnings: warnings,
+    );
+  }
+
   Future<String?> _resolveAccountIdForUid(String uid) async {
     try {
       final prof = await _client
@@ -823,7 +1207,7 @@ class AuthSupabaseService {
 
   // ─────────────────── إنشاء حساب رئيسي/موظف ───────────────────
 
-  Future<void> createClinicAccount({
+  Future<ProvisioningResult> createClinicAccount({
     required String clinicName,
     required String ownerEmail,
     required String ownerPassword,
@@ -836,7 +1220,7 @@ class AuthSupabaseService {
         ownerRole: ownerRole,
       );
 
-  Future<void> registerOwner({
+  Future<ProvisioningResult> registerOwner({
     required String clinicName,
     required String email,
     required String password,
@@ -847,19 +1231,26 @@ class AuthSupabaseService {
           'registerOwner called by non-super admin. This may fail due to RLS.');
     }
 
+    final expectedRole = _sanitizeString(ownerRole) ?? 'owner';
+
     try {
       final res = await _client.rpc('admin_create_owner_full', params: {
         'p_clinic_name': clinicName,
         'p_owner_email': email,
         'p_owner_password': password,
       });
-      if (res is Map) {
-        final ok = (res['ok'] == true);
-        if (ok) return;
-        dev.log('admin_create_owner_full returned non-ok: $res');
-      } else if (res != null) {
-        return;
+      final seed =
+          _extractProvisioningSeed(res, defaultRole: expectedRole);
+      if (seed.ok) {
+        return _finalizeProvisioning(
+          accountId: seed.accountId,
+          userUid: seed.userUid,
+          expectedRole: seed.role ?? expectedRole,
+          email: email,
+          source: 'admin_create_owner_full RPC',
+        );
       }
+      dev.log('admin_create_owner_full returned non-ok: $res');
     } catch (e, st) {
       dev.log('admin_create_owner_full RPC failed, trying functions...',
           error: e, stackTrace: st);
@@ -889,14 +1280,22 @@ class AuthSupabaseService {
         ],
         body: body,
       );
-      final ok = (data['ok'] == true) || (data['success'] == true);
-      if (ok) {
-        return;
+      final seed =
+          _extractProvisioningSeed(data, defaultRole: expectedRole);
+      if (seed.ok) {
+        return _finalizeProvisioning(
+          accountId: seed.accountId,
+          userUid: seed.userUid,
+          expectedRole: seed.role ?? expectedRole,
+          email: email,
+          source: 'Edge provisioning function',
+        );
       }
       dev.log(
           'registerOwner: function returned non-ok, using RPC old. data=$data');
-    } catch (e) {
-      dev.log('registerOwner: function(s) failed. Will use old RPC. err=$e');
+    } catch (e, st) {
+      dev.log('registerOwner: function(s) failed. Will use old RPC.',
+          error: e, stackTrace: st);
     }
 
     try {
@@ -911,8 +1310,8 @@ class AuthSupabaseService {
         'admin_bootstrap_clinic_for_email',
         params: params,
       );
-      final accountId = res?.toString().trim();
-      if (accountId == null || accountId.isEmpty || accountId == 'null') {
+      final accountId = _sanitizeString(res);
+      if (accountId == null || accountId.isEmpty) {
         throw Exception('RPC returned null/empty result.');
       }
       const uuidPattern =
@@ -920,7 +1319,13 @@ class AuthSupabaseService {
       if (!RegExp(uuidPattern).hasMatch(accountId)) {
         throw Exception('RPC returned non-UUID result: $accountId');
       }
-      return;
+      return _finalizeProvisioning(
+        accountId: accountId,
+        userUid: null,
+        expectedRole: expectedRole,
+        email: email,
+        source: 'admin_bootstrap_clinic_for_email RPC',
+      );
     } catch (rpcErr, st) {
       dev.log('registerOwner RPC fallback failed',
           error: rpcErr, stackTrace: st);
@@ -928,14 +1333,14 @@ class AuthSupabaseService {
     }
   }
 
-  Future<void> createEmployeeAccount({
+  Future<ProvisioningResult> createEmployeeAccount({
     required String clinicId,
     required String email,
     required String password,
   }) =>
       registerEmployee(accountId: clinicId, email: email, password: password);
 
-  Future<void> registerEmployee({
+  Future<ProvisioningResult> registerEmployee({
     required String accountId,
     required String email,
     required String password,
@@ -945,6 +1350,8 @@ class AuthSupabaseService {
           'registerEmployee called by non-super admin. This may fail due to RLS.');
     }
 
+    const expectedRole = 'employee';
+
     try {
       final res = await _client.rpc('admin_create_employee_full', params: {
         'p_account': accountId,
@@ -952,13 +1359,21 @@ class AuthSupabaseService {
         'p_password': password,
       });
 
-      if (res is Map) {
-        final ok = (res['ok'] == true);
-        if (ok) return;
-        dev.log('admin_create_employee_full returned non-ok: $res');
-      } else if (res != null) {
-        return;
+      final seed = _extractProvisioningSeed(
+        res,
+        defaultAccountId: accountId,
+        defaultRole: expectedRole,
+      );
+      if (seed.ok) {
+        return _finalizeProvisioning(
+          accountId: seed.accountId ?? accountId,
+          userUid: seed.userUid,
+          expectedRole: seed.role ?? expectedRole,
+          email: email,
+          source: 'admin_create_employee_full RPC',
+        );
       }
+      dev.log('admin_create_employee_full returned non-ok: $res');
     } catch (e, st) {
       dev.log('admin_create_employee_full RPC failed, trying functions...',
           error: e, stackTrace: st);
@@ -980,11 +1395,21 @@ class AuthSupabaseService {
         ],
         body: body,
       );
-      final ok = (data['ok'] == true) || (data['success'] == true);
-      if (!ok) {
+      final seed = _extractProvisioningSeed(
+        data,
+        defaultAccountId: accountId,
+        defaultRole: expectedRole,
+      );
+      if (!seed.ok) {
         throw Exception('Failed to create employee: ${data.toString()}');
       }
-      return;
+      return _finalizeProvisioning(
+        accountId: seed.accountId ?? accountId,
+        userUid: seed.userUid,
+        expectedRole: seed.role ?? expectedRole,
+        email: email,
+        source: 'Edge employee provisioning function',
+      );
     } catch (e, st) {
       dev.log('registerEmployee failed', error: e, stackTrace: st);
       rethrow;
