@@ -121,7 +121,7 @@ class ChatParticipantMapper {
     return fallback;
   }
 
-  static Map<String, dynamic> toRemote(Map<String, dynamic> localRow) {
+  static Map<String, Object?> toRemote(Map<String, dynamic> localRow) {
     final conversationId =
         _trim(_first(localRow, <String>[ChatParticipantFields.conversationId, ChatParticipantFields.conversationIdCamel]));
     final userUid =
@@ -165,7 +165,7 @@ class ChatParticipantMapper {
       fallback: false,
     );
 
-    final payload = <String, dynamic>{
+    final payload = <String, Object?>{
       ChatParticipantFields.conversationId: conversationId,
       ChatParticipantFields.userUid: userUid,
       ChatParticipantFields.muted: muted,
@@ -244,18 +244,18 @@ class ChatParticipantMapper {
     return result;
   }
 
-  static Map<String, dynamic> pinnedPatch(bool pinned) =>
-      <String, dynamic>{ChatParticipantFields.pinned: pinned};
+  static Map<String, Object?> pinnedPatch(bool pinned) =>
+      <String, Object?>{ChatParticipantFields.pinned: pinned};
 
-  static Map<String, dynamic> archivedPatch(bool archived) =>
-      <String, dynamic>{ChatParticipantFields.archived: archived};
+  static Map<String, Object?> archivedPatch(bool archived) =>
+      <String, Object?>{ChatParticipantFields.archived: archived};
 
-  static Map<String, dynamic> blockedPatch(bool blocked) =>
-      <String, dynamic>{ChatParticipantFields.blocked: blocked};
+  static Map<String, Object?> blockedPatch(bool blocked) =>
+      <String, Object?>{ChatParticipantFields.blocked: blocked};
 
-  static Map<String, dynamic> lastReadPatch(DateTime? timestamp) {
+  static Map<String, Object?> lastReadPatch(DateTime? timestamp) {
     final ts = (timestamp ?? DateTime.now()).toUtc();
-    return <String, dynamic>{
+    return <String, Object?>{
       ChatParticipantFields.lastReadAt: t.toIsoUtc(ts),
     };
   }

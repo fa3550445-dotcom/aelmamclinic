@@ -3,10 +3,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:aelmamclinic/domain/chat/models/chat_participant.dart';
 
 typedef ChatParticipantUpsertRunner = Future<void> Function(
-  Map<String, dynamic> values,
+  Map<String, Object?> values,
 );
 typedef ChatParticipantUpdateRunner = Future<void> Function(
-  Map<String, dynamic> values,
+  Map<String, Object?> values,
   Map<String, dynamic> match,
 );
 
@@ -78,30 +78,26 @@ class ChatParticipantRepository {
     );
   }
 
-  Future<void> _defaultUpsertRunner(Map<String, dynamic> values) async {
+  Future<void> _defaultUpsertRunner(Map<String, Object?> values) async {
     await _table.upsert(
       values,
       onConflict:
           '${ChatParticipantFields.conversationId}, ${ChatParticipantFields.userUid}',
-      returning: ReturningOption.minimal,
     );
   }
 
   Future<void> _defaultUpdateRunner(
-    Map<String, dynamic> values,
+    Map<String, Object?> values,
     Map<String, dynamic> match,
   ) async {
-    final builder = _table.update(
-      values,
-      returning: ReturningOption.minimal,
-    );
+    final builder = _table.update(values);
     await builder.match(match);
   }
 
   Future<void> _updateFlags({
     required String conversationId,
     required String userUid,
-    required Map<String, dynamic> values,
+    required Map<String, Object?> values,
     ChatParticipantUpdateRunner? runUpdate,
   }) async {
     final trimmedConversation = conversationId.trim();
