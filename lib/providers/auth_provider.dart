@@ -40,6 +40,52 @@ const _kCanCreate = 'auth.canCreate';
 const _kCanUpdate = 'auth.canUpdate';
 const _kCanDelete = 'auth.canDelete';
 
+/// نتيجة تحقق حراسة الحساب بعد المزامنة من الشبكة.
+enum AuthAccountGuardResult {
+  ok,
+  disabled,
+  accountFrozen,
+  noAccount,
+  signedOut,
+  transientFailure,
+  unknown,
+}
+
+/// حالة التحقق بعد تحديث بيانات المستخدم من الشبكة وحراسة الحساب.
+enum AuthSessionStatus {
+  success,
+  disabled,
+  accountFrozen,
+  noAccount,
+  signedOut,
+  networkError,
+  unknown,
+}
+
+/// نتيجة تفصيلية لدورة التحقق بعد تسجيل الدخول/استئناف الجلسة.
+class AuthSessionResult {
+  final AuthSessionStatus status;
+  final Object? error;
+  final StackTrace? stackTrace;
+
+  const AuthSessionResult._(this.status, {this.error, this.stackTrace});
+
+  const AuthSessionResult.success() : this._(AuthSessionStatus.success);
+  const AuthSessionResult.disabled() : this._(AuthSessionStatus.disabled);
+  const AuthSessionResult.accountFrozen()
+      : this._(AuthSessionStatus.accountFrozen);
+  const AuthSessionResult.noAccount() : this._(AuthSessionStatus.noAccount);
+  const AuthSessionResult.signedOut() : this._(AuthSessionStatus.signedOut);
+  const AuthSessionResult.networkError({Object? error, StackTrace? stackTrace})
+      : this._(AuthSessionStatus.networkError,
+            error: error, stackTrace: stackTrace);
+  const AuthSessionResult.unknown({Object? error, StackTrace? stackTrace})
+      : this._(AuthSessionStatus.unknown,
+            error: error, stackTrace: stackTrace);
+
+  bool get isSuccess => status == AuthSessionStatus.success;
+}
+
 class AuthProvider extends ChangeNotifier {
   final AuthSupabaseService _auth;
 
@@ -224,6 +270,44 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// يجري تحديثًا كاملاً من الشبكة ثم يتحقق من صلاحية الحساب الحالي.
+  Future<AuthSessionResult> refreshAndValidateCurrentUser() async {
+    try {
+      final refreshed = await _networkRefreshAndMark();
+      final guard = await _ensureActiveAccountOrSignOut();
+
+      switch (guard) {
+        case AuthAccountGuardResult.ok:
+          if (!isSuperAdmin) {
+            final accId = accountId;
+            if (accId == null || accId.isEmpty) {
+              return refreshed
+                  ? const AuthSessionResult.noAccount()
+                  : const AuthSessionResult.networkError();
+            }
+          }
+          notifyListeners();
+          return const AuthSessionResult.success();
+        case AuthAccountGuardResult.accountFrozen:
+          return const AuthSessionResult.accountFrozen();
+        case AuthAccountGuardResult.disabled:
+          return const AuthSessionResult.disabled();
+        case AuthAccountGuardResult.noAccount:
+          return const AuthSessionResult.noAccount();
+        case AuthAccountGuardResult.signedOut:
+          return const AuthSessionResult.signedOut();
+        case AuthAccountGuardResult.transientFailure:
+          return const AuthSessionResult.networkError();
+        case AuthAccountGuardResult.unknown:
+        default:
+          return const AuthSessionResult.unknown();
+      }
+    } catch (e, st) {
+      dev.log('refreshAndValidateCurrentUser failed', error: e, stackTrace: st);
+      return AuthSessionResult.unknown(error: e, stackTrace: st);
+    }
+  }
+
   /// تغيير سياق الحساب (مثلاً المالك يبدّل بين عيادات)
   Future<void> setAccountContext(String newAccountId) async {
     if (currentUser == null) return;
@@ -282,7 +366,7 @@ class AuthProvider extends ChangeNotifier {
     _permissionsError = error;
   }
 
-  Future<void> _networkRefreshAndMark() async {
+  Future<bool> _networkRefreshAndMark() async {
     bool success = false;
     try {
       await _refreshUser();      // يجلب من RPCs/fallbacks
@@ -306,6 +390,7 @@ class AuthProvider extends ChangeNotifier {
       final sp = await SharedPreferences.getInstance();
       await sp.setString(_kLastNetCheckAt, DateTime.now().toIso8601String());
     }
+    return success;
   }
 
   bool _isTransientNetworkError(Object error) {
@@ -389,9 +474,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// يتأكد أن الحساب الفعّال قابل للكتابة (غير مجمّد/غير معطّل) وإلا يخرج.
-  Future<void> _ensureActiveAccountOrSignOut() async {
-    if (!isLoggedIn) return;
-    if (isSuperAdmin) return; // السوبر أدمن خارج نطاق الحسابات
+  Future<AuthAccountGuardResult> _ensureActiveAccountOrSignOut() async {
+    if (!isLoggedIn) {
+      return AuthAccountGuardResult.signedOut;
+    }
+    if (isSuperAdmin) {
+      return AuthAccountGuardResult.ok; // السوبر أدمن خارج نطاق الحسابات
+    }
     const maxAttempts = 3;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -401,7 +490,7 @@ class AuthProvider extends ChangeNotifier {
         currentUser!['role'] = aa.role.toLowerCase();
         currentUser!['disabled'] = false;
         await _persistUser();
-        return;
+        return AuthAccountGuardResult.ok;
       } catch (e, st) {
         if (_isTransientNetworkError(e)) {
           final delay = Duration(milliseconds: 300 * (1 << (attempt - 1)));
@@ -410,10 +499,23 @@ class AuthProvider extends ChangeNotifier {
           );
           if (attempt >= maxAttempts) {
             dev.log('Keeping session after transient failure to validate account.');
-            return;
+            return AuthAccountGuardResult.transientFailure;
           }
           await Future.delayed(delay);
           continue;
+        }
+
+        AuthAccountGuardResult result = AuthAccountGuardResult.disabled;
+        if (e is AccountFrozenException) {
+          result = AuthAccountGuardResult.accountFrozen;
+        } else if (e is AccountUserDisabledException) {
+          result = AuthAccountGuardResult.disabled;
+        } else if (e is StateError) {
+          final lower = e.message.toLowerCase();
+          if (lower.contains('no active clinic') ||
+              lower.contains('unable to resolve account')) {
+            result = AuthAccountGuardResult.noAccount;
+          }
         }
 
         dev.log('Active account invalid: $e', stackTrace: st);
@@ -421,9 +523,10 @@ class AuthProvider extends ChangeNotifier {
         currentUser!['disabled'] = true;
         await _persistUser();
         await signOut();
-        return;
+        return result;
       }
     }
+    return AuthAccountGuardResult.unknown;
   }
 
   /// يجلب صلاحيات الميزات + CRUD للحساب الحالي ويخزّنها محليًا

@@ -65,60 +65,76 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkAndRouteIfSignedIn() async {
     if (_navigating || !mounted) return;
 
-    // أولوية لفحص الـ Provider (قد يكون حدد السوبر أدمن مسبقًا)
     final authProv = context.read<AuthProvider>();
-    if (authProv.isLoggedIn) {
-      // في حال الجلسة مسبقة، فعّل Bootstrap لمرة واحدة بدون سحب كامل
-      if (!_bootstrappedOnce) {
-        await authProv.bootstrapSync(
-          pull: false,
-          realtime: true,
-          enableLogs: kDebugMode,
-          debounce: const Duration(seconds: 1),
-        );
-        _bootstrappedOnce = true;
-      }
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) return;
 
-      if (authProv.isSuperAdmin) {
-        _navigating = true;
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
-        );
+    if (!authProv.isSuperAdmin &&
+        ((authProv.accountId ?? '').isEmpty || !authProv.isLoggedIn)) {
+      final result = await authProv.refreshAndValidateCurrentUser();
+      if (!mounted) return;
+      if (!result.isSuccess) {
+        final message = _messageForStatus(result.status);
+        if (message != null) {
+          setState(() {
+            _error = message;
+            _loading = false;
+          });
+        }
         return;
       }
     }
 
-    // إن لم يتوفّر في المزود، نفحص جلسة Supabase مباشرة
-    final u = Supabase.instance.client.auth.currentUser;
-    if (u == null) return; // لم يتم تسجيل الدخول بعد
+    if (!authProv.isLoggedIn) {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+      final email = (user.email ?? '').toLowerCase();
+      final isEmailSuper =
+          email == AuthSupabaseService.superAdminEmail.toLowerCase();
+      var isRoleSuper = false;
+      try {
+        final row = await Supabase.instance.client
+            .from('account_users')
+            .select('role')
+            .eq('user_uid', user.id)
+            .order('created_at', ascending: false)
+            .limit(1)
+            .maybeSingle();
+        final roleValue = row?['role']?.toString().toLowerCase();
+        isRoleSuper = roleValue == 'superadmin';
+      } catch (_) {}
 
-    // فعّل Bootstrap لمرة واحدة إذا لم يتم من قبل (جلسة محفوظة)
-    // لا نضبط _bootstrappedOnce هنا لكي يُعاد المحاولة فور اكتمال تحميل المزود.
+      if (!(isEmailSuper || isRoleSuper)) {
+        return;
+      }
+      _navigating = true;
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+      );
+      return;
+    }
 
-    final email = (u.email ?? '').toLowerCase();
-    final isEmailSuper =
-        email == AuthSupabaseService.superAdminEmail.toLowerCase();
+    final isSuper = authProv.isSuperAdmin;
+    final hasAccount = (authProv.accountId ?? '').isNotEmpty;
+    if (!isSuper && !hasAccount) {
+      return;
+    }
 
-    var isRoleSuper = false;
-    try {
-      final row = await Supabase.instance.client
-          .from('account_users')
-          .select('role')
-          .eq('user_uid', u.id)
-          .order('created_at', ascending: false)
-          .limit(1)
-          .maybeSingle();
-      final roleValue = row?['role']?.toString().toLowerCase();
-      isRoleSuper = roleValue == 'superadmin';
-    } catch (_) {
-      // تجاهل أي خطأ في الفحص الاحتياطي
+    if (!_bootstrappedOnce) {
+      await authProv.bootstrapSync(
+        pull: false,
+        realtime: true,
+        enableLogs: kDebugMode,
+        debounce: const Duration(seconds: 1),
+      );
+      _bootstrappedOnce = true;
     }
 
     _navigating = true;
     if (!mounted) return;
 
-    if (isEmailSuper || isRoleSuper) {
+    if (isSuper) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
       );
@@ -148,13 +164,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await auth.signIn(email, pass);
+      final result = await auth.refreshAndValidateCurrentUser();
+      if (!mounted) return;
 
-      if (auth.isDisabled) {
-        setState(() => _error = 'تم تعطيل هذا الحساب.');
+      if (!result.isSuccess) {
+        final message = _messageForStatus(result.status) ??
+            'تعذّر التحقق من الحساب. حاول مرة أخرى.';
+        setState(() => _error = message);
         return;
       }
 
-      // ✅ بعد نجاح تسجيل الدخول، نفّذ سحبًا أوليًا + Realtime
+      // ✅ بعد نجاح التحقق، نفّذ سحبًا أوليًا + Realtime
       if (auth.isLoggedIn) {
         await auth.bootstrapSync(
           pull: true,
@@ -178,6 +198,26 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (!mounted) return;
       setState(() => _loading = false);
+    }
+  }
+
+  String? _messageForStatus(AuthSessionStatus status) {
+    switch (status) {
+      case AuthSessionStatus.success:
+        return null;
+      case AuthSessionStatus.disabled:
+        return 'تم تعطيل هذا الحساب. يرجى التواصل مع الإدارة.';
+      case AuthSessionStatus.accountFrozen:
+        return 'تم تجميد حساب العيادة. تواصل مع الإدارة لاستعادة الوصول.';
+      case AuthSessionStatus.noAccount:
+        return 'لم يتم ربط هذا المستخدم بأي عيادة بعد. اطلب من الإدارة إكمال الإعداد.';
+      case AuthSessionStatus.signedOut:
+        return 'انتهت الجلسة أثناء التحقق من الحساب. حاول تسجيل الدخول مجددًا.';
+      case AuthSessionStatus.networkError:
+        return 'تعذّر التحقق من الحساب بسبب مشكلة في الاتصال. حاول مرة أخرى.';
+      case AuthSessionStatus.unknown:
+      default:
+        return 'حدث خطأ غير متوقع أثناء التحقق من الحساب. حاول لاحقًا.';
     }
   }
 
