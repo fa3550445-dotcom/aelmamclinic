@@ -949,6 +949,34 @@ class AuthSupabaseService {
     return null;
   }
 
+  String? _coerceUuidFromPayload(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is String) {
+      final value = raw.trim();
+      if (value.isEmpty || value == 'null') return null;
+      if (value.startsWith('{') || value.startsWith('[')) return null;
+      return value;
+    }
+    if (raw is Iterable) {
+      for (final element in raw) {
+        final coerced = _coerceUuidFromPayload(element);
+        if (coerced != null) return coerced;
+      }
+      return null;
+    }
+    if (raw is Map) {
+      for (final entry in raw.entries) {
+        final coerced = _coerceUuidFromPayload(entry.value);
+        if (coerced != null) return coerced;
+      }
+      return null;
+    }
+    final value = raw.toString().trim();
+    if (value.isEmpty || value == 'null') return null;
+    if (value.startsWith('{') || value.startsWith('[')) return null;
+    return value;
+  }
+
   // ─────────────────── مصادقة أساسية ───────────────────
 
   Future<AuthResponse> signIn(String email, String password) {
@@ -1030,13 +1058,30 @@ class AuthSupabaseService {
     }
 
     try {
-      final res = await _client.rpc('my_account_id');
-      if (res != null) {
-        final acc = res.toString();
-        if (acc.isNotEmpty && acc != 'null') {
-          dev.log('resolveAccountId: using my_account_id → $acc');
-          return acc;
+      final profile = await getMyProfileViaRpc();
+      if (profile != null) {
+        final mpAcc = _coerceUuidFromPayload(profile['account_id']);
+        if (mpAcc != null) {
+          dev.log('resolveAccountId: using my_profile.account_id → $mpAcc');
+          return mpAcc;
         }
+
+        final fromArray = _coerceUuidFromPayload(profile['account_ids']);
+        if (fromArray != null) {
+          dev.log('resolveAccountId: using my_profile.account_ids → $fromArray');
+          return fromArray;
+        }
+      }
+    } catch (e) {
+      dev.log('resolveAccountId: my_profile RPC failed: $e');
+    }
+
+    try {
+      final res = await _client.rpc('my_account_id');
+      final acc = _coerceUuidFromPayload(res);
+      if (acc != null) {
+        dev.log('resolveAccountId: using my_account_id → $acc');
+        return acc;
       }
     } catch (e) {
       dev.log('resolveAccountId: my_account_id RPC failed: $e');
@@ -1044,10 +1089,10 @@ class AuthSupabaseService {
 
     try {
       final list = await _client.rpc('my_accounts');
-      if (list is List && list.isNotEmpty) {
-        final acc = '${list.first}';
-        if (acc.isNotEmpty && acc != 'null') {
-          dev.log('resolveAccountId: using my_accounts[0] → $acc');
+      if (list != null) {
+        final acc = _coerceUuidFromPayload(list);
+        if (acc != null) {
+          dev.log('resolveAccountId: using my_accounts → $acc');
           return acc;
         }
       }
@@ -1081,6 +1126,32 @@ class AuthSupabaseService {
     }
 
     try {
+      final profile = await getMyProfileViaRpc();
+      if (profile != null) {
+        final mpAcc = _coerceUuidFromPayload(profile['account_id']);
+        final mpRole = (profile['role'] as String?)?.trim();
+        String? resolvedAccount = mpAcc;
+        if (resolvedAccount == null || resolvedAccount.isEmpty) {
+          resolvedAccount = _coerceUuidFromPayload(profile['account_ids']);
+        }
+        if (resolvedAccount != null && resolvedAccount.isNotEmpty) {
+          final role = (mpRole != null && mpRole.isNotEmpty)
+              ? mpRole
+              : 'employee';
+          await _assertAccountPolicies(
+              accountId: resolvedAccount, userUid: user.id);
+          return ActiveAccount(
+            id: resolvedAccount,
+            role: role,
+            canWrite: true,
+          );
+        }
+      }
+    } catch (e) {
+      dev.log('resolveActiveAccountOrThrow: my_profile fallback failed: $e');
+    }
+
+    try {
       final prof = await _client
           .from('profiles')
           .select('account_id, role')
@@ -1098,21 +1169,22 @@ class AuthSupabaseService {
 
     try {
       final acc = await _client.rpc('my_account_id');
-      if (acc != null && '$acc' != 'null' && '$acc'.toString().isNotEmpty) {
+      final resolved = _coerceUuidFromPayload(acc);
+      if (resolved != null) {
         String role = 'employee';
         try {
           final au = await _client
               .from('account_users')
               .select('role')
               .eq('user_uid', user.id)
-              .eq('account_id', '$acc')
+              .eq('account_id', resolved)
               .order('created_at', ascending: false)
               .limit(1)
               .maybeSingle();
           role = (au?['role'] as String?) ?? role;
         } catch (_) {}
-        await _assertAccountPolicies(accountId: '$acc', userUid: user.id);
-        return ActiveAccount(id: '$acc', role: role, canWrite: true);
+        await _assertAccountPolicies(accountId: resolved, userUid: user.id);
+        return ActiveAccount(id: resolved, role: role, canWrite: true);
       }
     } catch (e) {
       dev.log('resolveActiveAccountOrThrow: my_account_id fallthrough: $e');
@@ -1545,7 +1617,13 @@ class AuthSupabaseService {
     try {
       final res = await _client.rpc('my_accounts');
       if (res is List) {
-        accountIds = res.map((e) => e.toString()).cast<String>().toList();
+        accountIds = res
+            .map(_coerceUuidFromPayload)
+            .whereType<String>()
+            .toList();
+      } else {
+        final single = _coerceUuidFromPayload(res);
+        if (single != null) accountIds = [single];
       }
     } catch (e) {
       dev.log('my_accounts RPC failed, fallback to legacy resolver: $e');
