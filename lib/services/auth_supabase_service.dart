@@ -52,6 +52,16 @@ class ActiveAccount {
   });
 }
 
+class _AccountResolution {
+  final String id;
+  final String? role;
+
+  const _AccountResolution({
+    required this.id,
+    this.role,
+  });
+}
+
 /// تمثيل صلاحيات الميزات وعمليات CRUD لموظف ضمن حساب.
 class FeaturePermissions {
   final Set<String> allowedFeatures;
@@ -874,14 +884,22 @@ class AuthSupabaseService {
   }
 
   Future<String?> _resolveAccountIdForUid(String uid) async {
+    final res = await _resolveAccountForUid(uid);
+    return res?.id;
+  }
+
+  Future<_AccountResolution?> _resolveAccountForUid(String uid) async {
     try {
       final prof = await _client
           .from('profiles')
           .select('account_id, role')
           .eq('id', uid)
           .maybeSingle();
-      final pAcc = prof?['account_id'] as String?;
-      if (pAcc != null && pAcc.isNotEmpty) return pAcc;
+      final pAcc = (prof?['account_id'] as String?)?.trim();
+      if (pAcc != null && pAcc.isNotEmpty) {
+        final role = (prof?['role'] as String?)?.toLowerCase();
+        return _AccountResolution(id: pAcc, role: role);
+      }
     } catch (e) {
       dev.log('profiles lookup failed: $e');
     }
@@ -889,21 +907,44 @@ class AuthSupabaseService {
     try {
       final au = await _client
           .from('account_users')
-          .select('account_id')
+          .select('account_id, role, disabled')
           .eq('user_uid', uid)
           .order('created_at', ascending: false)
           .limit(1)
           .maybeSingle();
-      final aAcc = au?['account_id'] as String?;
-      if (aAcc != null && aAcc.isNotEmpty) return aAcc;
+      final aAcc = (au?['account_id'] as String?)?.trim();
+      if (aAcc != null && aAcc.isNotEmpty) {
+        final role = (au?['role'] as String?)?.toLowerCase();
+        return _AccountResolution(id: aAcc, role: role);
+      }
     } catch (e) {
       dev.log('account_users lookup failed: $e');
+    }
+
+    try {
+      final owner = await _client
+          .from('accounts')
+          .select('id')
+          .eq('owner_uid', uid)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      final oAcc = (owner?['id'] as String?)?.trim();
+      if (oAcc != null && oAcc.isNotEmpty) {
+        return _AccountResolution(id: oAcc, role: 'owner');
+      }
+    } on PostgrestException catch (e) {
+      dev.log('accounts owner lookup unsupported: ${e.message ?? e.toString()}');
+    } catch (e) {
+      dev.log('accounts owner lookup failed: $e');
     }
 
     final u = _client.auth.currentUser;
     final appMeta = u?.appMetadata;
     final mAcc = (appMeta?['account_id'] as String?);
-    if (mAcc != null && mAcc.isNotEmpty) return mAcc;
+    if (mAcc != null && mAcc.isNotEmpty) {
+      return _AccountResolution(id: mAcc, role: null);
+    }
 
     return null;
   }
@@ -1014,10 +1055,10 @@ class AuthSupabaseService {
       dev.log('resolveAccountId: my_accounts RPC failed: $e');
     }
 
-    final fb = await _resolveAccountIdForUid(user.id);
-    if (fb != null && fb.isNotEmpty) {
-      dev.log('resolveAccountId: fallback(uid) → $fb');
-      return fb;
+    final fb = await _resolveAccountForUid(user.id);
+    if (fb != null) {
+      dev.log('resolveAccountId: fallback(uid) → ${fb.id}');
+      return fb.id;
     }
 
     dev.log('resolveAccountId: could not resolve account_id.');
@@ -1077,10 +1118,11 @@ class AuthSupabaseService {
       dev.log('resolveActiveAccountOrThrow: my_account_id fallthrough: $e');
     }
 
-    final fb = await _resolveAccountIdForUid(user.id);
-    if (fb != null && fb.isNotEmpty) {
-      await _assertAccountPolicies(accountId: fb, userUid: user.id);
-      return ActiveAccount(id: fb, role: 'employee', canWrite: true);
+    final fb = await _resolveAccountForUid(user.id);
+    if (fb != null) {
+      await _assertAccountPolicies(accountId: fb.id, userUid: user.id);
+      final role = (fb.role?.isNotEmpty == true) ? fb.role! : 'employee';
+      return ActiveAccount(id: fb.id, role: role, canWrite: true);
     }
 
     throw StateError('No active clinic found for this user.');
@@ -1507,8 +1549,8 @@ class AuthSupabaseService {
       }
     } catch (e) {
       dev.log('my_accounts RPC failed, fallback to legacy resolver: $e');
-      final one = await _resolveAccountIdForUid(user.id);
-      if (one != null) accountIds = [one];
+      final one = await _resolveAccountForUid(user.id);
+      if (one != null) accountIds = [one.id];
     }
 
     if (accountIds.isEmpty) return [];
