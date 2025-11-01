@@ -448,6 +448,37 @@ class AuthProvider extends ChangeNotifier {
           }
         } catch (_) {}
       }
+
+      if (((currentUser?['accountId'] ?? '').toString().isEmpty) ||
+          ((currentUser?['role'] ?? '').toString().isEmpty)) {
+        try {
+          final aa = await _auth.resolveActiveAccountOrThrow();
+          currentUser ??= {};
+          currentUser!['accountId'] = aa.id;
+          currentUser!['role'] = aa.role.toLowerCase();
+          currentUser!['disabled'] = false;
+          _authDiag(
+            '_networkRefreshAndMark:resolvedViaActiveAccount',
+            context: {
+              'accountId': aa.id,
+              'role': aa.role,
+            },
+          );
+        } catch (e, st) {
+          if (e is AccountPolicyException || e is AuthException) {
+            rethrow;
+          }
+          _authDiagWarn(
+            '_networkRefreshAndMark:activeAccountFallbackFailed',
+            context: {
+              'uid': currentUser?['uid'],
+              'error': e.runtimeType.toString(),
+            },
+            stackTrace: st,
+          );
+        }
+      }
+
       success = ((currentUser?['accountId'] ?? '').toString().isNotEmpty);
     } catch (e, st) {
       dev.log('_networkRefreshAndMark failed', error: e, stackTrace: st);
